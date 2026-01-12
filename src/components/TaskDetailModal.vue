@@ -2,6 +2,7 @@
 import { ref, computed, watch } from 'vue'
 import { useTasksStore } from '@/stores/tasks'
 import SubtasksList from '@/components/SubtasksList.vue'
+import CommentsList from '@/components/CommentsList.vue'
 import type { BoardColumn } from '@/stores/board'
 import type { Task } from '@/types'
 
@@ -319,6 +320,14 @@ const openTask = async () => {
                 <!-- Subtasks -->
                 <div class="border-t pt-4">
                   <SubtasksList
+                    :task-id="task.id"
+                    @updated="emit('updated')"
+                  />
+                </div>
+
+                <!-- Comments -->
+                <div class="border-t pt-4">
+                  <CommentsList
                     :task-id="task.id"
                     @updated="emit('updated')"
                   />
