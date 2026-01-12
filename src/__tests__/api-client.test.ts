@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { createKanboardClient, KanboardClient, KanboardError } from '@/services/api'
+import { createKanboardClient, KanboardError } from '@/services/api'
 
 describe('KanboardClient', () => {
   const mockFetch = vi.fn()
