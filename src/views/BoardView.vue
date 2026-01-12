@@ -127,6 +127,19 @@ const handleCreateTask = async (data: {
           <h1 class="text-xl font-bold text-gray-900">
             {{ boardStore.project?.name || '載入中...' }}
           </h1>
+          <div class="flex border rounded-md overflow-hidden">
+            <button
+              class="px-3 py-1 text-sm bg-blue-600 text-white"
+            >
+              看板
+            </button>
+            <button
+              @click="router.push(`/projects/${projectId}/list`)"
+              class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200"
+            >
+              清單
+            </button>
+          </div>
         </div>
         <div class="flex items-center gap-4">
           <!-- Search button -->

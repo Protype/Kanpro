@@ -34,6 +34,7 @@ export interface UpdateTaskParams {
 
 export const useTasksStore = defineStore('tasks', () => {
   const currentTask = ref<Task | null>(null)
+  const allTasks = ref<Task[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
@@ -90,20 +91,49 @@ export const useTasksStore = defineStore('tasks', () => {
     return result
   }
 
+  async function fetchAllTasks(projectId: number): Promise<void> {
+    const authStore = useAuthStore()
+
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const client = authStore.getClient()
+      const tasks = await client.call<Task[]>('getAllTasks', {
+        project_id: projectId,
+        status_id: 1 // Active tasks only
+      })
+      allTasks.value = tasks || []
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : '載入任務失敗'
+      allTasks.value = []
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   function clearCurrentTask(): void {
     currentTask.value = null
     error.value = null
   }
 
+  function clearAllTasks(): void {
+    allTasks.value = []
+    error.value = null
+  }
+
   return {
     currentTask,
+    allTasks,
     isLoading,
     error,
     fetchTask,
+    fetchAllTasks,
     createTask,
     updateTask,
     closeTask,
     openTask,
-    clearCurrentTask
+    clearCurrentTask,
+    clearAllTasks
   }
 })
