@@ -2,21 +2,25 @@
 import { ref, onMounted, onUnmounted, provide } from 'vue'
 import { RouterView, useRouter } from 'vue-router'
 import { useKeyboardShortcuts } from '@/composables/useKeyboardShortcuts'
+import { useTheme } from '@/composables/useTheme'
 import KeyboardShortcutsModal from '@/components/KeyboardShortcutsModal.vue'
 import SearchModal from '@/components/SearchModal.vue'
 
 const router = useRouter()
 const shortcuts = useKeyboardShortcuts()
+const theme = useTheme()
 const showShortcutsModal = ref(false)
 const showSearchModal = ref(false)
 
-// Provide shortcuts to child components
+// Provide shortcuts and theme to child components
 provide('shortcuts', shortcuts)
+provide('theme', theme)
 
 let cleanup: (() => void) | null = null
 
 onMounted(() => {
   cleanup = shortcuts.init()
+  theme.init()
 
   // Global shortcuts
   shortcuts.register('?', () => {
