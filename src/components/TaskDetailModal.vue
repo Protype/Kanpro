@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue'
 import { useTasksStore } from '@/stores/tasks'
 import SubtasksList from '@/components/SubtasksList.vue'
 import CommentsList from '@/components/CommentsList.vue'
+import TaskTags from '@/components/TaskTags.vue'
 import type { BoardColumn } from '@/stores/board'
 import type { Task } from '@/types'
 
@@ -393,6 +394,15 @@ const openTask = async () => {
                       :title="color.name"
                     ></button>
                   </div>
+                </div>
+
+                <!-- Tags -->
+                <div>
+                  <TaskTags
+                    :task-id="task.id"
+                    :project-id="projectId"
+                    @updated="emit('updated')"
+                  />
                 </div>
 
                 <!-- Due Date -->

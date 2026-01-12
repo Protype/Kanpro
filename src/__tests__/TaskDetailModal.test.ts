@@ -222,7 +222,8 @@ describe('TaskDetailModal', () => {
           stubs: {
             teleport: true,
             SubtasksList: true,
-            CommentsList: true
+            CommentsList: true,
+            TaskTags: true
           }
         }
       })
