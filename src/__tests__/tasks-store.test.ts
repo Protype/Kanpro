@@ -167,4 +167,34 @@ describe('Tasks Store', () => {
       expect(result).toBe(true)
     })
   })
+
+  describe('fetchAllTasks', () => {
+    it('should fetch and store all tasks', async () => {
+      const mockTasks = [mockTask, { ...mockTask, id: 2, title: 'Task 2' }]
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 1,
+          result: mockTasks
+        })
+      })
+
+      const store = useTasksStore()
+      await store.fetchAllTasks(1)
+
+      expect(store.allTasks).toEqual(mockTasks)
+      expect(store.isLoading).toBe(false)
+    })
+
+    it('should handle fetch all tasks error', async () => {
+      mockFetch.mockRejectedValueOnce(new Error('Network error'))
+
+      const store = useTasksStore()
+      await store.fetchAllTasks(1)
+
+      expect(store.allTasks).toEqual([])
+      expect(store.error).toBe('Network error')
+    })
+  })
 })
