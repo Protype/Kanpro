@@ -185,6 +185,12 @@ const handleTaskUpdated = async () => {
             >
               清單
             </button>
+            <button
+              @click="router.push(`/projects/${projectId}/calendar`)"
+              class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200"
+            >
+              日曆
+            </button>
           </div>
         </div>
         <div class="flex items-center gap-4">
