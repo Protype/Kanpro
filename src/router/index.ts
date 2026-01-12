@@ -6,7 +6,13 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
+      name: 'projects',
+      component: () => import('@/views/ProjectsView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/projects/:id',
+      name: 'project-board',
       component: () => import('@/views/HomeView.vue'),
       meta: { requiresAuth: true }
     },
@@ -33,7 +39,7 @@ router.beforeEach(async (to, _from, next) => {
 
   // 如果已登入但訪問 guest 頁面（如登入頁），導向首頁
   if (to.meta.guest && authStore.isAuthenticated) {
-    return next({ name: 'home' })
+    return next({ name: 'projects' })
   }
 
   next()
