@@ -1,0 +1,28 @@
+# 本地環境設定
+.env.local
+.env.*.local
+
+# 依賴套件
+node_modules/
+
+# 建構輸出
+dist/
+build/
+*.tsbuildinfo
+
+# IDE 設定
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 系統檔案
+.DS_Store
+Thumbs.db
+
+# 日誌
+*.log
+npm-debug.log*
+
+# Tauri
+src-tauri/target/
