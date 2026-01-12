@@ -12,6 +12,7 @@
 
 - @docs/SPEC.md # 開發規格文件
 - @docs/TDD.md # 測試驅動開發文件
+- @docs/TODO.md # 待辦開發任務文件
 
 ## 重要測試說明
 
