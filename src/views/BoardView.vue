@@ -1,17 +1,25 @@
 <script setup lang="ts">
-import { onMounted, watch } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useBoardStore } from '@/stores/board'
+import { useTasksStore } from '@/stores/tasks'
 import TaskCard from '@/components/TaskCard.vue'
+import TaskFormModal from '@/components/TaskFormModal.vue'
 import type { Task } from '@/types'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 const boardStore = useBoardStore()
+const tasksStore = useTasksStore()
 
 const projectId = Number(route.params.id)
+
+// Modal state
+const showTaskModal = ref(false)
+const defaultColumnId = ref<number>(0)
+const taskModalRef = ref<InstanceType<typeof TaskFormModal> | null>(null)
 
 onMounted(() => {
   boardStore.fetchBoard(projectId)
@@ -35,6 +43,36 @@ const goToProjects = () => {
 const handleTaskClick = (task: Task) => {
   console.log('Task clicked:', task.id)
   // TODO: Open task detail modal
+}
+
+const openAddTaskModal = (columnId: number) => {
+  defaultColumnId.value = columnId
+  showTaskModal.value = true
+}
+
+const handleCreateTask = async (data: {
+  title: string
+  description: string
+  color_id: string
+  column_id: number
+}) => {
+  try {
+    await tasksStore.createTask({
+      project_id: projectId,
+      title: data.title,
+      description: data.description || undefined,
+      color_id: data.color_id,
+      column_id: data.column_id
+    })
+    showTaskModal.value = false
+    // Refresh board
+    await boardStore.fetchBoard(projectId)
+  } catch (error) {
+    console.error('Failed to create task:', error)
+    alert('建立任務失敗')
+  } finally {
+    taskModalRef.value?.setSubmitting(false)
+  }
 }
 </script>
 
@@ -109,6 +147,7 @@ const handleTaskClick = (task: Task) => {
               </span>
             </div>
             <button
+              @click="openAddTaskModal(column.id)"
               class="text-gray-500 hover:text-gray-700"
               title="新增任務"
             >
@@ -138,5 +177,16 @@ const handleTaskClick = (task: Task) => {
         </div>
       </div>
     </main>
+
+    <!-- Task Form Modal -->
+    <TaskFormModal
+      ref="taskModalRef"
+      :is-open="showTaskModal"
+      :project-id="projectId"
+      :columns="boardStore.columns"
+      :default-column-id="defaultColumnId"
+      @close="showTaskModal = false"
+      @submit="handleCreateTask"
+    />
   </div>
 </template>
