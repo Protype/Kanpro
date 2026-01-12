@@ -20,6 +20,10 @@ const handleLogout = () => {
 const goToProject = (projectId: number) => {
   router.push(`/projects/${projectId}`)
 }
+
+const goToDashboard = () => {
+  router.push('/dashboard')
+}
 </script>
 
 <template>
@@ -29,6 +33,12 @@ const goToProject = (projectId: number) => {
       <div class="mx-auto max-w-7xl px-4 py-4 flex justify-between items-center">
         <h1 class="text-2xl font-bold text-gray-900">Kanpro</h1>
         <div class="flex items-center gap-4">
+          <button
+            @click="goToDashboard"
+            class="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800"
+          >
+            儀表板
+          </button>
           <span class="text-gray-600">
             {{ authStore.user?.name || authStore.user?.username }}
           </span>
