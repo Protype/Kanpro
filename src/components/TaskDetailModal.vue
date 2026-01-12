@@ -4,6 +4,7 @@ import { useTasksStore } from '@/stores/tasks'
 import SubtasksList from '@/components/SubtasksList.vue'
 import CommentsList from '@/components/CommentsList.vue'
 import TaskTags from '@/components/TaskTags.vue'
+import AttachmentsList from '@/components/AttachmentsList.vue'
 import type { BoardColumn } from '@/stores/board'
 import type { Task } from '@/types'
 
@@ -330,6 +331,15 @@ const openTask = async () => {
                 <div class="border-t pt-4">
                   <CommentsList
                     :task-id="task.id"
+                    @updated="emit('updated')"
+                  />
+                </div>
+
+                <!-- Attachments -->
+                <div class="border-t pt-4">
+                  <AttachmentsList
+                    :task-id="task.id"
+                    :project-id="projectId"
                     @updated="emit('updated')"
                   />
                 </div>
