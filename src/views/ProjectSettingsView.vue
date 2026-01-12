@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useProjectsStore } from '@/stores/projects'
 import NotificationsDropdown from '@/components/NotificationsDropdown.vue'
 import MembersList from '@/components/MembersList.vue'
+import ColumnsList from '@/components/ColumnsList.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -211,6 +212,11 @@ const handleLogout = () => {
           <!-- Members Section -->
           <div class="p-6 border-b">
             <MembersList :project-id="projectId" />
+          </div>
+
+          <!-- Columns Section -->
+          <div class="p-6 border-b">
+            <ColumnsList :project-id="projectId" />
           </div>
 
           <!-- Danger Zone -->
