@@ -224,7 +224,8 @@ describe('TaskDetailModal', () => {
             SubtasksList: true,
             CommentsList: true,
             TaskTags: true,
-            AttachmentsList: true
+            AttachmentsList: true,
+            TaskLinksList: true
           }
         }
       })
