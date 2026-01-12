@@ -223,7 +223,8 @@ describe('TaskDetailModal', () => {
             teleport: true,
             SubtasksList: true,
             CommentsList: true,
-            TaskTags: true
+            TaskTags: true,
+            AttachmentsList: true
           }
         }
       })
