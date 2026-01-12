@@ -31,11 +31,24 @@ const mockColumns = [
   { id: 3, title: '完成', position: 3, project_id: 1, task_limit: 0, nb_tasks: 0, tasks: [] }
 ]
 
+// Helper to create default JSON-RPC response
+const createJsonRpcResponse = (result: unknown) => ({
+  ok: true,
+  json: () => Promise.resolve({
+    jsonrpc: '2.0',
+    id: 1,
+    result
+  })
+})
+
 describe('TaskDetailModal', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.stubGlobal('fetch', mockFetch)
+    vi.stubGlobal('alert', vi.fn())
     mockFetch.mockReset()
+    // Default mock for subtasks fetch (SubtasksList onMounted)
+    mockFetch.mockResolvedValue(createJsonRpcResponse([]))
 
     // Setup auth store with credentials
     const authStore = useAuthStore()
@@ -198,15 +211,6 @@ describe('TaskDetailModal', () => {
     })
 
     it('should emit update event when saving title', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({
-          jsonrpc: '2.0',
-          id: 1,
-          result: true
-        })
-      })
-
       const wrapper = mount(TaskDetailModal, {
         props: {
           isOpen: true,
@@ -216,10 +220,15 @@ describe('TaskDetailModal', () => {
         },
         global: {
           stubs: {
-            teleport: true
+            teleport: true,
+            SubtasksList: true // Stub SubtasksList to avoid fetch calls
           }
         }
       })
+
+      // Reset and set mock for updateTask
+      mockFetch.mockReset()
+      mockFetch.mockResolvedValueOnce(createJsonRpcResponse(true))
 
       await wrapper.find('[data-testid="edit-title-btn"]').trigger('click')
       const input = wrapper.find('[data-testid="title-input"]')
@@ -252,15 +261,6 @@ describe('TaskDetailModal', () => {
     })
 
     it('should close task when clicking close task button', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({
-          jsonrpc: '2.0',
-          id: 1,
-          result: true
-        })
-      })
-
       const wrapper = mount(TaskDetailModal, {
         props: {
           isOpen: true,
@@ -270,10 +270,14 @@ describe('TaskDetailModal', () => {
         },
         global: {
           stubs: {
-            teleport: true
+            teleport: true,
+            SubtasksList: true
           }
         }
       })
+
+      mockFetch.mockReset()
+      mockFetch.mockResolvedValueOnce(createJsonRpcResponse(true))
 
       await wrapper.find('[data-testid="close-task-btn"]').trigger('click')
       await flushPromises()
@@ -282,15 +286,6 @@ describe('TaskDetailModal', () => {
     })
 
     it('should open task when clicking open task button', async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({
-          jsonrpc: '2.0',
-          id: 1,
-          result: true
-        })
-      })
-
       const closedTask = { ...mockTask, is_active: false }
       const wrapper = mount(TaskDetailModal, {
         props: {
@@ -301,10 +296,14 @@ describe('TaskDetailModal', () => {
         },
         global: {
           stubs: {
-            teleport: true
+            teleport: true,
+            SubtasksList: true
           }
         }
       })
+
+      mockFetch.mockReset()
+      mockFetch.mockResolvedValueOnce(createJsonRpcResponse(true))
 
       await wrapper.find('[data-testid="open-task-btn"]').trigger('click')
       await flushPromises()

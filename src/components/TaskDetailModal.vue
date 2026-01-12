@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useTasksStore } from '@/stores/tasks'
+import SubtasksList from '@/components/SubtasksList.vue'
 import type { BoardColumn } from '@/stores/board'
 import type { Task } from '@/types'
 
@@ -313,6 +314,14 @@ const openTask = async () => {
                       </button>
                     </div>
                   </div>
+                </div>
+
+                <!-- Subtasks -->
+                <div class="border-t pt-4">
+                  <SubtasksList
+                    :task-id="task.id"
+                    @updated="emit('updated')"
+                  />
                 </div>
               </div>
 
