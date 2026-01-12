@@ -221,7 +221,8 @@ describe('TaskDetailModal', () => {
         global: {
           stubs: {
             teleport: true,
-            SubtasksList: true // Stub SubtasksList to avoid fetch calls
+            SubtasksList: true,
+            CommentsList: true
           }
         }
       })
