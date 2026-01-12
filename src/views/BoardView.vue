@@ -6,6 +6,7 @@ import { useBoardStore } from '@/stores/board'
 import { useTasksStore } from '@/stores/tasks'
 import TaskCard from '@/components/TaskCard.vue'
 import TaskFormModal from '@/components/TaskFormModal.vue'
+import TaskDetailModal from '@/components/TaskDetailModal.vue'
 import type { Task } from '@/types'
 
 const route = useRoute()
@@ -20,6 +21,10 @@ const projectId = Number(route.params.id)
 const showTaskModal = ref(false)
 const defaultColumnId = ref<number>(0)
 const taskModalRef = ref<InstanceType<typeof TaskFormModal> | null>(null)
+
+// Task detail modal state
+const showTaskDetailModal = ref(false)
+const selectedTask = ref<Task | null>(null)
 
 onMounted(() => {
   boardStore.fetchBoard(projectId)
@@ -41,8 +46,13 @@ const goToProjects = () => {
 }
 
 const handleTaskClick = (task: Task) => {
-  console.log('Task clicked:', task.id)
-  // TODO: Open task detail modal
+  selectedTask.value = task
+  showTaskDetailModal.value = true
+}
+
+const handleTaskUpdated = async () => {
+  // Refresh board to get updated task data
+  await boardStore.fetchBoard(projectId)
 }
 
 const openAddTaskModal = (columnId: number) => {
@@ -187,6 +197,16 @@ const handleCreateTask = async (data: {
       :default-column-id="defaultColumnId"
       @close="showTaskModal = false"
       @submit="handleCreateTask"
+    />
+
+    <!-- Task Detail Modal -->
+    <TaskDetailModal
+      :is-open="showTaskDetailModal"
+      :task="selectedTask"
+      :columns="boardStore.columns"
+      :project-id="projectId"
+      @close="showTaskDetailModal = false"
+      @updated="handleTaskUpdated"
     />
   </div>
 </template>
