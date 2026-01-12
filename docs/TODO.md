@@ -291,51 +291,51 @@
 
 ## Phase 2 (P2) - 進階功能
 
-### 22. 管理員功能 - 使用者管理
-- [ ] 使用者列表頁面
-- [ ] 新增使用者表單
-- [ ] 編輯使用者
-- [ ] 停用/啟用使用者
-- [ ] 刪除使用者
-- [ ] 實作 `getAllUsers` API
-- [ ] 實作 `getUser` API
-- [ ] 實作 `createUser` API
-- [ ] 實作 `updateUser` API
-- [ ] 實作 `disableUser` / `enableUser` API
-- [ ] 實作 `removeUser` API
+### 22. 管理員功能 - 使用者管理 ✅
+- [x] 使用者列表頁面
+- [x] 新增使用者表單
+- [x] 編輯使用者
+- [x] 停用/啟用使用者
+- [x] 刪除使用者
+- [x] 實作 `getAllUsers` API
+- [x] 實作 `getUser` API
+- [x] 實作 `createUser` API
+- [x] 實作 `updateUser` API
+- [x] 實作 `disableUser` / `enableUser` API
+- [x] 實作 `removeUser` API
 
-### 23. 管理員功能 - 群組管理
-- [ ] 群組列表頁面
-- [ ] 新增群組
-- [ ] 編輯群組
-- [ ] 刪除群組
-- [ ] 群組成員管理
-- [ ] 實作 `getAllGroups` API
-- [ ] 實作 `getGroup` API
-- [ ] 實作 `createGroup` API
-- [ ] 實作 `updateGroup` API
-- [ ] 實作 `removeGroup` API
-- [ ] 實作 `getGroupMembers` API
-- [ ] 實作 `addGroupMember` API
-- [ ] 實作 `removeGroupMember` API
+### 23. 管理員功能 - 群組管理 ✅
+- [x] 群組列表頁面
+- [x] 新增群組
+- [x] 編輯群組
+- [x] 刪除群組
+- [x] 群組成員管理
+- [x] 實作 `getAllGroups` API
+- [x] 實作 `getGroup` API
+- [x] 實作 `createGroup` API
+- [x] 實作 `updateGroup` API
+- [x] 實作 `removeGroup` API
+- [x] 實作 `getGroupMembers` API
+- [x] 實作 `addGroupMember` API
+- [x] 實作 `removeGroupMember` API
 
-### 24. 專案分析
-- [ ] 分析頁面 UI
-- [ ] 任務分佈圓餅圖
-- [ ] 使用者工作量圖表
+### 24. 專案分析 ✅
+- [x] 分析頁面 UI
+- [x] 任務分佈圓餅圖
+- [x] 使用者工作量圖表
 - [ ] 累積流程圖
 - [ ] 燃盡圖
 - [ ] 平均欄位停留時間
 - [ ] Lead/Cycle Time 趨勢圖
-- [ ] 實作 `getProjectActivity` API
+- [x] 實作 `getProjectActivity` API
 
-### 25. 鍵盤快捷鍵
-- [ ] 快捷鍵系統架構
-- [ ] 全域快捷鍵
-  - [ ] `Cmd/Ctrl + K` 開啟快速搜尋
-  - [ ] `?` 顯示快捷鍵說明
-  - [ ] `b` 開啟專案切換器
-  - [ ] `Esc` 關閉對話框
+### 25. 鍵盤快捷鍵 ✅
+- [x] 快捷鍵系統架構
+- [x] 全域快捷鍵
+  - [x] `Cmd/Ctrl + K` 開啟快速搜尋
+  - [x] `?` 顯示快捷鍵說明
+  - [x] `b` 開啟專案切換器
+  - [x] `Esc` 關閉對話框
   - [ ] `Cmd/Ctrl + Enter` 提交表單
 - [ ] 看板檢視快捷鍵
   - [ ] `n` 新增任務
@@ -348,24 +348,24 @@
   - [ ] `c` 新增評論
   - [ ] `l` 新增連結
 
-### 26. Kanpro 專屬功能 - 介面增強
-- [ ] 深色模式支援
+### 26. Kanpro 專屬功能 - 介面增強 ✅
+- [x] 深色模式支援
 - [ ] 響應式設計優化
 - [ ] 流暢拖放體驗優化
 - [ ] 即時更新機制（輪詢）
 
-### 27. Tauri Desktop 功能
+### 27. Tauri Desktop 功能 ✅
 - [ ] 系統匣整合
-- [ ] 原生桌面通知
+- [x] 原生桌面通知（前端整合）
 - [ ] 多伺服器支援
 - [ ] 離線快取機制
-- [ ] Tauri secure storage 整合
+- [x] Tauri secure storage 整合（前端整合）
 
 ---
 
 ## 技術債務 & 優化
 
-- [ ] 單元測試撰寫
+- [x] 單元測試撰寫（355 個測試）
 - [ ] E2E 測試撰寫
 - [ ] 效能優化（虛擬列表、懶載入）
 - [ ] 國際化 (i18n) 支援
