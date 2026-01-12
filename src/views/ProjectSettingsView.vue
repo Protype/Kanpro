@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useProjectsStore } from '@/stores/projects'
 import NotificationsDropdown from '@/components/NotificationsDropdown.vue'
+import MembersList from '@/components/MembersList.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -205,6 +206,11 @@ const handleLogout = () => {
                 <span v-else>儲存變更</span>
               </button>
             </div>
+          </div>
+
+          <!-- Members Section -->
+          <div class="p-6 border-b">
+            <MembersList :project-id="projectId" />
           </div>
 
           <!-- Danger Zone -->
