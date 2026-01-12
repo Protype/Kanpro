@@ -8,6 +8,7 @@ import TaskCard from '@/components/TaskCard.vue'
 import TaskFormModal from '@/components/TaskFormModal.vue'
 import TaskDetailModal from '@/components/TaskDetailModal.vue'
 import SearchModal from '@/components/SearchModal.vue'
+import NotificationsDropdown from '@/components/NotificationsDropdown.vue'
 import type { Task } from '@/types'
 
 const route = useRoute()
@@ -159,6 +160,7 @@ const handleCreateTask = async (data: {
             <span>搜尋</span>
             <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-xs bg-gray-200 rounded">⌘K</kbd>
           </button>
+          <NotificationsDropdown />
           <span class="text-gray-600 text-sm">
             {{ authStore.user?.name || authStore.user?.username }}
           </span>

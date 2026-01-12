@@ -3,6 +3,7 @@ import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useProjectsStore } from '@/stores/projects'
+import NotificationsDropdown from '@/components/NotificationsDropdown.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -39,6 +40,7 @@ const goToDashboard = () => {
           >
             儀表板
           </button>
+          <NotificationsDropdown />
           <span class="text-gray-600">
             {{ authStore.user?.name || authStore.user?.username }}
           </span>
