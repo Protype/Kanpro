@@ -13,5 +13,6 @@ export type {
   Board,
   BoardColumn,
   BoardSwimlane,
-  Activity
+  Activity,
+  ProjectMember
 } from './entities'

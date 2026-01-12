@@ -201,3 +201,15 @@ export interface Activity {
   task_id?: number
   data?: Record<string, unknown>
 }
+
+/**
+ * Kanboard 專案成員
+ */
+export interface ProjectMember {
+  id: number
+  username: string
+  name: string | null
+  email: string | null
+  role: 'project-manager' | 'project-member' | 'project-viewer'
+  is_active: boolean
+}
