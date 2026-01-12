@@ -97,6 +97,32 @@ export const useAuthStore = defineStore('auth', () => {
     })
   }
 
+  interface UpdateUserParams {
+    name?: string
+    email?: string
+  }
+
+  async function updateCurrentUser(params: UpdateUserParams): Promise<boolean> {
+    if (!user.value) {
+      throw new Error('Not authenticated')
+    }
+
+    const client = getClient()
+
+    const result = await client.call<boolean>('updateUser', {
+      id: user.value.id,
+      ...params
+    })
+
+    if (result) {
+      // Refresh user data
+      const updatedUser = await client.call<User>('getMe')
+      user.value = updatedUser
+    }
+
+    return result
+  }
+
   return {
     user,
     apiUrl,
@@ -106,6 +132,7 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     logout,
     restoreSession,
-    getClient
+    getClient,
+    updateCurrentUser
   }
 })

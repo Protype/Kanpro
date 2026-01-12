@@ -261,4 +261,136 @@ describe('Auth Store', () => {
       expect(localStorageMock.removeItem).toHaveBeenCalledWith('kanpro_auth')
     })
   })
+
+  describe('updateCurrentUser', () => {
+    it('should update user and return true', async () => {
+      const mockUser: User = {
+        id: 1,
+        username: 'admin',
+        name: 'Administrator',
+        email: 'admin@example.com',
+        role: 'app-admin',
+        is_active: true
+      }
+
+      // Login first
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 1,
+          result: mockUser
+        })
+      })
+
+      const store = useAuthStore()
+      await store.login({
+        apiUrl: 'http://localhost/jsonrpc.php',
+        username: 'admin',
+        password: 'admin'
+      })
+
+      // Update user
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 2,
+          result: true
+        })
+      })
+
+      // Fetch updated user
+      const updatedUser: User = {
+        ...mockUser,
+        name: 'New Name',
+        email: 'new@example.com'
+      }
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 3,
+          result: updatedUser
+        })
+      })
+
+      const result = await store.updateCurrentUser({
+        name: 'New Name',
+        email: 'new@example.com'
+      })
+
+      expect(result).toBe(true)
+      expect(store.user?.name).toBe('New Name')
+      expect(store.user?.email).toBe('new@example.com')
+    })
+
+    it('should call API with correct parameters', async () => {
+      const mockUser: User = {
+        id: 1,
+        username: 'admin',
+        name: 'Administrator',
+        email: 'admin@example.com',
+        role: 'app-admin',
+        is_active: true
+      }
+
+      // Login first
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 1,
+          result: mockUser
+        })
+      })
+
+      const store = useAuthStore()
+      await store.login({
+        apiUrl: 'http://localhost/jsonrpc.php',
+        username: 'admin',
+        password: 'admin'
+      })
+
+      // Update user
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 2,
+          result: true
+        })
+      })
+
+      // Fetch updated user
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 3,
+          result: mockUser
+        })
+      })
+
+      await store.updateCurrentUser({
+        name: 'Updated Name'
+      })
+
+      // Check the second call (update)
+      const updateCallBody = JSON.parse(mockFetch.mock.calls[1][1].body)
+      expect(updateCallBody.method).toBe('updateUser')
+      expect(updateCallBody.params).toEqual({
+        id: 1,
+        name: 'Updated Name'
+      })
+    })
+
+    it('should throw error when not authenticated', async () => {
+      const store = useAuthStore()
+
+      await expect(
+        store.updateCurrentUser({ name: 'Test' })
+      ).rejects.toThrow()
+    })
+  })
 })
