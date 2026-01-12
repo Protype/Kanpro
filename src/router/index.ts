@@ -13,7 +13,7 @@ const router = createRouter({
     {
       path: '/projects/:id',
       name: 'project-board',
-      component: () => import('@/views/HomeView.vue'),
+      component: () => import('@/views/BoardView.vue'),
       meta: { requiresAuth: true }
     },
     {
