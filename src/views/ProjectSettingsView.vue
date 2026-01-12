@@ -6,6 +6,7 @@ import { useProjectsStore } from '@/stores/projects'
 import NotificationsDropdown from '@/components/NotificationsDropdown.vue'
 import MembersList from '@/components/MembersList.vue'
 import ColumnsList from '@/components/ColumnsList.vue'
+import SwimlanesList from '@/components/SwimlanesList.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -217,6 +218,11 @@ const handleLogout = () => {
           <!-- Columns Section -->
           <div class="p-6 border-b">
             <ColumnsList :project-id="projectId" />
+          </div>
+
+          <!-- Swimlanes Section -->
+          <div class="p-6 border-b">
+            <SwimlanesList :project-id="projectId" />
           </div>
 
           <!-- Danger Zone -->
