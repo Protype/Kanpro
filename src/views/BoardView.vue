@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useBoardStore } from '@/stores/board'
@@ -7,6 +7,7 @@ import { useTasksStore } from '@/stores/tasks'
 import TaskCard from '@/components/TaskCard.vue'
 import TaskFormModal from '@/components/TaskFormModal.vue'
 import TaskDetailModal from '@/components/TaskDetailModal.vue'
+import SearchModal from '@/components/SearchModal.vue'
 import type { Task } from '@/types'
 
 const route = useRoute()
@@ -26,8 +27,25 @@ const taskModalRef = ref<InstanceType<typeof TaskFormModal> | null>(null)
 const showTaskDetailModal = ref(false)
 const selectedTask = ref<Task | null>(null)
 
+// Search modal state
+const showSearchModal = ref(false)
+
+// Keyboard shortcut handler
+const handleKeydown = (e: KeyboardEvent) => {
+  // Cmd/Ctrl + K to open search
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault()
+    showSearchModal.value = true
+  }
+}
+
 onMounted(() => {
   boardStore.fetchBoard(projectId)
+  window.addEventListener('keydown', handleKeydown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown)
 })
 
 watch(() => route.params.id, (newId) => {
@@ -53,6 +71,12 @@ const handleTaskClick = (task: Task) => {
 const handleTaskUpdated = async () => {
   // Refresh board to get updated task data
   await boardStore.fetchBoard(projectId)
+}
+
+const handleSearchSelect = (task: Task) => {
+  selectedTask.value = task
+  showTaskDetailModal.value = true
+  showSearchModal.value = false
 }
 
 const openAddTaskModal = (columnId: number) => {
@@ -105,6 +129,17 @@ const handleCreateTask = async (data: {
           </h1>
         </div>
         <div class="flex items-center gap-4">
+          <!-- Search button -->
+          <button
+            @click="showSearchModal = true"
+            class="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-500 bg-gray-100 hover:bg-gray-200 rounded-md"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <span>搜尋</span>
+            <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-xs bg-gray-200 rounded">⌘K</kbd>
+          </button>
           <span class="text-gray-600 text-sm">
             {{ authStore.user?.name || authStore.user?.username }}
           </span>
@@ -207,6 +242,14 @@ const handleCreateTask = async (data: {
       :project-id="projectId"
       @close="showTaskDetailModal = false"
       @updated="handleTaskUpdated"
+    />
+
+    <!-- Search Modal -->
+    <SearchModal
+      :is-open="showSearchModal"
+      :project-id="projectId"
+      @close="showSearchModal = false"
+      @select="handleSearchSelect"
     />
   </div>
 </template>
