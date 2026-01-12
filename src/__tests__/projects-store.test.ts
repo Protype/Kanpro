@@ -246,4 +246,100 @@ describe('Projects Store', () => {
       expect(project).toBeUndefined()
     })
   })
+
+  describe('updateProject', () => {
+    it('should update project and return true', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 1,
+          result: true
+        })
+      })
+
+      const store = useProjectsStore()
+      const result = await store.updateProject(1, { name: 'New Name', description: 'New Description' })
+
+      expect(result).toBe(true)
+    })
+
+    it('should call API with correct parameters', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 1,
+          result: true
+        })
+      })
+
+      const store = useProjectsStore()
+      await store.updateProject(5, { name: 'Test Project', description: 'Test Description' })
+
+      const callBody = JSON.parse(mockFetch.mock.calls[0][1].body)
+      expect(callBody.method).toBe('updateProject')
+      expect(callBody.params).toEqual({
+        project_id: 5,
+        name: 'Test Project',
+        description: 'Test Description'
+      })
+    })
+
+    it('should throw error on update failure', async () => {
+      mockFetch.mockRejectedValueOnce(new Error('Update failed'))
+
+      const store = useProjectsStore()
+
+      await expect(
+        store.updateProject(1, { name: 'New Name' })
+      ).rejects.toThrow('Update failed')
+    })
+  })
+
+  describe('removeProject', () => {
+    it('should remove project and return true', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 1,
+          result: true
+        })
+      })
+
+      const store = useProjectsStore()
+      const result = await store.removeProject(1)
+
+      expect(result).toBe(true)
+    })
+
+    it('should call API with correct parameters', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 1,
+          result: true
+        })
+      })
+
+      const store = useProjectsStore()
+      await store.removeProject(10)
+
+      const callBody = JSON.parse(mockFetch.mock.calls[0][1].body)
+      expect(callBody.method).toBe('removeProject')
+      expect(callBody.params).toEqual({ project_id: 10 })
+    })
+
+    it('should throw error on remove failure', async () => {
+      mockFetch.mockRejectedValueOnce(new Error('Remove failed'))
+
+      const store = useProjectsStore()
+
+      await expect(
+        store.removeProject(1)
+      ).rejects.toThrow('Remove failed')
+    })
+  })
 })

@@ -48,6 +48,30 @@ export const useProjectsStore = defineStore('projects', () => {
     return projects.value.find(p => p.id === id)
   }
 
+  async function updateProject(
+    projectId: number,
+    data: { name?: string; description?: string; start_date?: string; end_date?: string }
+  ): Promise<boolean> {
+    const authStore = useAuthStore()
+    const client = authStore.getClient()
+
+    const result = await client.call<boolean>('updateProject', {
+      project_id: projectId,
+      ...data
+    })
+    return result
+  }
+
+  async function removeProject(projectId: number): Promise<boolean> {
+    const authStore = useAuthStore()
+    const client = authStore.getClient()
+
+    const result = await client.call<boolean>('removeProject', {
+      project_id: projectId
+    })
+    return result
+  }
+
   return {
     projects,
     isLoading,
@@ -56,6 +80,8 @@ export const useProjectsStore = defineStore('projects', () => {
     activeProjects,
     filteredProjects,
     fetchProjects,
-    getProjectById
+    getProjectById,
+    updateProject,
+    removeProject
   }
 })
