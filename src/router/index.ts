@@ -53,6 +53,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/admin/groups',
+      name: 'admin-groups',
+      component: () => import('@/views/GroupsManagementView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/login',
       name: 'login',
       component: () => import('@/views/LoginView.vue'),

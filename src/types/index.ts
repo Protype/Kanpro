@@ -1,4 +1,5 @@
 export type {
+  Group,
   User,
   Project,
   Task,

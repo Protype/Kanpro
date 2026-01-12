@@ -1,4 +1,13 @@
 /**
+ * Kanboard 群組
+ */
+export interface Group {
+  id: number
+  name: string
+  external_id?: string | null
+}
+
+/**
  * Kanboard 使用者
  */
 export interface User {
