@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useProjectsStore } from '@/stores/projects'
 import { useDashboardStore } from '@/stores/dashboard'
+import NotificationsDropdown from '@/components/NotificationsDropdown.vue'
 import type { Task } from '@/types'
 
 const router = useRouter()
@@ -69,6 +70,7 @@ const goToProjects = () => {
           <h1 class="text-2xl font-bold text-gray-900">儀表板</h1>
         </div>
         <div class="flex items-center gap-4">
+          <NotificationsDropdown />
           <span class="text-gray-600 text-sm">
             {{ authStore.user?.name || authStore.user?.username }}
           </span>

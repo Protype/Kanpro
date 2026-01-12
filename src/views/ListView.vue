@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useBoardStore } from '@/stores/board'
 import { useTasksStore } from '@/stores/tasks'
 import TaskDetailModal from '@/components/TaskDetailModal.vue'
+import NotificationsDropdown from '@/components/NotificationsDropdown.vue'
 import type { Task } from '@/types'
 
 const route = useRoute()
@@ -194,6 +195,7 @@ const handleTaskUpdated = async () => {
           </div>
         </div>
         <div class="flex items-center gap-4">
+          <NotificationsDropdown />
           <span class="text-gray-600 text-sm">
             {{ authStore.user?.name || authStore.user?.username }}
           </span>
