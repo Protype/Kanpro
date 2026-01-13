@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useTasksStore } from '@/stores/tasks'
 import { useBoardStore } from '@/stores/board'
 import TaskDetailModal from '@/components/TaskDetailModal.vue'
+import ThemeToggle from '@/components/ThemeToggle.vue'
 import type { Task } from '@/types'
 
 const route = useRoute()
@@ -169,30 +170,30 @@ watch(projectId, () => {
 </script>
 
 <template>
-  <div class="h-full flex flex-col bg-gray-50">
+  <div class="h-full flex flex-col bg-surface-secondary">
     <!-- Header -->
     <div
       data-testid="calendar-header"
-      class="bg-white border-b px-6 py-4 flex items-center justify-between"
+      class="page-header px-6 py-4 flex items-center justify-between"
     >
       <div class="flex items-center gap-4">
-        <h1 class="text-xl font-semibold text-gray-900">
+        <h1 class="text-xl font-semibold text-content">
           {{ boardStore.project?.name || '專案' }} - 日曆
         </h1>
-        <div class="flex items-center gap-2 text-gray-600">
+        <div class="flex items-center gap-2 text-content-secondary">
           <router-link
             :to="`/projects/${projectId}`"
-            class="px-3 py-1 text-sm hover:bg-gray-100 rounded"
+            class="px-3 py-1 text-sm hover:bg-surface-hover rounded"
           >
             看板
           </router-link>
           <router-link
             :to="`/projects/${projectId}/list`"
-            class="px-3 py-1 text-sm hover:bg-gray-100 rounded"
+            class="px-3 py-1 text-sm hover:bg-surface-hover rounded"
           >
             清單
           </router-link>
-          <span class="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded">
+          <span class="px-3 py-1 text-sm bg-accent-light text-accent rounded">
             日曆
           </span>
         </div>
@@ -200,10 +201,11 @@ watch(projectId, () => {
 
       <!-- Navigation -->
       <div class="flex items-center gap-4">
+        <ThemeToggle />
         <button
           data-testid="today-btn"
           @click="goToToday"
-          class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50"
+          class="btn-secondary btn-sm"
         >
           今天
         </button>
@@ -211,19 +213,19 @@ watch(projectId, () => {
           <button
             data-testid="prev-month"
             @click="goToPrevMonth"
-            class="p-1 hover:bg-gray-100 rounded"
+            class="p-1 hover:bg-surface-hover rounded text-content-secondary hover:text-content"
           >
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <span class="text-lg font-medium min-w-[140px] text-center">
+          <span class="text-lg font-medium min-w-[140px] text-center text-content">
             {{ currentYear }} {{ currentMonthName }}
           </span>
           <button
             data-testid="next-month"
             @click="goToNextMonth"
-            class="p-1 hover:bg-gray-100 rounded"
+            class="p-1 hover:bg-surface-hover rounded text-content-secondary hover:text-content"
           >
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -235,13 +237,13 @@ watch(projectId, () => {
 
     <!-- Calendar -->
     <div class="flex-1 p-6 overflow-auto">
-      <div class="bg-white rounded-lg shadow h-full flex flex-col">
+      <div class="card h-full flex flex-col">
         <!-- Weekday headers -->
-        <div class="grid grid-cols-7 border-b">
+        <div class="grid grid-cols-7 border-b border-edge">
           <div
             v-for="day in weekDays"
             :key="day"
-            class="px-2 py-3 text-center text-sm font-medium text-gray-500"
+            class="px-2 py-3 text-center text-sm font-medium text-content-tertiary"
           >
             {{ day }}
           </div>
@@ -253,8 +255,8 @@ watch(projectId, () => {
             v-for="(day, index) in calendarDays"
             :key="index"
             :class="[
-              'min-h-[100px] border-r border-b p-1 overflow-hidden',
-              day.month !== 'current' ? 'bg-gray-50' : 'bg-white'
+              'min-h-[100px] border-r border-b border-edge p-1 overflow-hidden',
+              day.month !== 'current' ? 'bg-surface-secondary' : 'bg-surface'
             ]"
           >
             <!-- Date number -->
@@ -262,8 +264,8 @@ watch(projectId, () => {
               :data-testid="isToday(day.fullDate) ? 'today' : undefined"
               :class="[
                 'text-sm font-medium mb-1 w-7 h-7 flex items-center justify-center rounded-full',
-                isToday(day.fullDate) ? 'bg-blue-600 text-white' : '',
-                day.month !== 'current' ? 'text-gray-400' : 'text-gray-900'
+                isToday(day.fullDate) ? 'bg-accent text-content-inverse' : '',
+                day.month !== 'current' ? 'text-content-tertiary' : 'text-content'
               ]"
             >
               {{ day.date }}
@@ -278,7 +280,7 @@ watch(projectId, () => {
                 :class="[
                   'calendar-task text-xs px-1 py-0.5 rounded truncate cursor-pointer hover:opacity-80',
                   getTaskColor(task.color_id),
-                  task.color_id === 'white' ? 'text-gray-700' : 'text-white'
+                  task.color_id === 'white' ? 'text-content-secondary' : 'text-white'
                 ]"
                 :title="task.title"
               >

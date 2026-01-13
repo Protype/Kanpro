@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { useTheme, type ThemeMode } from '@/composables/useTheme'
+import { useTheme, THEMES, type ThemeName } from '@/composables/useTheme'
 
 describe('useTheme', () => {
   let theme: ReturnType<typeof useTheme>
@@ -10,20 +10,8 @@ describe('useTheme', () => {
 
     // Reset document class
     document.documentElement.classList.remove('dark', 'light')
-
-    // Mock matchMedia
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-      value: vi.fn().mockImplementation((query: string) => ({
-        matches: query === '(prefers-color-scheme: dark)',
-        media: query,
-        onchange: null,
-        addListener: vi.fn(),
-        removeListener: vi.fn(),
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-        dispatchEvent: vi.fn()
-      }))
+    THEMES.forEach(t => {
+      document.documentElement.classList.remove(`theme-${t.id}`)
     })
 
     theme = useTheme()
@@ -34,119 +22,189 @@ describe('useTheme', () => {
   })
 
   describe('initial state', () => {
-    it('should default to system mode', () => {
-      expect(theme.mode.value).toBe('system')
+    it('should default to twenty-crm theme', () => {
+      expect(theme.currentTheme.value).toBe('twenty-crm')
     })
 
-    it('should apply dark class when system prefers dark', () => {
-      theme.init()
-      expect(document.documentElement.classList.contains('dark')).toBe(true)
+    it('should have correct theme info', () => {
+      expect(theme.themeInfo.value.name).toBe('Twenty CRM')
+      expect(theme.themeInfo.value.isDark).toBe(false)
     })
   })
 
-  describe('setMode', () => {
-    it('should set light mode', () => {
-      theme.setMode('light')
+  describe('setTheme', () => {
+    it('should set twenty-crm theme', () => {
+      theme.setTheme('twenty-crm')
 
-      expect(theme.mode.value).toBe('light')
-      expect(document.documentElement.classList.contains('dark')).toBe(false)
+      expect(theme.currentTheme.value).toBe('twenty-crm')
+      expect(document.documentElement.classList.contains('theme-twenty-crm')).toBe(true)
     })
 
-    it('should set dark mode', () => {
-      theme.setMode('dark')
+    it('should set github-dark theme', () => {
+      theme.setTheme('github-dark')
 
-      expect(theme.mode.value).toBe('dark')
-      expect(document.documentElement.classList.contains('dark')).toBe(true)
+      expect(theme.currentTheme.value).toBe('github-dark')
+      expect(document.documentElement.classList.contains('theme-github-dark')).toBe(true)
     })
 
-    it('should set system mode', () => {
-      theme.setMode('system')
+    it('should set dracula theme', () => {
+      theme.setTheme('dracula')
 
-      expect(theme.mode.value).toBe('system')
+      expect(theme.currentTheme.value).toBe('dracula')
+      expect(document.documentElement.classList.contains('theme-dracula')).toBe(true)
+    })
+
+    it('should remove old theme class when switching', () => {
+      theme.setTheme('twenty-crm')
+      theme.setTheme('github-dark')
+
+      expect(document.documentElement.classList.contains('theme-twenty-crm')).toBe(false)
+      expect(document.documentElement.classList.contains('theme-github-dark')).toBe(true)
     })
 
     it('should persist preference to localStorage', () => {
-      theme.setMode('dark')
+      theme.setTheme('dracula')
 
-      expect(localStorage.getItem('theme-mode')).toBe('dark')
-    })
-  })
-
-  describe('toggle', () => {
-    it('should toggle from light to dark', () => {
-      theme.setMode('light')
-      theme.toggle()
-
-      expect(theme.mode.value).toBe('dark')
+      expect(localStorage.getItem('kanpro-theme')).toBe('dracula')
     })
 
-    it('should toggle from dark to light', () => {
-      theme.setMode('dark')
-      theme.toggle()
+    it('should fallback to default theme for unknown theme', () => {
+      theme.setTheme('unknown-theme' as ThemeName)
 
-      expect(theme.mode.value).toBe('light')
-    })
-
-    it('should toggle from system to dark when system prefers light', () => {
-      // Mock system prefers light
-      Object.defineProperty(window, 'matchMedia', {
-        writable: true,
-        value: vi.fn().mockImplementation((query: string) => ({
-          matches: false,
-          media: query,
-          onchange: null,
-          addListener: vi.fn(),
-          removeListener: vi.fn(),
-          addEventListener: vi.fn(),
-          removeEventListener: vi.fn(),
-          dispatchEvent: vi.fn()
-        }))
-      })
-
-      const newTheme = useTheme()
-      newTheme.setMode('system')
-      newTheme.toggle()
-
-      expect(newTheme.mode.value).toBe('dark')
+      expect(theme.currentTheme.value).toBe('twenty-crm')
     })
   })
 
   describe('isDark', () => {
-    it('should return true when dark mode is set', () => {
-      theme.setMode('dark')
-
-      expect(theme.isDark.value).toBe(true)
-    })
-
-    it('should return false when light mode is set', () => {
-      theme.setMode('light')
+    it('should return false for twenty-crm theme', () => {
+      theme.setTheme('twenty-crm')
 
       expect(theme.isDark.value).toBe(false)
     })
 
-    it('should return true when system mode and system prefers dark', () => {
-      theme.init()
-      theme.setMode('system')
+    it('should return true for github-dark theme', () => {
+      theme.setTheme('github-dark')
+
+      expect(theme.isDark.value).toBe(true)
+    })
+
+    it('should return true for dracula theme', () => {
+      theme.setTheme('dracula')
 
       expect(theme.isDark.value).toBe(true)
     })
   })
 
-  describe('restore from localStorage', () => {
+  describe('themeInfo', () => {
+    it('should return correct info for twenty-crm', () => {
+      theme.setTheme('twenty-crm')
+
+      expect(theme.themeInfo.value.id).toBe('twenty-crm')
+      expect(theme.themeInfo.value.name).toBe('Twenty CRM')
+      expect(theme.themeInfo.value.description).toBe('清爽專業風格')
+      expect(theme.themeInfo.value.isDark).toBe(false)
+    })
+
+    it('should return correct info for github-dark', () => {
+      theme.setTheme('github-dark')
+
+      expect(theme.themeInfo.value.id).toBe('github-dark')
+      expect(theme.themeInfo.value.name).toBe('GitHub Dark')
+      expect(theme.themeInfo.value.description).toBe('工程師護眼風格')
+      expect(theme.themeInfo.value.isDark).toBe(true)
+    })
+
+    it('should return correct info for dracula', () => {
+      theme.setTheme('dracula')
+
+      expect(theme.themeInfo.value.id).toBe('dracula')
+      expect(theme.themeInfo.value.name).toBe('Dracula')
+      expect(theme.themeInfo.value.description).toBe('經典暗色主題')
+      expect(theme.themeInfo.value.isDark).toBe(true)
+    })
+  })
+
+  describe('init', () => {
     it('should restore saved preference', () => {
+      localStorage.setItem('kanpro-theme', 'dracula')
+
+      const newTheme = useTheme()
+      newTheme.init()
+
+      expect(newTheme.currentTheme.value).toBe('dracula')
+    })
+
+    it('should use default theme if no saved preference', () => {
+      const newTheme = useTheme()
+      newTheme.init()
+
+      expect(newTheme.currentTheme.value).toBe('twenty-crm')
+    })
+
+    it('should migrate old light mode to twenty-crm', () => {
+      localStorage.setItem('kanpro-theme', 'light')
+
+      const newTheme = useTheme()
+      newTheme.init()
+
+      expect(newTheme.currentTheme.value).toBe('twenty-crm')
+    })
+
+    it('should migrate old dark mode to github-dark', () => {
+      localStorage.setItem('kanpro-theme', 'dark')
+
+      const newTheme = useTheme()
+      newTheme.init()
+
+      expect(newTheme.currentTheme.value).toBe('github-dark')
+    })
+
+    it('should migrate old system mode to twenty-crm', () => {
+      localStorage.setItem('kanpro-theme', 'system')
+
+      const newTheme = useTheme()
+      newTheme.init()
+
+      expect(newTheme.currentTheme.value).toBe('twenty-crm')
+    })
+
+    it('should migrate from old theme-mode storage key', () => {
       localStorage.setItem('theme-mode', 'dark')
 
       const newTheme = useTheme()
       newTheme.init()
 
-      expect(newTheme.mode.value).toBe('dark')
+      expect(newTheme.currentTheme.value).toBe('github-dark')
+      expect(localStorage.getItem('theme-mode')).toBeNull()
+      expect(localStorage.getItem('kanpro-theme')).toBe('github-dark')
     })
 
-    it('should use system mode if no saved preference', () => {
+    it('should apply theme class on init', () => {
+      localStorage.setItem('kanpro-theme', 'github-dark')
+
       const newTheme = useTheme()
       newTheme.init()
 
-      expect(newTheme.mode.value).toBe('system')
+      expect(document.documentElement.classList.contains('theme-github-dark')).toBe(true)
+    })
+  })
+
+  describe('THEMES constant', () => {
+    it('should have three themes', () => {
+      expect(THEMES.length).toBe(3)
+    })
+
+    it('should have twenty-crm as first theme', () => {
+      expect(THEMES[0].id).toBe('twenty-crm')
+    })
+
+    it('should have all required fields', () => {
+      THEMES.forEach(theme => {
+        expect(theme.id).toBeDefined()
+        expect(theme.name).toBeDefined()
+        expect(theme.description).toBeDefined()
+        expect(typeof theme.isDark).toBe('boolean')
+      })
     })
   })
 })

@@ -9,6 +9,7 @@ import TaskFormModal from '@/components/TaskFormModal.vue'
 import TaskDetailModal from '@/components/TaskDetailModal.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import NotificationsDropdown from '@/components/NotificationsDropdown.vue'
+import ThemeToggle from '@/components/ThemeToggle.vue'
 import type { Task } from '@/types'
 
 const route = useRoute()
@@ -112,37 +113,37 @@ const handleCreateTask = async (data: {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-100 flex flex-col">
+  <div class="min-h-screen bg-surface-secondary flex flex-col">
     <!-- Header -->
-    <header class="bg-white shadow flex-shrink-0">
+    <header class="page-header flex-shrink-0">
       <div class="mx-auto max-w-full px-4 py-3 flex justify-between items-center">
         <div class="flex items-center gap-4">
           <button
             @click="goToProjects"
-            class="text-gray-600 hover:text-gray-900"
+            class="text-content-secondary hover:text-content"
           >
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h1 class="text-xl font-bold text-gray-900">
+          <h1 class="text-xl font-bold text-content">
             {{ boardStore.project?.name || '載入中...' }}
           </h1>
-          <div class="flex border rounded-md overflow-hidden">
+          <div class="flex border border-edge rounded-md overflow-hidden">
             <button
-              class="px-3 py-1 text-sm bg-blue-600 text-white"
+              class="px-3 py-1 text-sm bg-accent text-content-inverse"
             >
               看板
             </button>
             <button
               @click="router.push(`/projects/${projectId}/list`)"
-              class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200"
+              class="px-3 py-1 text-sm bg-surface-secondary text-content hover:bg-surface-hover"
             >
               清單
             </button>
             <button
               @click="router.push(`/projects/${projectId}/calendar`)"
-              class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200"
+              class="px-3 py-1 text-sm bg-surface-secondary text-content hover:bg-surface-hover"
             >
               日曆
             </button>
@@ -150,7 +151,7 @@ const handleCreateTask = async (data: {
           <!-- Settings button -->
           <button
             @click="router.push(`/projects/${projectId}/settings`)"
-            class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
+            class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded"
             title="專案設定"
           >
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -163,21 +164,22 @@ const handleCreateTask = async (data: {
           <!-- Search button -->
           <button
             @click="showSearchModal = true"
-            class="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-500 bg-gray-100 hover:bg-gray-200 rounded-md"
+            class="flex items-center gap-2 px-3 py-1.5 text-sm text-content-tertiary bg-surface-secondary hover:bg-surface-hover rounded-md"
           >
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <span>搜尋</span>
-            <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-xs bg-gray-200 rounded">⌘K</kbd>
+            <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-xs bg-surface-tertiary rounded">⌘K</kbd>
           </button>
+          <ThemeToggle />
           <NotificationsDropdown />
-          <span class="text-gray-600 text-sm">
+          <span class="text-content-secondary text-sm">
             {{ authStore.user?.name || authStore.user?.username }}
           </span>
           <button
             @click="handleLogout"
-            class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+            class="btn-secondary btn-sm"
           >
             登出
           </button>
@@ -187,7 +189,7 @@ const handleCreateTask = async (data: {
 
     <!-- Loading -->
     <div v-if="boardStore.isLoading" class="flex-1 flex items-center justify-center">
-      <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <svg class="animate-spin h-8 w-8 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
       </svg>
@@ -195,11 +197,11 @@ const handleCreateTask = async (data: {
 
     <!-- Error -->
     <div v-else-if="boardStore.error" class="flex-1 flex items-center justify-center">
-      <div class="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
-        <p class="text-red-600">{{ boardStore.error }}</p>
+      <div class="alert-error max-w-md">
+        <p>{{ boardStore.error }}</p>
         <button
           @click="boardStore.fetchBoard(projectId)"
-          class="mt-3 text-sm text-red-600 hover:text-red-800 underline"
+          class="mt-3 text-sm text-error hover:underline"
         >
           重試
         </button>
@@ -213,19 +215,19 @@ const handleCreateTask = async (data: {
         <div
           v-for="column in boardStore.columns"
           :key="column.id"
-          class="w-72 flex-shrink-0 bg-gray-200 rounded-lg flex flex-col max-h-full"
+          class="w-72 flex-shrink-0 bg-surface-tertiary rounded-lg flex flex-col max-h-full"
         >
           <!-- Column Header -->
           <div class="p-3 flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <h3 class="font-semibold text-gray-700">{{ column.title }}</h3>
-              <span class="text-xs text-gray-500 bg-gray-300 px-1.5 py-0.5 rounded">
+              <h3 class="font-semibold text-content-secondary">{{ column.title }}</h3>
+              <span class="text-xs text-content-tertiary bg-surface-active px-1.5 py-0.5 rounded">
                 {{ column.nb_tasks }}
               </span>
             </div>
             <button
               @click="openAddTaskModal(column.id)"
-              class="text-gray-500 hover:text-gray-700"
+              class="text-content-tertiary hover:text-content-secondary"
               title="新增任務"
             >
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -246,7 +248,7 @@ const handleCreateTask = async (data: {
             <!-- Empty state -->
             <div
               v-if="column.tasks.length === 0"
-              class="text-center py-8 text-gray-400 text-sm"
+              class="text-center py-8 text-content-tertiary text-sm"
             >
               無任務
             </div>

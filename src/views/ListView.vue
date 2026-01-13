@@ -6,6 +6,7 @@ import { useBoardStore } from '@/stores/board'
 import { useTasksStore } from '@/stores/tasks'
 import TaskDetailModal from '@/components/TaskDetailModal.vue'
 import NotificationsDropdown from '@/components/NotificationsDropdown.vue'
+import ThemeToggle from '@/components/ThemeToggle.vue'
 import type { Task } from '@/types'
 
 const route = useRoute()
@@ -158,50 +159,51 @@ const handleTaskUpdated = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-100 flex flex-col">
+  <div class="min-h-screen bg-surface-secondary flex flex-col">
     <!-- Header -->
-    <header class="bg-white shadow flex-shrink-0">
+    <header class="page-header flex-shrink-0">
       <div class="mx-auto max-w-full px-4 py-3 flex justify-between items-center">
         <div class="flex items-center gap-4">
           <button
             @click="goToProjects"
-            class="text-gray-600 hover:text-gray-900"
+            class="text-content-secondary hover:text-content"
           >
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h1 class="text-xl font-bold text-gray-900">
+          <h1 class="text-xl font-bold text-content">
             {{ boardStore.project?.name || '載入中...' }}
           </h1>
-          <div class="flex border rounded-md overflow-hidden">
+          <div class="flex border border-edge rounded-md overflow-hidden">
             <button
               @click="goToBoard"
-              class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200"
+              class="px-3 py-1 text-sm bg-surface-secondary text-content hover:bg-surface-hover"
             >
               看板
             </button>
             <button
-              class="px-3 py-1 text-sm bg-blue-600 text-white"
+              class="px-3 py-1 text-sm bg-accent text-content-inverse"
             >
               清單
             </button>
             <button
               @click="router.push(`/projects/${projectId}/calendar`)"
-              class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200"
+              class="px-3 py-1 text-sm bg-surface-secondary text-content hover:bg-surface-hover"
             >
               日曆
             </button>
           </div>
         </div>
         <div class="flex items-center gap-4">
+          <ThemeToggle />
           <NotificationsDropdown />
-          <span class="text-gray-600 text-sm">
+          <span class="text-content-secondary text-sm">
             {{ authStore.user?.name || authStore.user?.username }}
           </span>
           <button
             @click="handleLogout"
-            class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+            class="btn-secondary btn-sm"
           >
             登出
           </button>
@@ -211,7 +213,7 @@ const handleTaskUpdated = async () => {
 
     <!-- Loading -->
     <div v-if="tasksStore.isLoading" class="flex-1 flex items-center justify-center">
-      <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <svg class="animate-spin h-8 w-8 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
       </svg>
@@ -220,109 +222,109 @@ const handleTaskUpdated = async () => {
     <!-- Content -->
     <main v-else class="flex-1 p-4">
       <!-- Toolbar -->
-      <div class="bg-white rounded-lg shadow mb-4 p-4 flex items-center gap-4">
+      <div class="card mb-4 p-4 flex items-center gap-4">
         <input
           v-model="filterQuery"
           type="text"
           placeholder="搜尋任務..."
-          class="flex-1 max-w-md px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          class="input flex-1 max-w-md"
         />
-        <label class="flex items-center gap-2 text-sm text-gray-600">
+        <label class="flex items-center gap-2 text-sm text-content-secondary">
           <input
             v-model="showClosedTasks"
             type="checkbox"
-            class="rounded border-gray-300"
+            class="checkbox"
           />
           顯示已關閉任務
         </label>
-        <span class="text-sm text-gray-500">
+        <span class="text-sm text-content-tertiary">
           共 {{ filteredTasks.length }} 個任務
         </span>
       </div>
 
       <!-- Table -->
-      <div class="bg-white rounded-lg shadow overflow-hidden">
-        <table class="w-full">
-          <thead class="bg-gray-50 border-b">
+      <div class="card overflow-hidden">
+        <table class="table">
+          <thead class="table-header">
             <tr>
               <th
                 @click="toggleSort('id')"
-                class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
+                class="table-header-cell cursor-pointer hover:bg-surface-hover uppercase"
               >
                 # {{ getSortIcon('id') }}
               </th>
               <th
                 @click="toggleSort('title')"
-                class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
+                class="table-header-cell cursor-pointer hover:bg-surface-hover uppercase"
               >
                 標題 {{ getSortIcon('title') }}
               </th>
               <th
                 @click="toggleSort('column_id')"
-                class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
+                class="table-header-cell cursor-pointer hover:bg-surface-hover uppercase"
               >
                 欄位 {{ getSortIcon('column_id') }}
               </th>
               <th
                 @click="toggleSort('priority')"
-                class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
+                class="table-header-cell cursor-pointer hover:bg-surface-hover uppercase"
               >
                 優先級 {{ getSortIcon('priority') }}
               </th>
               <th
                 @click="toggleSort('date_due')"
-                class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
+                class="table-header-cell cursor-pointer hover:bg-surface-hover uppercase"
               >
                 到期日 {{ getSortIcon('date_due') }}
               </th>
               <th
                 @click="toggleSort('date_creation')"
-                class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100"
+                class="table-header-cell cursor-pointer hover:bg-surface-hover uppercase"
               >
                 建立日期 {{ getSortIcon('date_creation') }}
               </th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th class="table-header-cell uppercase">
                 狀態
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y">
+          <tbody class="divide-y divide-edge">
             <tr
               v-for="task in filteredTasks"
               :key="task.id"
               @click="openTaskDetail(task)"
-              class="hover:bg-gray-50 cursor-pointer"
+              class="table-row cursor-pointer"
             >
-              <td class="px-4 py-3 text-sm text-gray-500">
+              <td class="table-cell text-content-tertiary">
                 #{{ task.id }}
               </td>
-              <td class="px-4 py-3">
+              <td class="table-cell">
                 <div class="flex items-center gap-2">
                   <div :class="['w-3 h-3 rounded-full', getColorClass(task.color_id)]"></div>
-                  <span class="font-medium text-gray-900">{{ task.title }}</span>
+                  <span class="font-medium text-content">{{ task.title }}</span>
                 </div>
               </td>
-              <td class="px-4 py-3 text-sm text-gray-600">
+              <td class="table-cell text-content-secondary">
                 {{ getColumnName(task.column_id) }}
               </td>
-              <td class="px-4 py-3 text-sm text-gray-600">
+              <td class="table-cell text-content-secondary">
                 {{ task.priority || '-' }}
               </td>
-              <td class="px-4 py-3 text-sm">
+              <td class="table-cell">
                 <span
-                  :class="isOverdue(task) ? 'text-red-600 font-medium' : 'text-gray-600'"
+                  :class="isOverdue(task) ? 'text-error font-medium' : 'text-content-secondary'"
                 >
                   {{ formatDate(task.date_due) }}
                 </span>
               </td>
-              <td class="px-4 py-3 text-sm text-gray-600">
+              <td class="table-cell text-content-secondary">
                 {{ formatDate(task.date_creation) }}
               </td>
-              <td class="px-4 py-3">
+              <td class="table-cell">
                 <span
                   :class="[
                     'px-2 py-1 text-xs rounded',
-                    task.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                    task.is_active ? 'badge-success' : 'badge-neutral'
                   ]"
                 >
                   {{ task.is_active ? '開啟' : '已關閉' }}
@@ -330,7 +332,7 @@ const handleTaskUpdated = async () => {
               </td>
             </tr>
             <tr v-if="filteredTasks.length === 0">
-              <td colspan="7" class="px-4 py-8 text-center text-gray-500">
+              <td colspan="7" class="px-4 py-8 text-center text-content-tertiary">
                 沒有符合條件的任務
               </td>
             </tr>

@@ -2,10 +2,10 @@
   <div class="relative">
     <button
       @click="showMenu = !showMenu"
-      class="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-      :title="currentLabel"
+      class="p-2 rounded-lg text-content-secondary hover:bg-surface-hover transition-colors"
+      :title="themeInfo.name"
     >
-      <!-- Sun icon (light mode) -->
+      <!-- Sun icon (light theme) -->
       <svg
         v-if="!isDark"
         xmlns="http://www.w3.org/2000/svg"
@@ -21,7 +21,7 @@
           d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
         />
       </svg>
-      <!-- Moon icon (dark mode) -->
+      <!-- Moon icon (dark theme) -->
       <svg
         v-else
         xmlns="http://www.w3.org/2000/svg"
@@ -43,22 +43,62 @@
     <Transition name="dropdown">
       <div
         v-if="showMenu"
-        class="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 rounded-lg shadow-lg ring-1 ring-black/5 dark:ring-white/10 z-50"
+        class="absolute right-0 mt-2 w-48 bg-surface rounded-lg border border-edge z-50"
+        style="box-shadow: var(--shadow-lg)"
       >
         <div class="py-1">
           <button
-            v-for="option in options"
-            :key="option.value"
-            @click="selectMode(option.value)"
-            class="w-full px-4 py-2 text-left text-sm flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            :class="mode === option.value ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'"
+            v-for="theme in THEMES"
+            :key="theme.id"
+            @click="selectTheme(theme.id)"
+            class="w-full px-4 py-2 text-left text-sm flex items-center gap-3 hover:bg-surface-hover transition-colors"
+            :class="currentTheme === theme.id ? 'text-accent' : 'text-content'"
           >
-            <component :is="option.icon" class="h-4 w-4" />
-            {{ option.label }}
+            <!-- Theme icon -->
+            <span class="flex-shrink-0">
+              <svg
+                v-if="!theme.isDark"
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                />
+              </svg>
+              <svg
+                v-else
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                />
+              </svg>
+            </span>
+
+            <!-- Theme info -->
+            <span class="flex-1 min-w-0">
+              <span class="block font-medium truncate">{{ theme.name }}</span>
+              <span class="block text-xs text-content-tertiary truncate">{{ theme.description }}</span>
+            </span>
+
+            <!-- Check mark -->
             <svg
-              v-if="mode === option.value"
+              v-if="currentTheme === theme.id"
               xmlns="http://www.w3.org/2000/svg"
-              class="h-4 w-4 ml-auto"
+              class="h-4 w-4 flex-shrink-0"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -73,83 +113,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, h } from 'vue'
-import { useTheme, type ThemeMode } from '@/composables/useTheme'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useTheme, type ThemeName, THEMES } from '@/composables/useTheme'
 
 const theme = useTheme()
-const { mode, isDark, setMode } = theme
+const { currentTheme, themeInfo, isDark, setTheme } = theme
 
 const showMenu = ref(false)
 
-const currentLabel = computed(() => {
-  const labels: Record<ThemeMode, string> = {
-    light: '淺色模式',
-    dark: '深色模式',
-    system: '系統預設'
-  }
-  return labels[mode.value]
-})
-
-// Icon components
-const SunIcon = {
-  render: () => h('svg', {
-    xmlns: 'http://www.w3.org/2000/svg',
-    class: 'h-4 w-4',
-    fill: 'none',
-    viewBox: '0 0 24 24',
-    stroke: 'currentColor'
-  }, [
-    h('path', {
-      'stroke-linecap': 'round',
-      'stroke-linejoin': 'round',
-      'stroke-width': '2',
-      d: 'M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z'
-    })
-  ])
-}
-
-const MoonIcon = {
-  render: () => h('svg', {
-    xmlns: 'http://www.w3.org/2000/svg',
-    class: 'h-4 w-4',
-    fill: 'none',
-    viewBox: '0 0 24 24',
-    stroke: 'currentColor'
-  }, [
-    h('path', {
-      'stroke-linecap': 'round',
-      'stroke-linejoin': 'round',
-      'stroke-width': '2',
-      d: 'M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z'
-    })
-  ])
-}
-
-const ComputerIcon = {
-  render: () => h('svg', {
-    xmlns: 'http://www.w3.org/2000/svg',
-    class: 'h-4 w-4',
-    fill: 'none',
-    viewBox: '0 0 24 24',
-    stroke: 'currentColor'
-  }, [
-    h('path', {
-      'stroke-linecap': 'round',
-      'stroke-linejoin': 'round',
-      'stroke-width': '2',
-      d: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'
-    })
-  ])
-}
-
-const options = [
-  { value: 'light' as ThemeMode, label: '淺色模式', icon: SunIcon },
-  { value: 'dark' as ThemeMode, label: '深色模式', icon: MoonIcon },
-  { value: 'system' as ThemeMode, label: '系統預設', icon: ComputerIcon }
-]
-
-function selectMode(newMode: ThemeMode) {
-  setMode(newMode)
+function selectTheme(themeId: ThemeName) {
+  setTheme(themeId)
   showMenu.value = false
 }
 

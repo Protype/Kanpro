@@ -2,9 +2,12 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useTheme } from '@/composables/useTheme'
+import ThemeToggle from '@/components/ThemeToggle.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const theme = useTheme()
 
 const apiUrl = ref('')
 const username = ref('')
@@ -14,6 +17,9 @@ const isLoading = ref(false)
 const errorMessage = ref('')
 
 onMounted(() => {
+  // 初始化主題
+  theme.init()
+
   // 從環境變數載入預設 API URL
   const envApiUrl = import.meta.env.VITE_KANBOARD_API_URL
   if (envApiUrl) {
@@ -52,22 +58,24 @@ const handleLogin = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-100">
-    <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8">
-      <h2 class="text-2xl font-bold text-center text-gray-900 mb-8">Kanpro</h2>
+  <div class="min-h-screen flex items-center justify-center bg-surface-secondary">
+    <!-- Theme Toggle -->
+    <div class="absolute top-4 right-4">
+      <ThemeToggle />
+    </div>
+
+    <div class="max-w-md w-full card p-8 mx-4">
+      <h2 class="text-2xl font-bold text-center text-content mb-8">Kanpro</h2>
 
       <!-- 錯誤訊息 -->
-      <div
-        v-if="errorMessage"
-        class="mb-4 p-3 bg-red-50 border border-red-200 rounded-md"
-      >
-        <p class="text-sm text-red-600">{{ errorMessage }}</p>
+      <div v-if="errorMessage" class="alert-error mb-4">
+        <p class="text-sm">{{ errorMessage }}</p>
       </div>
 
       <form @submit.prevent="handleLogin" class="space-y-6">
         <!-- 伺服器網址 -->
         <div>
-          <label for="apiUrl" class="block text-sm font-medium text-gray-700">
+          <label for="apiUrl" class="block text-sm font-medium text-content-secondary mb-1">
             伺服器網址
           </label>
           <input
@@ -76,13 +84,13 @@ const handleLogin = async () => {
             type="url"
             required
             placeholder="http://your-kanboard-server/jsonrpc.php"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            class="input"
           />
         </div>
 
         <!-- 帳號 -->
         <div>
-          <label for="username" class="block text-sm font-medium text-gray-700">
+          <label for="username" class="block text-sm font-medium text-content-secondary mb-1">
             帳號
           </label>
           <input
@@ -91,13 +99,13 @@ const handleLogin = async () => {
             type="text"
             required
             autocomplete="username"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            class="input"
           />
         </div>
 
         <!-- 密碼 -->
         <div>
-          <label for="password" class="block text-sm font-medium text-gray-700">
+          <label for="password" class="block text-sm font-medium text-content-secondary mb-1">
             密碼
           </label>
           <input
@@ -106,7 +114,7 @@ const handleLogin = async () => {
             type="password"
             required
             autocomplete="current-password"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            class="input"
           />
         </div>
 
@@ -116,9 +124,9 @@ const handleLogin = async () => {
             id="rememberMe"
             v-model="rememberMe"
             type="checkbox"
-            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            class="h-4 w-4 text-accent focus:ring-accent border-edge rounded"
           />
-          <label for="rememberMe" class="ml-2 block text-sm text-gray-700">
+          <label for="rememberMe" class="ml-2 block text-sm text-content-secondary">
             記住我
           </label>
         </div>
@@ -127,10 +135,10 @@ const handleLogin = async () => {
         <button
           type="submit"
           :disabled="isLoading"
-          class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="btn-primary w-full"
         >
-          <span v-if="isLoading" class="flex items-center">
-            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <span v-if="isLoading" class="flex items-center justify-center">
+            <svg class="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>

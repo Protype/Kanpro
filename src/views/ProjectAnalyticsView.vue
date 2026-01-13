@@ -1,23 +1,24 @@
 <template>
-  <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+  <div class="min-h-screen bg-surface-secondary">
     <!-- Header -->
-    <header class="bg-white dark:bg-gray-800 shadow">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-4">
-            <router-link
-              :to="`/projects/${projectId}`"
-              class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-            </router-link>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">專案分析</h1>
-          </div>
-          <div class="text-sm text-gray-500 dark:text-gray-400">
+    <header class="page-header">
+      <div class="page-header-content">
+        <div class="flex items-center gap-4">
+          <router-link
+            :to="`/projects/${projectId}`"
+            class="text-content-secondary hover:text-content"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+          </router-link>
+          <h1 class="text-2xl font-bold text-content">專案分析</h1>
+        </div>
+        <div class="flex items-center gap-4">
+          <ThemeToggle />
+          <span class="text-sm text-content-tertiary">
             {{ projectName }}
-          </div>
+          </span>
         </div>
       </div>
     </header>
@@ -26,40 +27,40 @@
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Loading State -->
       <div v-if="isLoading" class="flex justify-center py-12">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-accent"></div>
       </div>
 
       <!-- Error State -->
-      <div v-else-if="error" class="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg">
-        <p class="text-red-600 dark:text-red-400">{{ error }}</p>
+      <div v-else-if="error" class="alert-error">
+        <p>{{ error }}</p>
       </div>
 
       <!-- Analytics Content -->
       <div v-else class="space-y-8">
         <!-- Stats Overview -->
         <section class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">總活動數</h3>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{{ activityStats.total }}</p>
+          <div class="card p-6">
+            <h3 class="text-sm font-medium text-content-tertiary">總活動數</h3>
+            <p class="mt-2 text-3xl font-bold text-content">{{ activityStats.total }}</p>
           </div>
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">建立任務</h3>
-            <p class="mt-2 text-3xl font-bold text-green-600 dark:text-green-400">{{ activityStats.taskCreated }}</p>
+          <div class="card p-6">
+            <h3 class="text-sm font-medium text-content-tertiary">建立任務</h3>
+            <p class="mt-2 text-3xl font-bold text-success">{{ activityStats.taskCreated }}</p>
           </div>
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">移動任務</h3>
-            <p class="mt-2 text-3xl font-bold text-blue-600 dark:text-blue-400">{{ activityStats.taskMoved }}</p>
+          <div class="card p-6">
+            <h3 class="text-sm font-medium text-content-tertiary">移動任務</h3>
+            <p class="mt-2 text-3xl font-bold text-accent">{{ activityStats.taskMoved }}</p>
           </div>
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">關閉任務</h3>
-            <p class="mt-2 text-3xl font-bold text-purple-600 dark:text-purple-400">{{ activityStats.taskClosed }}</p>
+          <div class="card p-6">
+            <h3 class="text-sm font-medium text-content-tertiary">關閉任務</h3>
+            <p class="mt-2 text-3xl font-bold text-info">{{ activityStats.taskClosed }}</p>
           </div>
         </section>
 
         <!-- Task Distribution -->
-        <section class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">任務分佈</h2>
-          <div v-if="taskDistribution.length === 0" class="text-gray-500 dark:text-gray-400 text-center py-8">
+        <section class="card p-6">
+          <h2 class="text-lg font-semibold text-content mb-4">任務分佈</h2>
+          <div v-if="taskDistribution.length === 0" class="text-content-tertiary text-center py-8">
             沒有任務資料
           </div>
           <div v-else class="space-y-3">
@@ -68,22 +69,22 @@
               :key="item.column"
               class="flex items-center gap-4"
             >
-              <span class="w-32 text-sm text-gray-600 dark:text-gray-400">{{ item.column }}</span>
-              <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-6 overflow-hidden">
+              <span class="w-32 text-sm text-content-secondary">{{ item.column }}</span>
+              <div class="flex-1 bg-surface-tertiary rounded-full h-6 overflow-hidden">
                 <div
-                  class="bg-blue-600 h-full rounded-full transition-all duration-500"
+                  class="bg-accent h-full rounded-full transition-all duration-500"
                   :style="{ width: `${getDistributionPercentage(item.count)}%` }"
                 ></div>
               </div>
-              <span class="w-12 text-right text-sm font-medium text-gray-900 dark:text-white">{{ item.count }}</span>
+              <span class="w-12 text-right text-sm font-medium text-content">{{ item.count }}</span>
             </div>
           </div>
         </section>
 
         <!-- User Workload -->
-        <section class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">成員工作量</h2>
-          <div v-if="userWorkload.length === 0" class="text-gray-500 dark:text-gray-400 text-center py-8">
+        <section class="card p-6">
+          <h2 class="text-lg font-semibold text-content mb-4">成員工作量</h2>
+          <div v-if="userWorkload.length === 0" class="text-content-tertiary text-center py-8">
             沒有成員資料
           </div>
           <div v-else class="space-y-3">
@@ -92,24 +93,24 @@
               :key="item.username"
               class="flex items-center gap-4"
             >
-              <span class="w-32 text-sm text-gray-600 dark:text-gray-400 truncate" :title="item.user">
+              <span class="w-32 text-sm text-content-secondary truncate" :title="item.user">
                 {{ item.user }}
               </span>
-              <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-6 overflow-hidden">
+              <div class="flex-1 bg-surface-tertiary rounded-full h-6 overflow-hidden">
                 <div
-                  class="bg-green-600 h-full rounded-full transition-all duration-500"
+                  class="bg-success h-full rounded-full transition-all duration-500"
                   :style="{ width: `${getWorkloadPercentage(item.count)}%` }"
                 ></div>
               </div>
-              <span class="w-12 text-right text-sm font-medium text-gray-900 dark:text-white">{{ item.count }}</span>
+              <span class="w-12 text-right text-sm font-medium text-content">{{ item.count }}</span>
             </div>
           </div>
         </section>
 
         <!-- Activity Timeline -->
-        <section class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">每日活動</h2>
-          <div v-if="activityByDay.length === 0" class="text-gray-500 dark:text-gray-400 text-center py-8">
+        <section class="card p-6">
+          <h2 class="text-lg font-semibold text-content mb-4">每日活動</h2>
+          <div v-if="activityByDay.length === 0" class="text-content-tertiary text-center py-8">
             沒有活動資料
           </div>
           <div v-else class="overflow-x-auto">
@@ -120,11 +121,11 @@
                 class="flex flex-col items-center gap-1"
               >
                 <div
-                  class="w-8 bg-blue-600 rounded-t transition-all duration-500"
+                  class="w-8 bg-accent rounded-t transition-all duration-500"
                   :style="{ height: `${getActivityBarHeight(day.count)}px` }"
                   :title="`${day.date}: ${day.count} 活動`"
                 ></div>
-                <span class="text-xs text-gray-500 dark:text-gray-400 transform -rotate-45 origin-top-left whitespace-nowrap">
+                <span class="text-xs text-content-tertiary transform -rotate-45 origin-top-left whitespace-nowrap">
                   {{ formatDate(day.date) }}
                 </span>
               </div>
@@ -133,16 +134,16 @@
         </section>
 
         <!-- Recent Activity -->
-        <section class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">最近活動</h2>
-          <div v-if="recentActivities.length === 0" class="text-gray-500 dark:text-gray-400 text-center py-8">
+        <section class="card p-6">
+          <h2 class="text-lg font-semibold text-content mb-4">最近活動</h2>
+          <div v-if="recentActivities.length === 0" class="text-content-tertiary text-center py-8">
             沒有活動紀錄
           </div>
           <div v-else class="space-y-3">
             <div
               v-for="activity in recentActivities"
               :key="activity.id"
-              class="flex items-center gap-4 py-2 border-b border-gray-200 dark:border-gray-700 last:border-0"
+              class="flex items-center gap-4 py-2 border-b border-edge last:border-0"
             >
               <div
                 class="w-8 h-8 rounded-full flex items-center justify-center text-white"
@@ -162,8 +163,8 @@
                 </svg>
               </div>
               <div class="flex-1">
-                <p class="text-sm text-gray-900 dark:text-white">{{ formatEventName(activity.event_name) }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">
+                <p class="text-sm text-content">{{ formatEventName(activity.event_name) }}</p>
+                <p class="text-xs text-content-tertiary">
                   任務 #{{ activity.task_id }} · {{ formatDateTime(activity.date_creation) }}
                 </p>
               </div>
@@ -182,7 +183,7 @@ import { useAnalyticsStore } from '@/stores/analytics'
 import { useBoardStore } from '@/stores/board'
 import { useMembersStore } from '@/stores/members'
 import { useProjectsStore } from '@/stores/projects'
-import type { Activity } from '@/types'
+import ThemeToggle from '@/components/ThemeToggle.vue'
 
 const route = useRoute()
 const analyticsStore = useAnalyticsStore()
@@ -274,11 +275,11 @@ function formatEventName(eventName: string): string {
 }
 
 function getActivityColor(eventName: string): string {
-  if (eventName.includes('create')) return 'bg-green-600'
-  if (eventName.includes('close')) return 'bg-purple-600'
-  if (eventName.includes('move')) return 'bg-blue-600'
-  if (eventName.includes('update')) return 'bg-yellow-600'
-  return 'bg-gray-600'
+  if (eventName.includes('create')) return 'bg-success'
+  if (eventName.includes('close')) return 'bg-info'
+  if (eventName.includes('move')) return 'bg-accent'
+  if (eventName.includes('update')) return 'bg-warning'
+  return 'bg-surface-tertiary'
 }
 
 async function loadAnalytics() {

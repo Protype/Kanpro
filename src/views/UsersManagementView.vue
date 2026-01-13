@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useUsersStore } from '@/stores/users'
 import NotificationsDropdown from '@/components/NotificationsDropdown.vue'
+import ThemeToggle from '@/components/ThemeToggle.vue'
 import type { User } from '@/types'
 
 const router = useRouter()
@@ -164,29 +165,30 @@ const handleLogout = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-100">
+  <div class="min-h-screen bg-surface-secondary">
     <!-- Header -->
-    <header class="bg-white shadow">
-      <div class="mx-auto max-w-7xl px-4 py-4 flex justify-between items-center">
+    <header class="page-header">
+      <div class="page-header-content">
         <div class="flex items-center gap-4">
           <button
             @click="goBack"
-            class="text-gray-600 hover:text-gray-900"
+            class="text-content-secondary hover:text-content"
           >
             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h1 class="text-xl font-bold text-gray-900">使用者管理</h1>
+          <h1 class="text-xl font-bold text-content">使用者管理</h1>
         </div>
         <div class="flex items-center gap-4">
+          <ThemeToggle />
           <NotificationsDropdown />
-          <span class="text-gray-600 text-sm">
+          <span class="text-content-secondary text-sm">
             {{ authStore.user?.name || authStore.user?.username }}
           </span>
           <button
             @click="handleLogout"
-            class="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
+            class="btn-secondary btn-sm"
           >
             登出
           </button>
@@ -196,8 +198,8 @@ const handleLogout = () => {
 
     <main class="mx-auto max-w-4xl px-4 py-6">
       <!-- Error Alert -->
-      <div v-if="error" class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-        <div class="flex items-center gap-2 text-red-800">
+      <div v-if="error" class="alert-error mb-6">
+        <div class="flex items-center gap-2">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
@@ -206,8 +208,8 @@ const handleLogout = () => {
       </div>
 
       <!-- Success Alert -->
-      <div v-if="successMessage" class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
-        <div class="flex items-center gap-2 text-green-800">
+      <div v-if="successMessage" class="alert-success mb-6">
+        <div class="flex items-center gap-2">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
           </svg>
@@ -217,16 +219,16 @@ const handleLogout = () => {
 
       <!-- Header with Add button -->
       <div class="flex items-center justify-between mb-6">
-        <h2 class="text-lg font-semibold text-gray-900">
+        <h2 class="text-lg font-semibold text-content">
           所有使用者
-          <span v-if="usersStore.usersCount > 0" class="text-gray-400 text-sm font-normal">
+          <span v-if="usersStore.usersCount > 0" class="text-content-tertiary text-sm font-normal">
             ({{ usersStore.usersCount }})
           </span>
         </h2>
         <button
           v-if="!isAdding"
           @click="startAdding"
-          class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          class="btn-primary"
         >
           + 新增使用者
         </button>
@@ -234,7 +236,7 @@ const handleLogout = () => {
 
       <!-- Loading -->
       <div v-if="usersStore.isLoading" class="flex items-center justify-center py-12">
-        <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <svg class="animate-spin h-8 w-8 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
@@ -242,51 +244,51 @@ const handleLogout = () => {
 
       <div v-else class="space-y-4">
         <!-- Add user form -->
-        <div v-if="isAdding" class="bg-white rounded-lg shadow p-6 space-y-4">
-          <h3 class="text-lg font-semibold text-gray-900">新增使用者</h3>
+        <div v-if="isAdding" class="card p-6 space-y-4">
+          <h3 class="text-lg font-semibold text-content">新增使用者</h3>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">使用者名稱 *</label>
+              <label class="block text-sm font-medium text-content-secondary mb-1">使用者名稱 *</label>
               <input
                 v-model="newUsername"
                 type="text"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input"
                 placeholder="輸入使用者名稱"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">密碼 *</label>
+              <label class="block text-sm font-medium text-content-secondary mb-1">密碼 *</label>
               <input
                 v-model="newPassword"
                 type="password"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input"
                 placeholder="輸入密碼"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">顯示名稱</label>
+              <label class="block text-sm font-medium text-content-secondary mb-1">顯示名稱</label>
               <input
                 v-model="newName"
                 type="text"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input"
                 placeholder="選填"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">電子郵件</label>
+              <label class="block text-sm font-medium text-content-secondary mb-1">電子郵件</label>
               <input
                 v-model="newEmail"
                 type="email"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="input"
                 placeholder="選填"
               />
             </div>
             <div class="col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">角色</label>
+              <label class="block text-sm font-medium text-content-secondary mb-1">角色</label>
               <select
                 v-model="newRole"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="select"
               >
                 <option v-for="role in roles" :key="role.value" :value="role.value">
                   {{ role.label }}
@@ -299,14 +301,14 @@ const handleLogout = () => {
             <button
               @click="cancelAdding"
               :disabled="isSubmitting"
-              class="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+              class="btn-secondary"
             >
               取消
             </button>
             <button
               @click="handleAddUser"
               :disabled="!newUsername.trim() || !newPassword || isSubmitting"
-              class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+              class="btn-primary"
             >
               新增
             </button>
@@ -314,8 +316,8 @@ const handleLogout = () => {
         </div>
 
         <!-- Users list -->
-        <div class="bg-white rounded-lg shadow">
-          <div class="divide-y">
+        <div class="card">
+          <div class="divide-y divide-edge">
             <div
               v-for="user in usersStore.users"
               :key="user.id"
@@ -325,8 +327,8 @@ const handleLogout = () => {
               <div v-if="editingUserId !== user.id" class="flex items-center justify-between">
                 <div class="flex items-center gap-4">
                   <!-- Avatar -->
-                  <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                    <span class="text-gray-600 font-medium">
+                  <div class="avatar-md">
+                    <span>
                       {{ (user.name || user.username).charAt(0).toUpperCase() }}
                     </span>
                   </div>
@@ -334,25 +336,25 @@ const handleLogout = () => {
                   <!-- User info -->
                   <div>
                     <div class="flex items-center gap-2">
-                      <span class="font-medium text-gray-900">{{ user.name || user.username }}</span>
+                      <span class="font-medium text-content">{{ user.name || user.username }}</span>
                       <span
                         v-if="!user.is_active"
-                        class="text-xs px-2 py-0.5 bg-red-100 text-red-700 rounded"
+                        class="badge-error"
                       >
                         已停用
                       </span>
                       <span
                         v-if="user.role === 'app-admin'"
-                        class="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded"
+                        class="text-xs px-2 py-0.5 bg-accent-light text-accent rounded"
                       >
                         管理員
                       </span>
                     </div>
-                    <div class="text-sm text-gray-500">
+                    <div class="text-sm text-content-tertiary">
                       @{{ user.username }}
                       <span v-if="user.email">· {{ user.email }}</span>
                     </div>
-                    <div class="text-xs text-gray-400">
+                    <div class="text-xs text-content-tertiary">
                       {{ getRoleLabel(user.role) }}
                     </div>
                   </div>
@@ -363,7 +365,7 @@ const handleLogout = () => {
                   <button
                     @click="handleToggleActive(user)"
                     :disabled="user.id === authStore.user?.id"
-                    class="p-2 text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                    class="p-2 text-content-tertiary hover:text-content-secondary disabled:opacity-30"
                     :title="user.is_active ? '停用' : '啟用'"
                   >
                     <svg v-if="user.is_active" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -376,7 +378,7 @@ const handleLogout = () => {
                   <!-- Edit -->
                   <button
                     @click="startEditing(user)"
-                    class="p-2 text-gray-400 hover:text-gray-600"
+                    class="p-2 text-content-tertiary hover:text-content-secondary"
                     title="編輯"
                   >
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -387,7 +389,7 @@ const handleLogout = () => {
                   <button
                     @click="handleRemoveUser(user)"
                     :disabled="user.id === authStore.user?.id"
-                    class="p-2 text-gray-400 hover:text-red-500 disabled:opacity-30"
+                    class="p-2 text-content-tertiary hover:text-error disabled:opacity-30"
                     title="刪除"
                   >
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -401,26 +403,26 @@ const handleLogout = () => {
               <div v-else class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">顯示名稱</label>
+                    <label class="block text-sm font-medium text-content-secondary mb-1">顯示名稱</label>
                     <input
                       v-model="editName"
                       type="text"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      class="input"
                     />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">電子郵件</label>
+                    <label class="block text-sm font-medium text-content-secondary mb-1">電子郵件</label>
                     <input
                       v-model="editEmail"
                       type="email"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      class="input"
                     />
                   </div>
                   <div class="col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">角色</label>
+                    <label class="block text-sm font-medium text-content-secondary mb-1">角色</label>
                     <select
                       v-model="editRole"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      class="select"
                     >
                       <option v-for="role in roles" :key="role.value" :value="role.value">
                         {{ role.label }}
@@ -432,14 +434,14 @@ const handleLogout = () => {
                   <button
                     @click="cancelEditing"
                     :disabled="isSubmitting"
-                    class="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                    class="btn-secondary"
                   >
                     取消
                   </button>
                   <button
                     @click="handleSaveUser"
                     :disabled="isSubmitting"
-                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                    class="btn-primary"
                   >
                     儲存
                   </button>
@@ -450,7 +452,7 @@ const handleLogout = () => {
             <!-- Empty state -->
             <div
               v-if="usersStore.users.length === 0 && !usersStore.isLoading"
-              class="p-8 text-center text-gray-500"
+              class="p-8 text-center text-content-tertiary"
             >
               沒有使用者
             </div>

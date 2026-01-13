@@ -1,1 +1,73 @@
 @import "tailwindcss";
+@import "./themes.css";
+@import "./components.css";
+
+/**
+ * Tailwind CSS v4 Theme Configuration
+ *
+ * Map CSS variables to Tailwind utility classes:
+ * - bg-surface, bg-surface-secondary, bg-surface-tertiary
+ * - text-content, text-content-secondary, text-content-tertiary
+ * - border-edge, border-edge-secondary
+ * - bg-accent, text-accent, border-accent
+ */
+
+@theme {
+  /* Surface Colors (backgrounds) */
+  --color-surface: var(--color-bg-primary);
+  --color-surface-secondary: var(--color-bg-secondary);
+  --color-surface-tertiary: var(--color-bg-tertiary);
+  --color-surface-hover: var(--color-bg-hover);
+  --color-surface-active: var(--color-bg-active);
+
+  /* Content Colors (text) */
+  --color-content: var(--color-text-primary);
+  --color-content-secondary: var(--color-text-secondary);
+  --color-content-tertiary: var(--color-text-tertiary);
+  --color-content-inverse: var(--color-text-inverse);
+
+  /* Edge Colors (borders) */
+  --color-edge: var(--color-border-primary);
+  --color-edge-secondary: var(--color-border-secondary);
+  --color-edge-focus: var(--color-border-focus);
+
+  /* Accent Colors */
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-accent-light: var(--color-accent-light);
+
+  /* Status Colors */
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-error: var(--color-error);
+  --color-info: var(--color-info);
+
+  /* Shadows */
+  --shadow-surface-sm: var(--shadow-sm);
+  --shadow-surface-md: var(--shadow-md);
+  --shadow-surface-lg: var(--shadow-lg);
+
+  /* Border Radius */
+  --radius-surface-sm: var(--radius-sm);
+  --radius-surface-md: var(--radius-md);
+  --radius-surface-lg: var(--radius-lg);
+  --radius-surface-xl: var(--radius-xl);
+}
+
+/**
+ * Base Styles
+ */
+@layer base {
+  html {
+    @apply antialiased;
+  }
+
+  body {
+    @apply bg-surface text-content transition-colors duration-200;
+  }
+
+  /* Smooth transitions for theme switching */
+  * {
+    @apply transition-colors duration-200;
+  }
+}
