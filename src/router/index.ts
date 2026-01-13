@@ -38,6 +38,12 @@ const router = createRouter({
           meta: { sidebarMode: 'global' }
         },
         {
+          path: 'activity',
+          name: 'activity',
+          component: () => import('@/views/ActivityView.vue'),
+          meta: { sidebarMode: 'global' }
+        },
+        {
           path: 'my-tasks',
           name: 'my-tasks',
           component: () => import('@/views/MyTasksView.vue'),

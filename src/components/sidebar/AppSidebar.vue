@@ -40,7 +40,8 @@ const isProjectMode = computed(() => sidebarStore.mode === 'project')
 
 // Navigation items for global mode
 const globalNavItems = [
-  { name: 'dashboard', label: '動態總覽', icon: 'activity', route: '/dashboard' },
+  { name: 'dashboard', label: '儀表板', icon: 'dashboard', route: '/dashboard' },
+  { name: 'activity', label: '動態總覽', icon: 'activity', route: '/activity' },
   { name: 'all-tasks', label: '任務總覽', icon: 'tasks', route: '/' },
   { name: 'my-tasks', label: '我的任務', icon: 'user', route: '/my-tasks' }
 ]
@@ -110,7 +111,7 @@ const goToGlobal = () => {
       </router-link>
       <button
         @click="toggleSidebar"
-        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
+        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors cursor-pointer"
         :title="sidebarStore.isExpanded ? '折疊側邊欄' : '展開側邊欄'"
       >
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -138,7 +139,7 @@ const goToGlobal = () => {
       <div v-if="isProjectMode" class="px-3 mb-4">
         <button
           @click="goToGlobal"
-          class="flex items-center gap-2 text-content-secondary hover:text-content text-sm mb-3 w-full"
+          class="flex items-center gap-2 text-content-secondary hover:text-content text-sm mb-3 w-full cursor-pointer"
         >
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -162,14 +163,18 @@ const goToGlobal = () => {
             :key="item.name"
             @click="handleNavClick(item)"
             :class="[
-              'flex items-center gap-3 w-full px-3 py-2 rounded-md transition-colors',
+              'flex items-center gap-3 w-full px-3 py-2 rounded-md transition-colors cursor-pointer',
               isActive(item.route)
                 ? 'bg-accent text-content-inverse'
                 : 'text-content-secondary hover:bg-surface-hover hover:text-content'
             ]"
           >
+            <!-- Dashboard Icon -->
+            <svg v-if="item.icon === 'dashboard'" class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+            </svg>
             <!-- Activity Icon -->
-            <svg v-if="item.icon === 'activity'" class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg v-else-if="item.icon === 'activity'" class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
             <!-- Tasks Icon -->
@@ -197,7 +202,7 @@ const goToGlobal = () => {
             :key="item.name"
             @click="handleNavClick(item)"
             :class="[
-              'flex items-center gap-3 w-full px-3 py-2 rounded-md transition-colors',
+              'flex items-center gap-3 w-full px-3 py-2 rounded-md transition-colors cursor-pointer',
               isActiveView(item.name)
                 ? 'bg-accent text-content-inverse'
                 : 'text-content-secondary hover:bg-surface-hover hover:text-content'
@@ -229,7 +234,7 @@ const goToGlobal = () => {
             :key="item.name"
             @click="handleNavClick(item)"
             :class="[
-              'flex items-center gap-3 w-full px-3 py-2 rounded-md transition-colors',
+              'flex items-center gap-3 w-full px-3 py-2 rounded-md transition-colors cursor-pointer',
               isActiveView(item.name)
                 ? 'bg-accent text-content-inverse'
                 : 'text-content-secondary hover:bg-surface-hover hover:text-content'
@@ -264,7 +269,7 @@ const goToGlobal = () => {
           </span>
           <router-link
             to="/projects"
-            class="text-xs text-accent hover:text-accent-hover"
+            class="text-xs text-accent hover:text-accent-hover cursor-pointer"
           >
             全部
           </router-link>
@@ -279,7 +284,7 @@ const goToGlobal = () => {
             <button
               @click="handleProjectClick(project.id)"
               :class="[
-                'flex items-center gap-3 w-full px-3 py-2 rounded-md transition-colors',
+                'flex items-center gap-3 w-full px-3 py-2 rounded-md transition-colors cursor-pointer',
                 sidebarStore.currentProjectId === project.id
                   ? 'bg-surface-active text-content'
                   : 'text-content-secondary hover:bg-surface-hover hover:text-content'
@@ -294,7 +299,7 @@ const goToGlobal = () => {
               <button
                 v-if="sidebarStore.isExpanded && !isProjectMode"
                 @click="toggleProjectExpand(project.id, $event)"
-                class="ml-auto p-1 text-content-tertiary hover:text-content-secondary"
+                class="ml-auto p-1 text-content-tertiary hover:text-content-secondary cursor-pointer"
               >
                 <svg
                   class="w-4 h-4 transition-transform"
@@ -315,25 +320,25 @@ const goToGlobal = () => {
             >
               <router-link
                 :to="`/projects/${project.id}/activity`"
-                class="flex items-center gap-2 px-3 py-1.5 text-sm text-content-tertiary hover:text-content-secondary rounded-md hover:bg-surface-hover"
+                class="flex items-center gap-2 px-3 py-1.5 text-sm text-content-tertiary hover:text-content-secondary rounded-md hover:bg-surface-hover cursor-pointer"
               >
                 專案動態
               </router-link>
               <router-link
                 :to="`/projects/${project.id}`"
-                class="flex items-center gap-2 px-3 py-1.5 text-sm text-content-tertiary hover:text-content-secondary rounded-md hover:bg-surface-hover"
+                class="flex items-center gap-2 px-3 py-1.5 text-sm text-content-tertiary hover:text-content-secondary rounded-md hover:bg-surface-hover cursor-pointer"
               >
                 列表
               </router-link>
               <router-link
                 :to="`/projects/${project.id}/board`"
-                class="flex items-center gap-2 px-3 py-1.5 text-sm text-content-tertiary hover:text-content-secondary rounded-md hover:bg-surface-hover"
+                class="flex items-center gap-2 px-3 py-1.5 text-sm text-content-tertiary hover:text-content-secondary rounded-md hover:bg-surface-hover cursor-pointer"
               >
                 看板
               </router-link>
               <router-link
                 :to="`/projects/${project.id}/calendar`"
-                class="flex items-center gap-2 px-3 py-1.5 text-sm text-content-tertiary hover:text-content-secondary rounded-md hover:bg-surface-hover"
+                class="flex items-center gap-2 px-3 py-1.5 text-sm text-content-tertiary hover:text-content-secondary rounded-md hover:bg-surface-hover cursor-pointer"
               >
                 行事曆
               </router-link>
@@ -361,7 +366,7 @@ const goToGlobal = () => {
         <router-link
           v-if="sidebarStore.isExpanded"
           to="/settings"
-          class="p-1.5 text-content-tertiary hover:text-content-secondary rounded-md hover:bg-surface-hover"
+          class="p-1.5 text-content-tertiary hover:text-content-secondary rounded-md hover:bg-surface-hover cursor-pointer"
           title="設定"
         >
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

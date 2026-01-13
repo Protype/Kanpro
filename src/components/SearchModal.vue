@@ -3,10 +3,13 @@ import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useSearchStore } from '@/stores/search'
 import type { Task } from '@/types'
 
-const props = defineProps<{
-  isOpen: boolean
-  projectId: number
-}>()
+const props = withDefaults(defineProps<{
+  isOpen?: boolean
+  projectId?: number
+}>(), {
+  isOpen: true,
+  projectId: 0
+})
 
 const emit = defineEmits<{
   close: []
