@@ -214,4 +214,134 @@ describe('useKeyboardShortcuts', () => {
       expect(handler).toHaveBeenCalledTimes(1)
     })
   })
+
+  describe('sequence shortcuts', () => {
+    it('should register sequence shortcut v+b', async () => {
+      const handler = vi.fn()
+      shortcuts.registerSequence(['v', 'b'], handler, { description: 'Board view' })
+
+      dispatchKeyEvent('v')
+      await new Promise(resolve => setTimeout(resolve, 50))
+      dispatchKeyEvent('b')
+
+      expect(handler).toHaveBeenCalledTimes(1)
+    })
+
+    it('should register sequence shortcut v+l', async () => {
+      const handler = vi.fn()
+      shortcuts.registerSequence(['v', 'l'], handler, { description: 'List view' })
+
+      dispatchKeyEvent('v')
+      await new Promise(resolve => setTimeout(resolve, 50))
+      dispatchKeyEvent('l')
+
+      expect(handler).toHaveBeenCalledTimes(1)
+    })
+
+    it('should register sequence shortcut v+c', async () => {
+      const handler = vi.fn()
+      shortcuts.registerSequence(['v', 'c'], handler, { description: 'Calendar view' })
+
+      dispatchKeyEvent('v')
+      await new Promise(resolve => setTimeout(resolve, 50))
+      dispatchKeyEvent('c')
+
+      expect(handler).toHaveBeenCalledTimes(1)
+    })
+
+    it('should timeout sequence after delay', async () => {
+      const handler = vi.fn()
+      shortcuts.registerSequence(['v', 'b'], handler)
+
+      dispatchKeyEvent('v')
+      await new Promise(resolve => setTimeout(resolve, 600))
+      dispatchKeyEvent('b')
+
+      expect(handler).not.toHaveBeenCalled()
+    })
+
+    it('should reset sequence on wrong key', async () => {
+      const handler = vi.fn()
+      shortcuts.registerSequence(['v', 'b'], handler)
+
+      dispatchKeyEvent('v')
+      await new Promise(resolve => setTimeout(resolve, 50))
+      dispatchKeyEvent('x')
+      dispatchKeyEvent('b')
+
+      expect(handler).not.toHaveBeenCalled()
+    })
+
+    it('should unregister sequence shortcut', async () => {
+      const handler = vi.fn()
+      const unregister = shortcuts.registerSequence(['v', 'b'], handler)
+
+      unregister()
+      dispatchKeyEvent('v')
+      await new Promise(resolve => setTimeout(resolve, 50))
+      dispatchKeyEvent('b')
+
+      expect(handler).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('context shortcuts', () => {
+    it('should register context-aware shortcut', () => {
+      const handler = vi.fn()
+      shortcuts.registerWithContext('n', handler, {
+        context: 'board',
+        description: 'New task'
+      })
+
+      shortcuts.setContext('board')
+      dispatchKeyEvent('n')
+
+      expect(handler).toHaveBeenCalledTimes(1)
+    })
+
+    it('should not trigger shortcut in wrong context', () => {
+      const handler = vi.fn()
+      shortcuts.registerWithContext('n', handler, { context: 'board' })
+
+      shortcuts.setContext('list')
+      dispatchKeyEvent('n')
+
+      expect(handler).not.toHaveBeenCalled()
+    })
+
+    it('should trigger global shortcuts in any context', () => {
+      const handler = vi.fn()
+      shortcuts.register('?', handler)
+
+      shortcuts.setContext('board')
+      dispatchKeyEvent('?')
+
+      expect(handler).toHaveBeenCalledTimes(1)
+    })
+
+    it('should get current context', () => {
+      shortcuts.setContext('task-detail')
+      expect(shortcuts.getContext()).toBe('task-detail')
+    })
+  })
+
+  describe('ctrl/meta + Enter', () => {
+    it('should register ctrl+Enter shortcut', () => {
+      const handler = vi.fn()
+      shortcuts.register('Enter', handler, { ctrl: true, description: 'Submit form' })
+
+      dispatchKeyEvent('Enter', { ctrlKey: true })
+
+      expect(handler).toHaveBeenCalledTimes(1)
+    })
+
+    it('should register meta+Enter shortcut', () => {
+      const handler = vi.fn()
+      shortcuts.register('Enter', handler, { meta: true, description: 'Submit form' })
+
+      dispatchKeyEvent('Enter', { metaKey: true })
+
+      expect(handler).toHaveBeenCalledTimes(1)
+    })
+  })
 })
