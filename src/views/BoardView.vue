@@ -1,24 +1,28 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
 import { useBoardStore } from '@/stores/board'
 import { useTasksStore } from '@/stores/tasks'
 import TaskCard from '@/components/TaskCard.vue'
 import TaskFormModal from '@/components/TaskFormModal.vue'
 import TaskDetailModal from '@/components/TaskDetailModal.vue'
 import SearchModal from '@/components/SearchModal.vue'
-import NotificationsDropdown from '@/components/NotificationsDropdown.vue'
-import ThemeToggle from '@/components/ThemeToggle.vue'
 import type { Task } from '@/types'
+
+const props = defineProps<{
+  showSearchModal?: boolean
+}>()
+
+const emit = defineEmits<{
+  'close-search-modal': []
+}>()
 
 const route = useRoute()
 const router = useRouter()
-const authStore = useAuthStore()
 const boardStore = useBoardStore()
 const tasksStore = useTasksStore()
 
-const projectId = Number(route.params.id)
+const projectId = computed(() => Number(route.params.id))
 
 // Modal state
 const showTaskModal = ref(false)
@@ -29,25 +33,8 @@ const taskModalRef = ref<InstanceType<typeof TaskFormModal> | null>(null)
 const showTaskDetailModal = ref(false)
 const selectedTask = ref<Task | null>(null)
 
-// Search modal state
-const showSearchModal = ref(false)
-
-// Keyboard shortcut handler
-const handleKeydown = (e: KeyboardEvent) => {
-  // Cmd/Ctrl + K to open search
-  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-    e.preventDefault()
-    showSearchModal.value = true
-  }
-}
-
 onMounted(() => {
-  boardStore.fetchBoard(projectId)
-  window.addEventListener('keydown', handleKeydown)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeydown)
+  boardStore.fetchBoard(projectId.value)
 })
 
 watch(() => route.params.id, (newId) => {
@@ -56,14 +43,27 @@ watch(() => route.params.id, (newId) => {
   }
 })
 
-const handleLogout = () => {
-  authStore.logout()
-  router.push('/login')
-}
-
-const goToProjects = () => {
-  router.push('/')
-}
+// Handle task query param for deep linking
+watch(
+  () => route.query.task,
+  async (taskId) => {
+    if (taskId) {
+      const id = Number(taskId)
+      // Find task in board columns
+      for (const column of boardStore.columns) {
+        const task = column.tasks.find(t => t.id === id)
+        if (task) {
+          selectedTask.value = task
+          showTaskDetailModal.value = true
+          break
+        }
+      }
+      // Clear query param
+      router.replace({ query: {} })
+    }
+  },
+  { immediate: true }
+)
 
 const handleTaskClick = (task: Task) => {
   selectedTask.value = task
@@ -72,13 +72,13 @@ const handleTaskClick = (task: Task) => {
 
 const handleTaskUpdated = async () => {
   // Refresh board to get updated task data
-  await boardStore.fetchBoard(projectId)
+  await boardStore.fetchBoard(projectId.value)
 }
 
 const handleSearchSelect = (task: Task) => {
   selectedTask.value = task
   showTaskDetailModal.value = true
-  showSearchModal.value = false
+  emit('close-search-modal')
 }
 
 const openAddTaskModal = (columnId: number) => {
@@ -94,7 +94,7 @@ const handleCreateTask = async (data: {
 }) => {
   try {
     await tasksStore.createTask({
-      project_id: projectId,
+      project_id: projectId.value,
       title: data.title,
       description: data.description || undefined,
       color_id: data.color_id,
@@ -102,7 +102,7 @@ const handleCreateTask = async (data: {
     })
     showTaskModal.value = false
     // Refresh board
-    await boardStore.fetchBoard(projectId)
+    await boardStore.fetchBoard(projectId.value)
   } catch (error) {
     console.error('Failed to create task:', error)
     alert('建立任務失敗')
@@ -113,80 +113,7 @@ const handleCreateTask = async (data: {
 </script>
 
 <template>
-  <div class="min-h-screen bg-surface-secondary flex flex-col">
-    <!-- Header -->
-    <header class="page-header flex-shrink-0">
-      <div class="mx-auto max-w-full px-4 py-3 flex justify-between items-center">
-        <div class="flex items-center gap-4">
-          <button
-            @click="goToProjects"
-            class="text-content-secondary hover:text-content"
-          >
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <h1 class="text-xl font-bold text-content">
-            {{ boardStore.project?.name || '載入中...' }}
-          </h1>
-          <div class="flex border border-edge rounded-md overflow-hidden">
-            <button
-              class="px-3 py-1 text-sm bg-accent text-content-inverse"
-            >
-              看板
-            </button>
-            <button
-              @click="router.push(`/projects/${projectId}/list`)"
-              class="px-3 py-1 text-sm bg-surface-secondary text-content hover:bg-surface-hover"
-            >
-              清單
-            </button>
-            <button
-              @click="router.push(`/projects/${projectId}/calendar`)"
-              class="px-3 py-1 text-sm bg-surface-secondary text-content hover:bg-surface-hover"
-            >
-              日曆
-            </button>
-          </div>
-          <!-- Settings button -->
-          <button
-            @click="router.push(`/projects/${projectId}/settings`)"
-            class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded"
-            title="專案設定"
-          >
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </button>
-        </div>
-        <div class="flex items-center gap-4">
-          <!-- Search button -->
-          <button
-            @click="showSearchModal = true"
-            class="flex items-center gap-2 px-3 py-1.5 text-sm text-content-tertiary bg-surface-secondary hover:bg-surface-hover rounded-md"
-          >
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <span>搜尋</span>
-            <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-xs bg-surface-tertiary rounded">⌘K</kbd>
-          </button>
-          <ThemeToggle />
-          <NotificationsDropdown />
-          <span class="text-content-secondary text-sm">
-            {{ authStore.user?.name || authStore.user?.username }}
-          </span>
-          <button
-            @click="handleLogout"
-            class="btn-secondary btn-sm"
-          >
-            登出
-          </button>
-        </div>
-      </div>
-    </header>
-
+  <div class="h-full flex flex-col bg-surface-secondary">
     <!-- Loading -->
     <div v-if="boardStore.isLoading" class="flex-1 flex items-center justify-center">
       <svg class="animate-spin h-8 w-8 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -280,9 +207,9 @@ const handleCreateTask = async (data: {
 
     <!-- Search Modal -->
     <SearchModal
-      :is-open="showSearchModal"
+      v-if="showSearchModal"
       :project-id="projectId"
-      @close="showSearchModal = false"
+      @close="emit('close-search-modal')"
       @select="handleSearchSelect"
     />
   </div>

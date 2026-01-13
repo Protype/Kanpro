@@ -1,18 +1,24 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
 import { useProjectsStore } from '@/stores/projects'
-import NotificationsDropdown from '@/components/NotificationsDropdown.vue'
-import ThemeToggle from '@/components/ThemeToggle.vue'
 import MembersList from '@/components/MembersList.vue'
 import ColumnsList from '@/components/ColumnsList.vue'
 import SwimlanesList from '@/components/SwimlanesList.vue'
 import CategoriesList from '@/components/CategoriesList.vue'
+import SearchModal from '@/components/SearchModal.vue'
+import type { Task } from '@/types'
+
+defineProps<{
+  showSearchModal?: boolean
+}>()
+
+const emit = defineEmits<{
+  'close-search-modal': []
+}>()
 
 const route = useRoute()
 const router = useRouter()
-const authStore = useAuthStore()
 const projectsStore = useProjectsStore()
 
 const projectId = computed(() => Number(route.params.id))
@@ -90,49 +96,20 @@ const handleDelete = async () => {
   }
 }
 
-const goBack = () => {
-  router.push(`/projects/${projectId.value}`)
-}
-
-const handleLogout = () => {
-  authStore.logout()
-  router.push('/login')
+const handleSearchSelect = (task: Task) => {
+  router.push(`/projects/${task.project_id}?task=${task.id}`)
+  emit('close-search-modal')
 }
 </script>
 
 <template>
-  <div class="min-h-screen bg-surface-secondary">
-    <!-- Header -->
-    <header class="page-header">
-      <div class="page-header-content">
-        <div class="flex items-center gap-4">
-          <button
-            @click="goBack"
-            class="text-content-secondary hover:text-content"
-          >
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <h1 class="text-xl font-bold text-content">專案設定</h1>
-        </div>
-        <div class="flex items-center gap-4">
-          <ThemeToggle />
-          <NotificationsDropdown />
-          <span class="text-content-secondary text-sm">
-            {{ authStore.user?.name || authStore.user?.username }}
-          </span>
-          <button
-            @click="handleLogout"
-            class="btn-secondary"
-          >
-            登出
-          </button>
-        </div>
-      </div>
-    </header>
-
+  <div class="h-full overflow-auto bg-surface-secondary">
     <main class="mx-auto max-w-2xl px-4 py-6">
+      <!-- Page Title -->
+      <div class="mb-6">
+        <h1 class="text-2xl font-bold text-content">專案設定</h1>
+        <p class="text-content-secondary mt-1">{{ currentProject?.name }}</p>
+      </div>
       <!-- Loading -->
       <div v-if="isLoading" class="flex items-center justify-center py-12">
         <svg class="animate-spin h-8 w-8 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -297,5 +274,13 @@ const handleLogout = () => {
         </div>
       </div>
     </Teleport>
+
+    <!-- Search Modal -->
+    <SearchModal
+      v-if="showSearchModal"
+      :project-id="projectId"
+      @close="emit('close-search-modal')"
+      @select="handleSearchSelect"
+    />
   </div>
 </template>

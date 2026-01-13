@@ -146,16 +146,16 @@ const handleMoveDown = async (column: Column) => {
   <div class="space-y-4">
     <!-- Header -->
     <div class="flex items-center justify-between">
-      <h3 class="text-lg font-semibold text-gray-900">
+      <h3 class="text-lg font-semibold text-content">
         欄位管理
-        <span v-if="columnsStore.columnsCount > 0" class="text-gray-400 text-sm font-normal">
+        <span v-if="columnsStore.columnsCount > 0" class="text-content-tertiary text-sm font-normal">
           ({{ columnsStore.columnsCount }})
         </span>
       </h3>
       <button
         v-if="!isAdding"
         @click="startAdding"
-        class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        class="px-3 py-1.5 text-sm bg-accent text-content-inverse rounded-md hover:bg-accent-hover"
       >
         + 新增欄位
       </button>
@@ -163,7 +163,7 @@ const handleMoveDown = async (column: Column) => {
 
     <!-- Loading -->
     <div v-if="columnsStore.isLoading" class="text-center py-4">
-      <svg class="animate-spin h-6 w-6 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <svg class="animate-spin h-6 w-6 text-accent mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
       </svg>
@@ -171,33 +171,33 @@ const handleMoveDown = async (column: Column) => {
 
     <div v-else class="space-y-3">
       <!-- Add column form -->
-      <div v-if="isAdding" class="bg-gray-50 rounded-lg p-4 space-y-3">
+      <div v-if="isAdding" class="bg-surface-secondary rounded-lg p-4 space-y-3">
         <div class="space-y-3">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">欄位名稱 *</label>
+            <label class="block text-sm font-medium text-content-secondary mb-1">欄位名稱 *</label>
             <input
               v-model="newColumnTitle"
               type="text"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full px-3 py-2 border border-edge rounded-md focus:outline-none focus:ring-2 focus:ring-accent bg-surface text-content"
               placeholder="輸入欄位名稱"
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">WIP 限制</label>
+            <label class="block text-sm font-medium text-content-secondary mb-1">WIP 限制</label>
             <input
               v-model.number="newColumnTaskLimit"
               type="number"
               min="0"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full px-3 py-2 border border-edge rounded-md focus:outline-none focus:ring-2 focus:ring-accent bg-surface text-content"
               placeholder="0 表示不限制"
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">描述</label>
+            <label class="block text-sm font-medium text-content-secondary mb-1">描述</label>
             <input
               v-model="newColumnDescription"
               type="text"
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full px-3 py-2 border border-edge rounded-md focus:outline-none focus:ring-2 focus:ring-accent bg-surface text-content"
               placeholder="選填"
             />
           </div>
@@ -206,14 +206,14 @@ const handleMoveDown = async (column: Column) => {
           <button
             @click="cancelAdding"
             :disabled="isSubmitting"
-            class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
+            class="px-4 py-2 text-sm text-content-secondary hover:text-content"
           >
             取消
           </button>
           <button
             @click="handleAddColumn"
             :disabled="!newColumnTitle.trim() || isSubmitting"
-            class="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+            class="px-4 py-2 text-sm bg-accent text-content-inverse rounded-md hover:bg-accent-hover disabled:opacity-50"
           >
             新增
           </button>
@@ -221,7 +221,7 @@ const handleMoveDown = async (column: Column) => {
       </div>
 
       <!-- Columns list -->
-      <div class="bg-white rounded-lg border divide-y">
+      <div class="bg-surface rounded-lg border border-edge divide-y divide-edge">
         <div
           v-for="column in columnsStore.sortedColumns"
           :key="column.id"
@@ -235,7 +235,7 @@ const handleMoveDown = async (column: Column) => {
                 <button
                   @click="handleMoveUp(column)"
                   :disabled="column.position <= 1"
-                  class="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                  class="p-1 text-content-tertiary hover:text-content-secondary disabled:opacity-30"
                   title="上移"
                 >
                   <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -245,7 +245,7 @@ const handleMoveDown = async (column: Column) => {
                 <button
                   @click="handleMoveDown(column)"
                   :disabled="column.position >= columnsStore.columnsCount"
-                  class="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                  class="p-1 text-content-tertiary hover:text-content-secondary disabled:opacity-30"
                   title="下移"
                 >
                   <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -256,13 +256,13 @@ const handleMoveDown = async (column: Column) => {
 
               <!-- Column info -->
               <div>
-                <div class="font-medium text-gray-900">
+                <div class="font-medium text-content">
                   {{ column.title }}
-                  <span v-if="column.task_limit > 0" class="text-sm text-gray-500 ml-2">
+                  <span v-if="column.task_limit > 0" class="text-sm text-content-secondary ml-2">
                     (WIP: {{ column.task_limit }})
                   </span>
                 </div>
-                <div v-if="column.description" class="text-sm text-gray-500">
+                <div v-if="column.description" class="text-sm text-content-secondary">
                   {{ column.description }}
                 </div>
               </div>
@@ -271,7 +271,7 @@ const handleMoveDown = async (column: Column) => {
             <div class="flex items-center gap-2">
               <button
                 @click="startEditing(column)"
-                class="p-2 text-gray-400 hover:text-gray-600"
+                class="p-2 text-content-tertiary hover:text-content-secondary"
                 title="編輯"
               >
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -280,7 +280,7 @@ const handleMoveDown = async (column: Column) => {
               </button>
               <button
                 @click="handleRemoveColumn(column)"
-                class="p-2 text-gray-400 hover:text-red-500"
+                class="p-2 text-content-tertiary hover:text-error"
                 title="刪除"
               >
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -293,42 +293,42 @@ const handleMoveDown = async (column: Column) => {
           <!-- Edit mode -->
           <div v-else class="space-y-3">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">欄位名稱 *</label>
+              <label class="block text-sm font-medium text-content-secondary mb-1">欄位名稱 *</label>
               <input
                 v-model="editTitle"
                 type="text"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-edge rounded-md focus:outline-none focus:ring-2 focus:ring-accent bg-surface text-content"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">WIP 限制</label>
+              <label class="block text-sm font-medium text-content-secondary mb-1">WIP 限制</label>
               <input
                 v-model.number="editTaskLimit"
                 type="number"
                 min="0"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-edge rounded-md focus:outline-none focus:ring-2 focus:ring-accent bg-surface text-content"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">描述</label>
+              <label class="block text-sm font-medium text-content-secondary mb-1">描述</label>
               <input
                 v-model="editDescription"
                 type="text"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="w-full px-3 py-2 border border-edge rounded-md focus:outline-none focus:ring-2 focus:ring-accent bg-surface text-content"
               />
             </div>
             <div class="flex gap-2 justify-end">
               <button
                 @click="cancelEditing"
                 :disabled="isSubmitting"
-                class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
+                class="px-4 py-2 text-sm text-content-secondary hover:text-content"
               >
                 取消
               </button>
               <button
                 @click="handleSaveColumn"
                 :disabled="!editTitle.trim() || isSubmitting"
-                class="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                class="px-4 py-2 text-sm bg-accent text-content-inverse rounded-md hover:bg-accent-hover disabled:opacity-50"
               >
                 儲存
               </button>
@@ -339,7 +339,7 @@ const handleMoveDown = async (column: Column) => {
         <!-- Empty state -->
         <div
           v-if="columnsStore.columns.length === 0 && !columnsStore.isLoading"
-          class="p-8 text-center text-gray-500"
+          class="p-8 text-center text-content-secondary"
         >
           沒有欄位
         </div>

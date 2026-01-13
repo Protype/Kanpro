@@ -1,15 +1,20 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
 import { useProjectsStore } from '@/stores/projects'
 import { useDashboardStore } from '@/stores/dashboard'
-import NotificationsDropdown from '@/components/NotificationsDropdown.vue'
-import ThemeToggle from '@/components/ThemeToggle.vue'
+import SearchModal from '@/components/SearchModal.vue'
 import type { Task } from '@/types'
 
+defineProps<{
+  showSearchModal?: boolean
+}>()
+
+const emit = defineEmits<{
+  'close-search-modal': []
+}>()
+
 const router = useRouter()
-const authStore = useAuthStore()
 const projectsStore = useProjectsStore()
 const dashboardStore = useDashboardStore()
 
@@ -48,56 +53,29 @@ onMounted(async () => {
   ])
 })
 
-const handleLogout = () => {
-  authStore.logout()
-  router.push('/login')
-}
-
 const goToProject = (projectId: number) => {
   router.push(`/projects/${projectId}`)
 }
 
 const goToProjects = () => {
-  router.push('/')
+  router.push('/projects')
 }
 
-const goToSettings = () => {
-  router.push('/settings')
+const handleSearchSelect = (task: Task) => {
+  router.push(`/projects/${task.project_id}?task=${task.id}`)
+  emit('close-search-modal')
 }
 </script>
 
 <template>
-  <div class="min-h-screen bg-surface-secondary">
-    <!-- Header -->
-    <header class="page-header">
-      <div class="page-header-content">
-        <div class="flex items-center gap-4">
-          <h1 class="page-title">儀表板</h1>
-        </div>
-        <div class="flex items-center gap-4">
-          <NotificationsDropdown />
-          <ThemeToggle />
-          <button
-            @click="goToSettings"
-            class="text-content-secondary hover:text-content"
-            title="使用者設定"
-          >
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </button>
-          <span class="text-content-secondary text-sm">
-            {{ authStore.user?.name || authStore.user?.username }}
-          </span>
-          <button @click="handleLogout" class="btn-secondary btn-sm">
-            登出
-          </button>
-        </div>
-      </div>
-    </header>
-
+  <div class="h-full overflow-auto bg-surface-secondary">
     <main class="mx-auto max-w-7xl px-4 py-6">
+      <!-- Header -->
+      <div class="mb-6">
+        <h1 class="text-2xl font-bold text-content">儀表板</h1>
+        <p class="text-content-secondary mt-1">所有專案的活動總覽</p>
+      </div>
+
       <!-- Loading -->
       <div v-if="dashboardStore.isLoading" class="flex items-center justify-center py-12">
         <svg class="spinner h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -231,5 +209,12 @@ const goToSettings = () => {
         </div>
       </div>
     </main>
+
+    <!-- Search Modal -->
+    <SearchModal
+      v-if="showSearchModal"
+      @close="emit('close-search-modal')"
+      @select="handleSearchSelect"
+    />
   </div>
 </template>

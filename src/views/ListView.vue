@@ -1,17 +1,22 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
 import { useBoardStore } from '@/stores/board'
 import { useTasksStore } from '@/stores/tasks'
 import TaskDetailModal from '@/components/TaskDetailModal.vue'
-import NotificationsDropdown from '@/components/NotificationsDropdown.vue'
-import ThemeToggle from '@/components/ThemeToggle.vue'
+import SearchModal from '@/components/SearchModal.vue'
 import type { Task } from '@/types'
+
+const props = defineProps<{
+  showSearchModal?: boolean
+}>()
+
+const emit = defineEmits<{
+  'close-search-modal': []
+}>()
 
 const route = useRoute()
 const router = useRouter()
-const authStore = useAuthStore()
 const boardStore = useBoardStore()
 const tasksStore = useTasksStore()
 
@@ -134,18 +139,23 @@ watch(() => route.params.id, async (newId) => {
   }
 })
 
-const handleLogout = () => {
-  authStore.logout()
-  router.push('/login')
-}
-
-const goToProjects = () => {
-  router.push('/')
-}
-
-const goToBoard = () => {
-  router.push(`/projects/${projectId.value}`)
-}
+// Handle task query param for deep linking
+watch(
+  () => route.query.task,
+  async (taskId) => {
+    if (taskId) {
+      const id = Number(taskId)
+      const task = tasksStore.allTasks.find(t => t.id === id)
+      if (task) {
+        selectedTask.value = task
+        showTaskDetailModal.value = true
+      }
+      // Clear query param
+      router.replace({ query: {} })
+    }
+  },
+  { immediate: true }
+)
 
 const openTaskDetail = (task: Task) => {
   selectedTask.value = task
@@ -156,61 +166,16 @@ const handleTaskUpdated = async () => {
   await tasksStore.fetchAllTasks(projectId.value)
   await boardStore.fetchBoard(projectId.value)
 }
+
+const handleSearchSelect = (task: Task) => {
+  selectedTask.value = task
+  showTaskDetailModal.value = true
+  emit('close-search-modal')
+}
 </script>
 
 <template>
-  <div class="min-h-screen bg-surface-secondary flex flex-col">
-    <!-- Header -->
-    <header class="page-header flex-shrink-0">
-      <div class="mx-auto max-w-full px-4 py-3 flex justify-between items-center">
-        <div class="flex items-center gap-4">
-          <button
-            @click="goToProjects"
-            class="text-content-secondary hover:text-content"
-          >
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <h1 class="text-xl font-bold text-content">
-            {{ boardStore.project?.name || '載入中...' }}
-          </h1>
-          <div class="flex border border-edge rounded-md overflow-hidden">
-            <button
-              @click="goToBoard"
-              class="px-3 py-1 text-sm bg-surface-secondary text-content hover:bg-surface-hover"
-            >
-              看板
-            </button>
-            <button
-              class="px-3 py-1 text-sm bg-accent text-content-inverse"
-            >
-              清單
-            </button>
-            <button
-              @click="router.push(`/projects/${projectId}/calendar`)"
-              class="px-3 py-1 text-sm bg-surface-secondary text-content hover:bg-surface-hover"
-            >
-              日曆
-            </button>
-          </div>
-        </div>
-        <div class="flex items-center gap-4">
-          <ThemeToggle />
-          <NotificationsDropdown />
-          <span class="text-content-secondary text-sm">
-            {{ authStore.user?.name || authStore.user?.username }}
-          </span>
-          <button
-            @click="handleLogout"
-            class="btn-secondary btn-sm"
-          >
-            登出
-          </button>
-        </div>
-      </div>
-    </header>
-
+  <div class="h-full flex flex-col bg-surface-secondary">
     <!-- Loading -->
     <div v-if="tasksStore.isLoading" class="flex-1 flex items-center justify-center">
       <svg class="animate-spin h-8 w-8 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -220,7 +185,7 @@ const handleTaskUpdated = async () => {
     </div>
 
     <!-- Content -->
-    <main v-else class="flex-1 p-4">
+    <main v-else class="flex-1 p-4 overflow-auto">
       <!-- Toolbar -->
       <div class="card mb-4 p-4 flex items-center gap-4">
         <input
@@ -349,6 +314,14 @@ const handleTaskUpdated = async () => {
       :project-id="projectId"
       @close="showTaskDetailModal = false"
       @updated="handleTaskUpdated"
+    />
+
+    <!-- Search Modal -->
+    <SearchModal
+      v-if="showSearchModal"
+      :project-id="projectId"
+      @close="emit('close-search-modal')"
+      @select="handleSearchSelect"
     />
   </div>
 </template>

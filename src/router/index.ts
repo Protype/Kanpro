@@ -4,71 +4,108 @@ import { useAuthStore } from '@/stores/auth'
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    {
-      path: '/',
-      name: 'projects',
-      component: () => import('@/views/ProjectsView.vue'),
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/dashboard',
-      name: 'dashboard',
-      component: () => import('@/views/DashboardView.vue'),
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/projects/:id',
-      name: 'project-board',
-      component: () => import('@/views/BoardView.vue'),
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/projects/:id/list',
-      name: 'project-list',
-      component: () => import('@/views/ListView.vue'),
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/projects/:id/calendar',
-      name: 'project-calendar',
-      component: () => import('@/views/CalendarView.vue'),
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/projects/:id/settings',
-      name: 'project-settings',
-      component: () => import('@/views/ProjectSettingsView.vue'),
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/projects/:id/analytics',
-      name: 'project-analytics',
-      component: () => import('@/views/ProjectAnalyticsView.vue'),
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/settings',
-      name: 'user-settings',
-      component: () => import('@/views/UserSettingsView.vue'),
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/admin/users',
-      name: 'admin-users',
-      component: () => import('@/views/UsersManagementView.vue'),
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/admin/groups',
-      name: 'admin-groups',
-      component: () => import('@/views/GroupsManagementView.vue'),
-      meta: { requiresAuth: true }
-    },
+    // Authentication pages (no sidebar)
     {
       path: '/login',
-      name: 'login',
-      component: () => import('@/views/LoginView.vue'),
-      meta: { guest: true }
+      component: () => import('@/layouts/AuthLayout.vue'),
+      meta: { guest: true },
+      children: [
+        {
+          path: '',
+          name: 'login',
+          component: () => import('@/views/LoginView.vue')
+        }
+      ]
+    },
+
+    // Main application (with sidebar)
+    {
+      path: '/',
+      component: () => import('@/layouts/MainLayout.vue'),
+      meta: { requiresAuth: true },
+      children: [
+        // Global views
+        {
+          path: '',
+          name: 'all-tasks',
+          component: () => import('@/views/AllTasksView.vue'),
+          meta: { sidebarMode: 'global' }
+        },
+        {
+          path: 'dashboard',
+          name: 'dashboard',
+          component: () => import('@/views/DashboardView.vue'),
+          meta: { sidebarMode: 'global' }
+        },
+        {
+          path: 'my-tasks',
+          name: 'my-tasks',
+          component: () => import('@/views/MyTasksView.vue'),
+          meta: { sidebarMode: 'global' }
+        },
+        {
+          path: 'projects',
+          name: 'projects',
+          component: () => import('@/views/ProjectsView.vue'),
+          meta: { sidebarMode: 'global' }
+        },
+        {
+          path: 'settings',
+          name: 'user-settings',
+          component: () => import('@/views/UserSettingsView.vue'),
+          meta: { sidebarMode: 'global' }
+        },
+        {
+          path: 'admin/users',
+          name: 'admin-users',
+          component: () => import('@/views/UsersManagementView.vue'),
+          meta: { sidebarMode: 'global' }
+        },
+        {
+          path: 'admin/groups',
+          name: 'admin-groups',
+          component: () => import('@/views/GroupsManagementView.vue'),
+          meta: { sidebarMode: 'global' }
+        },
+
+        // Project views - List is default
+        {
+          path: 'projects/:id',
+          meta: { sidebarMode: 'project' },
+          children: [
+            {
+              path: '',
+              name: 'project-list',
+              component: () => import('@/views/ListView.vue')
+            },
+            {
+              path: 'board',
+              name: 'project-board',
+              component: () => import('@/views/BoardView.vue')
+            },
+            {
+              path: 'calendar',
+              name: 'project-calendar',
+              component: () => import('@/views/CalendarView.vue')
+            },
+            {
+              path: 'activity',
+              name: 'project-activity',
+              component: () => import('@/views/ProjectActivityView.vue')
+            },
+            {
+              path: 'settings',
+              name: 'project-settings',
+              component: () => import('@/views/ProjectSettingsView.vue')
+            },
+            {
+              path: 'analytics',
+              name: 'project-analytics',
+              component: () => import('@/views/ProjectAnalyticsView.vue')
+            }
+          ]
+        }
+      ]
     }
   ]
 })
@@ -87,7 +124,7 @@ router.beforeEach(async (to, _from, next) => {
 
   // 如果已登入但訪問 guest 頁面（如登入頁），導向首頁
   if (to.meta.guest && authStore.isAuthenticated) {
-    return next({ name: 'projects' })
+    return next({ name: 'all-tasks' })
   }
 
   next()

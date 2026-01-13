@@ -128,7 +128,7 @@ watch(() => isOpen.value, (open) => {
     <button
       data-testid="notifications-btn"
       @click.stop="toggleDropdown"
-      class="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
+      class="relative p-2 text-content-secondary hover:text-content hover:bg-surface-hover rounded-full transition-colors"
       title="通知"
     >
       <!-- Bell Icon -->
@@ -140,7 +140,7 @@ watch(() => isOpen.value, (open) => {
       <span
         v-if="notificationsStore.unreadCount > 0"
         data-testid="unread-badge"
-        class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1"
+        class="absolute -top-1 -right-1 bg-error text-content-inverse text-xs font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1"
       >
         {{ notificationsStore.unreadCount > 99 ? '99+' : notificationsStore.unreadCount }}
       </span>
@@ -158,15 +158,15 @@ watch(() => isOpen.value, (open) => {
       <div
         v-if="isOpen"
         data-testid="notifications-dropdown"
-        class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 overflow-hidden z-50"
+        class="absolute right-0 mt-2 w-80 bg-surface rounded-lg shadow-lg ring-1 ring-edge overflow-hidden z-50"
       >
         <!-- Header -->
-        <div class="flex items-center justify-between px-4 py-3 border-b bg-gray-50">
-          <h3 class="text-sm font-semibold text-gray-900">通知</h3>
+        <div class="flex items-center justify-between px-4 py-3 border-b border-edge bg-surface-secondary">
+          <h3 class="text-sm font-semibold text-content">通知</h3>
           <button
             v-if="notificationsStore.unreadCount > 0"
             @click="handleMarkAllAsRead"
-            class="text-xs text-blue-600 hover:text-blue-800"
+            class="text-xs text-accent hover:text-accent-hover"
           >
             全部標為已讀
           </button>
@@ -174,7 +174,7 @@ watch(() => isOpen.value, (open) => {
 
         <!-- Loading -->
         <div v-if="notificationsStore.isLoading" class="px-4 py-8 text-center">
-          <svg class="animate-spin h-6 w-6 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <svg class="animate-spin h-6 w-6 text-accent mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
@@ -187,8 +187,8 @@ watch(() => isOpen.value, (open) => {
             :key="activity.id"
             @click="handleActivityClick(activity)"
             :class="[
-              'px-4 py-3 cursor-pointer hover:bg-gray-50 border-b last:border-b-0 transition-colors',
-              notificationsStore.isRead(activity.id) ? 'bg-white' : 'bg-blue-50'
+              'px-4 py-3 cursor-pointer hover:bg-surface-hover border-b border-edge last:border-b-0 transition-colors',
+              notificationsStore.isRead(activity.id) ? 'bg-surface' : 'bg-accent-light'
             ]"
           >
             <div class="flex items-start gap-3">
@@ -196,7 +196,7 @@ watch(() => isOpen.value, (open) => {
               <div
                 :class="[
                   'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
-                  notificationsStore.isRead(activity.id) ? 'bg-gray-100 text-gray-500' : 'bg-blue-100 text-blue-600'
+                  notificationsStore.isRead(activity.id) ? 'bg-surface-tertiary text-content-secondary' : 'bg-accent/20 text-accent'
                 ]"
               >
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -206,13 +206,13 @@ watch(() => isOpen.value, (open) => {
 
               <!-- Content -->
               <div class="flex-1 min-w-0">
-                <p class="text-sm text-gray-900">
+                <p class="text-sm text-content">
                   <span class="font-medium">{{ getEventLabel(activity.event_name) }}</span>
-                  <span v-if="getTaskTitle(activity)" class="text-gray-600">
+                  <span v-if="getTaskTitle(activity)" class="text-content-secondary">
                     : {{ getTaskTitle(activity) }}
                   </span>
                 </p>
-                <p class="text-xs text-gray-500 mt-1">
+                <p class="text-xs text-content-tertiary mt-1">
                   {{ formatDate(activity.date_creation) }}
                 </p>
               </div>
@@ -220,7 +220,7 @@ watch(() => isOpen.value, (open) => {
               <!-- Unread Indicator -->
               <div
                 v-if="!notificationsStore.isRead(activity.id)"
-                class="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full"
+                class="flex-shrink-0 w-2 h-2 bg-accent rounded-full"
               ></div>
             </div>
           </div>
@@ -228,7 +228,7 @@ watch(() => isOpen.value, (open) => {
           <!-- Empty State -->
           <div
             v-if="notificationsStore.activities.length === 0 && !notificationsStore.isLoading"
-            class="px-4 py-8 text-center text-gray-500 text-sm"
+            class="px-4 py-8 text-center text-content-secondary text-sm"
           >
             沒有通知
           </div>

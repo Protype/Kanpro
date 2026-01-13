@@ -4,9 +4,16 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useGroupsStore } from '@/stores/groups'
 import { useUsersStore } from '@/stores/users'
-import NotificationsDropdown from '@/components/NotificationsDropdown.vue'
-import ThemeToggle from '@/components/ThemeToggle.vue'
-import type { Group, User } from '@/types'
+import SearchModal from '@/components/SearchModal.vue'
+import type { Group, User, Task } from '@/types'
+
+defineProps<{
+  showSearchModal?: boolean
+}>()
+
+const emit = defineEmits<{
+  'close-search-modal': []
+}>()
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -189,49 +196,20 @@ const availableUsers = computed(() => {
   return usersStore.users.filter(u => !memberIds.has(u.id) && u.is_active)
 })
 
-const goBack = () => {
-  router.back()
-}
-
-const handleLogout = () => {
-  authStore.logout()
-  router.push('/login')
+const handleSearchSelect = (task: Task) => {
+  router.push(`/projects/${task.project_id}?task=${task.id}`)
+  emit('close-search-modal')
 }
 </script>
 
 <template>
-  <div class="min-h-screen bg-surface-secondary">
-    <!-- Header -->
-    <header class="page-header">
-      <div class="page-header-content">
-        <div class="flex items-center gap-4">
-          <button
-            @click="goBack"
-            class="text-content-secondary hover:text-content"
-          >
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <h1 class="text-xl font-bold text-content">群組管理</h1>
-        </div>
-        <div class="flex items-center gap-4">
-          <ThemeToggle />
-          <NotificationsDropdown />
-          <span class="text-content-secondary text-sm">
-            {{ authStore.user?.name || authStore.user?.username }}
-          </span>
-          <button
-            @click="handleLogout"
-            class="btn-secondary btn-sm"
-          >
-            登出
-          </button>
-        </div>
-      </div>
-    </header>
-
+  <div class="h-full overflow-auto bg-surface-secondary">
     <main class="mx-auto max-w-4xl px-4 py-6">
+      <!-- Page Title -->
+      <div class="mb-6">
+        <h1 class="text-2xl font-bold text-content">群組管理</h1>
+        <p class="text-content-secondary mt-1">管理使用者群組</p>
+      </div>
       <!-- Error Alert -->
       <div v-if="error" class="alert-error mb-6">
         <div class="flex items-center gap-2">
@@ -549,5 +527,12 @@ const handleLogout = () => {
         </div>
       </div>
     </Teleport>
+
+    <!-- Search Modal -->
+    <SearchModal
+      v-if="showSearchModal"
+      @close="emit('close-search-modal')"
+      @select="handleSearchSelect"
+    />
   </div>
 </template>

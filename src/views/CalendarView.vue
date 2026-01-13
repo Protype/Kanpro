@@ -4,8 +4,16 @@ import { useRoute, useRouter } from 'vue-router'
 import { useTasksStore } from '@/stores/tasks'
 import { useBoardStore } from '@/stores/board'
 import TaskDetailModal from '@/components/TaskDetailModal.vue'
-import ThemeToggle from '@/components/ThemeToggle.vue'
+import SearchModal from '@/components/SearchModal.vue'
 import type { Task } from '@/types'
+
+defineProps<{
+  showSearchModal?: boolean
+}>()
+
+const emit = defineEmits<{
+  'close-search-modal': []
+}>()
 
 const route = useRoute()
 const router = useRouter()
@@ -160,6 +168,12 @@ const loadData = async () => {
   await tasksStore.fetchAllTasks(projectId.value)
 }
 
+const handleSearchSelect = (task: Task) => {
+  selectedTask.value = task
+  isTaskModalOpen.value = true
+  emit('close-search-modal')
+}
+
 onMounted(() => {
   loadData()
 })
@@ -171,37 +185,13 @@ watch(projectId, () => {
 
 <template>
   <div class="h-full flex flex-col bg-surface-secondary">
-    <!-- Header -->
+    <!-- Calendar Header -->
     <div
       data-testid="calendar-header"
-      class="page-header px-6 py-4 flex items-center justify-between"
+      class="px-6 py-4 flex items-center justify-between bg-surface border-b border-edge"
     >
+      <!-- Month/Year Navigation -->
       <div class="flex items-center gap-4">
-        <h1 class="text-xl font-semibold text-content">
-          {{ boardStore.project?.name || '專案' }} - 日曆
-        </h1>
-        <div class="flex items-center gap-2 text-content-secondary">
-          <router-link
-            :to="`/projects/${projectId}`"
-            class="px-3 py-1 text-sm hover:bg-surface-hover rounded"
-          >
-            看板
-          </router-link>
-          <router-link
-            :to="`/projects/${projectId}/list`"
-            class="px-3 py-1 text-sm hover:bg-surface-hover rounded"
-          >
-            清單
-          </router-link>
-          <span class="px-3 py-1 text-sm bg-accent-light text-accent rounded">
-            日曆
-          </span>
-        </div>
-      </div>
-
-      <!-- Navigation -->
-      <div class="flex items-center gap-4">
-        <ThemeToggle />
         <button
           data-testid="today-btn"
           @click="goToToday"
@@ -300,6 +290,14 @@ watch(projectId, () => {
       :project-id="projectId"
       @close="closeTaskModal"
       @updated="handleTaskUpdated"
+    />
+
+    <!-- Search Modal -->
+    <SearchModal
+      v-if="showSearchModal"
+      :project-id="projectId"
+      @close="emit('close-search-modal')"
+      @select="handleSearchSelect"
     />
   </div>
 </template>

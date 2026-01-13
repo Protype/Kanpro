@@ -1,30 +1,12 @@
 <template>
-  <div class="min-h-screen bg-surface-secondary">
-    <!-- Header -->
-    <header class="page-header">
-      <div class="page-header-content">
-        <div class="flex items-center gap-4">
-          <router-link
-            :to="`/projects/${projectId}`"
-            class="text-content-secondary hover:text-content"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
-          </router-link>
-          <h1 class="text-2xl font-bold text-content">專案分析</h1>
-        </div>
-        <div class="flex items-center gap-4">
-          <ThemeToggle />
-          <span class="text-sm text-content-tertiary">
-            {{ projectName }}
-          </span>
-        </div>
-      </div>
-    </header>
-
+  <div class="h-full overflow-auto bg-surface-secondary">
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Page Title -->
+      <div class="mb-6">
+        <h1 class="text-2xl font-bold text-content">專案分析</h1>
+        <p class="text-content-secondary mt-1">{{ projectName }}</p>
+      </div>
       <!-- Loading State -->
       <div v-if="isLoading" class="flex justify-center py-12">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-accent"></div>
@@ -173,19 +155,37 @@
         </section>
       </div>
     </main>
+
+    <!-- Search Modal -->
+    <SearchModal
+      v-if="showSearchModal"
+      :project-id="projectId"
+      @close="emit('close-search-modal')"
+      @select="handleSearchSelect"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAnalyticsStore } from '@/stores/analytics'
 import { useBoardStore } from '@/stores/board'
 import { useMembersStore } from '@/stores/members'
 import { useProjectsStore } from '@/stores/projects'
-import ThemeToggle from '@/components/ThemeToggle.vue'
+import SearchModal from '@/components/SearchModal.vue'
+import type { Task } from '@/types'
+
+defineProps<{
+  showSearchModal?: boolean
+}>()
+
+const emit = defineEmits<{
+  'close-search-modal': []
+}>()
 
 const route = useRoute()
+const router = useRouter()
 const analyticsStore = useAnalyticsStore()
 const boardStore = useBoardStore()
 const membersStore = useMembersStore()
@@ -317,4 +317,9 @@ watch(
 onMounted(() => {
   loadAnalytics()
 })
+
+const handleSearchSelect = (task: Task) => {
+  router.push(`/projects/${task.project_id}?task=${task.id}`)
+  emit('close-search-modal')
+}
 </script>

@@ -122,6 +122,19 @@ export const useTasksStore = defineStore('tasks', () => {
     error.value = null
   }
 
+  async function searchTasks(query: string, projectId?: number): Promise<Task[]> {
+    const authStore = useAuthStore()
+    const client = authStore.getClient()
+
+    const params: Record<string, unknown> = { query }
+    if (projectId) {
+      params.project_id = projectId
+    }
+
+    const tasks = await client.call<Task[]>('searchTasks', params)
+    return tasks || []
+  }
+
   return {
     currentTask,
     allTasks,
@@ -134,6 +147,7 @@ export const useTasksStore = defineStore('tasks', () => {
     closeTask,
     openTask,
     clearCurrentTask,
-    clearAllTasks
+    clearAllTasks,
+    searchTasks
   }
 })

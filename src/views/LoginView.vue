@@ -27,8 +27,36 @@ onMounted(() => {
   }
 })
 
+/**
+ * 驗證 API URL 格式
+ * 支援相對路徑（以 / 開頭）和完整 URL（http:// 或 https://）
+ */
+const isValidApiUrl = (url: string): boolean => {
+  const trimmedUrl = url.trim()
+
+  // 允許相對路徑（以 / 開頭）
+  if (trimmedUrl.startsWith('/')) {
+    return true
+  }
+
+  // 允許完整 URL（http:// 或 https://）
+  try {
+    const parsed = new URL(trimmedUrl)
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
 const handleLogin = async () => {
   errorMessage.value = ''
+
+  // 驗證 API URL 格式
+  if (!isValidApiUrl(apiUrl.value)) {
+    errorMessage.value = '請輸入有效的伺服器網址（如 /api/jsonrpc.php 或 http://...）'
+    return
+  }
+
   isLoading.value = true
 
   try {
@@ -81,9 +109,9 @@ const handleLogin = async () => {
           <input
             id="apiUrl"
             v-model="apiUrl"
-            type="url"
+            type="text"
             required
-            placeholder="http://your-kanboard-server/jsonrpc.php"
+            placeholder="/api/jsonrpc.php 或 http://your-kanboard-server/jsonrpc.php"
             class="input"
           />
         </div>
