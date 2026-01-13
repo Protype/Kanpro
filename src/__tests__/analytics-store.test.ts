@@ -325,4 +325,140 @@ describe('Analytics Store', () => {
       expect(store.error).toBeNull()
     })
   })
+
+  describe('calculateCumulativeFlow', () => {
+    it('should calculate cumulative flow data', () => {
+      const store = useAnalyticsStore()
+      const tasksWithDates: Task[] = [
+        { ...mockTasks[0], column_id: 1, date_creation: 1704067200, date_moved: 1704153600 },
+        { ...mockTasks[1], column_id: 2, date_creation: 1704067200, date_moved: 1704240000 },
+        { ...mockTasks[2], column_id: 3, date_creation: 1704153600, date_moved: 1704326400 }
+      ]
+
+      const flowData = store.calculateCumulativeFlow(tasksWithDates, mockColumns, '2024-01-01', '2024-01-05')
+
+      expect(flowData.length).toBeGreaterThan(0)
+      expect(flowData[0]).toHaveProperty('date')
+      expect(flowData[0]).toHaveProperty('columns')
+    })
+
+    it('should return empty array for empty tasks', () => {
+      const store = useAnalyticsStore()
+
+      const flowData = store.calculateCumulativeFlow([], mockColumns, '2024-01-01', '2024-01-05')
+
+      expect(flowData).toEqual([])
+    })
+  })
+
+  describe('calculateBurndown', () => {
+    it('should calculate burndown data', () => {
+      const store = useAnalyticsStore()
+      const tasksWithDates: Task[] = [
+        { ...mockTasks[0], is_active: false, date_completed: 1704153600 },
+        { ...mockTasks[1], is_active: false, date_completed: 1704240000 },
+        { ...mockTasks[2], is_active: true }
+      ]
+
+      const burndownData = store.calculateBurndown(tasksWithDates, '2024-01-01', '2024-01-05')
+
+      expect(burndownData.length).toBeGreaterThan(0)
+      expect(burndownData[0]).toHaveProperty('date')
+      expect(burndownData[0]).toHaveProperty('remaining')
+      expect(burndownData[0]).toHaveProperty('ideal')
+    })
+
+    it('should return empty array for empty tasks', () => {
+      const store = useAnalyticsStore()
+
+      const burndownData = store.calculateBurndown([], '2024-01-01', '2024-01-05')
+
+      expect(burndownData).toEqual([])
+    })
+
+    it('should show decreasing remaining count', () => {
+      const store = useAnalyticsStore()
+      const tasksWithDates: Task[] = [
+        { ...mockTasks[0], is_active: false, date_completed: 1704153600 },
+        { ...mockTasks[1], is_active: false, date_completed: 1704240000 },
+        { ...mockTasks[2], is_active: true }
+      ]
+
+      const burndownData = store.calculateBurndown(tasksWithDates, '2024-01-01', '2024-01-05')
+      const firstRemaining = burndownData[0]?.remaining ?? 0
+      const lastRemaining = burndownData[burndownData.length - 1]?.remaining ?? 0
+
+      expect(lastRemaining).toBeLessThanOrEqual(firstRemaining)
+    })
+  })
+
+  describe('calculateColumnTime', () => {
+    it('should calculate average time in each column', () => {
+      const store = useAnalyticsStore()
+      store.activities = [
+        { id: 1, date_creation: 1704067200, event_name: 'task.move.column', creator_id: 1, project_id: 1, task_id: 1, data: { src_column_id: 1, dst_column_id: 2 } },
+        { id: 2, date_creation: 1704153600, event_name: 'task.move.column', creator_id: 1, project_id: 1, task_id: 1, data: { src_column_id: 2, dst_column_id: 3 } }
+      ]
+
+      const columnTime = store.calculateColumnTime(mockColumns)
+
+      expect(columnTime.length).toBe(3)
+      expect(columnTime[0]).toHaveProperty('column')
+      expect(columnTime[0]).toHaveProperty('avgDays')
+    })
+
+    it('should return zero days for columns with no movement', () => {
+      const store = useAnalyticsStore()
+      store.activities = []
+
+      const columnTime = store.calculateColumnTime(mockColumns)
+
+      expect(columnTime.every(ct => ct.avgDays === 0)).toBe(true)
+    })
+  })
+
+  describe('calculateLeadCycleTime', () => {
+    it('should calculate lead and cycle time', () => {
+      const store = useAnalyticsStore()
+      const completedTasks: Task[] = [
+        { ...mockTasks[0], is_active: false, date_creation: 1704067200, date_started: 1704153600, date_completed: 1704326400 },
+        { ...mockTasks[1], is_active: false, date_creation: 1704067200, date_started: 1704240000, date_completed: 1704412800 }
+      ]
+
+      const leadCycleData = store.calculateLeadCycleTime(completedTasks)
+
+      expect(leadCycleData).toHaveProperty('avgLeadTime')
+      expect(leadCycleData).toHaveProperty('avgCycleTime')
+      expect(leadCycleData).toHaveProperty('tasks')
+      expect(leadCycleData.avgLeadTime).toBeGreaterThan(0)
+    })
+
+    it('should return zero for empty tasks', () => {
+      const store = useAnalyticsStore()
+
+      const leadCycleData = store.calculateLeadCycleTime([])
+
+      expect(leadCycleData.avgLeadTime).toBe(0)
+      expect(leadCycleData.avgCycleTime).toBe(0)
+      expect(leadCycleData.tasks).toEqual([])
+    })
+
+    it('should calculate lead time as time from creation to completion', () => {
+      const store = useAnalyticsStore()
+      const task: Task = {
+        ...mockTasks[0],
+        is_active: false,
+        date_creation: 1704067200, // 2024-01-01
+        date_started: 1704153600,  // 2024-01-02
+        date_completed: 1704326400 // 2024-01-04
+      }
+
+      const leadCycleData = store.calculateLeadCycleTime([task])
+
+      // Lead time: 3 days (Jan 1 to Jan 4)
+      expect(leadCycleData.avgLeadTime).toBe(3)
+      // Cycle time: 2 days (Jan 2 to Jan 4)
+      expect(leadCycleData.avgCycleTime).toBe(2)
+    })
+  })
 })
