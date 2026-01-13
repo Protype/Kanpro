@@ -183,48 +183,48 @@
 - [x] [x] 拖放調整到期日功能
 
 ### 10. 子任務功能 ✅
-- [x] [ ] 子任務列表元件
-- [x] [ ] 子任務進度條
-- [x] [ ] 新增子任務功能
-- [x] [ ] 子任務狀態切換
-- [x] [ ] 實作 `getAllSubtasks` API
-- [x] [ ] 實作 `createSubtask` API
-- [x] [ ] 實作 `updateSubtask` API
-- [x] [ ] 實作 `removeSubtask` API
+- [x] [x] 子任務列表元件
+- [x] [x] 子任務進度條
+- [x] [x] 新增子任務功能
+- [x] [x] 子任務狀態切換
+- [x] [x] 實作 `getAllSubtasks` API
+- [x] [x] 實作 `createSubtask` API
+- [x] [x] 實作 `updateSubtask` API
+- [x] [x] 實作 `removeSubtask` API
 
 ### 11. 評論功能 ✅
-- [x] [ ] 評論列表元件
-- [x] [ ] 新增評論表單（Markdown）
-- [x] [ ] 編輯/刪除評論
-- [x] [ ] @提及使用者功能
-- [x] [ ] 實作 `getAllComments` API
-- [x] [ ] 實作 `createComment` API
-- [x] [ ] 實作 `updateComment` API
-- [x] [ ] 實作 `removeComment` API
+- [x] [x] 評論列表元件
+- [x] [x] 新增評論表單（Markdown）
+- [x] [x] 編輯/刪除評論
+- [x] [x] @提及使用者功能
+- [x] [x] 實作 `getAllComments` API
+- [x] [x] 實作 `createComment` API
+- [x] [x] 實作 `updateComment` API
+- [x] [x] 實作 `removeComment` API
 
 ### 12. 附件功能 ✅
-- [x] [ ] 附件列表元件
-- [x] [ ] 檔案上傳功能
-- [x] [ ] 檔案下載功能
-- [x] [ ] 圖片預覽
-- [x] [ ] 刪除附件
-- [x] [ ] 實作 `getAllTaskFiles` API
-- [x] [ ] 實作 `createTaskFile` API
-- [x] [ ] 實作 `downloadTaskFile` API
-- [x] [ ] 實作 `removeTaskFile` API
+- [x] [x] 附件列表元件
+- [x] [x] 檔案上傳功能
+- [x] [x] 檔案下載功能
+- [x] [x] 圖片預覽
+- [x] [x] 刪除附件
+- [x] [x] 實作 `getAllTaskFiles` API
+- [x] [x] 實作 `createTaskFile` API
+- [x] [x] 實作 `downloadTaskFile` API
+- [x] [x] 實作 `removeTaskFile` API
 
 ### 13. 標籤功能 ✅
-- [x] [ ] 標籤元件
-- [x] [ ] 標籤選擇器（多選）
-- [x] [ ] 實作 `getTaskTags` API
-- [x] [ ] 實作 `setTaskTags` API
+- [x] [x] 標籤元件
+- [x] [x] 標籤選擇器（多選）
+- [x] [x] 實作 `getTaskTags` API
+- [x] [x] 實作 `setTaskTags` API
 
 ### 14. 任務連結功能 ✅
-- [x] [ ] 連結列表元件
-- [x] [ ] 新增連結表單
-- [x] [ ] 實作 `getAllTaskLinks` API
-- [x] [ ] 實作 `createTaskLink` API
-- [x] [ ] 實作 `removeTaskLink` API
+- [x] [x] 連結列表元件
+- [x] [x] 新增連結表單
+- [x] [x] 實作 `getAllTaskLinks` API
+- [x] [x] 實作 `createTaskLink` API
+- [x] [x] 實作 `removeTaskLink` API
 
 ### 15. 通知中心 ✅
 - [x] [x] 通知圖示元件（含未讀數量）
@@ -286,97 +286,97 @@
 - [x] [x] 實作 `removeCategory` API
 
 ### 21. 使用者設定 ✅
-- [x] [ ] 設定頁面 UI
-- [x] [ ] 個人資訊編輯
-- [x] [ ] 偏好設定
-- [x] [ ] 實作 `updateUser` API
+- [x] [x] 設定頁面 UI
+- [x] [x] 個人資訊編輯
+- [x] [x] 偏好設定
+- [x] [x] 實作 `updateUser` API
 
 ---
 
 ## Phase 2 (P2) - 進階功能
 
 ### 22. 管理員功能 - 使用者管理 ✅
-- [x] [ ] 使用者列表頁面
-- [x] [ ] 新增使用者表單
-- [x] [ ] 編輯使用者
-- [x] [ ] 停用/啟用使用者
-- [x] [ ] 刪除使用者
-- [x] [ ] 實作 `getAllUsers` API
-- [x] [ ] 實作 `getUser` API
-- [x] [ ] 實作 `createUser` API
-- [x] [ ] 實作 `updateUser` API
-- [x] [ ] 實作 `disableUser` / `enableUser` API
-- [x] [ ] 實作 `removeUser` API
+- [x] [x] 使用者列表頁面
+- [x] [x] 新增使用者表單
+- [x] [x] 編輯使用者
+- [x] [x] 停用/啟用使用者
+- [x] [x] 刪除使用者
+- [x] [x] 實作 `getAllUsers` API
+- [x] [x] 實作 `getUser` API
+- [x] [x] 實作 `createUser` API
+- [x] [x] 實作 `updateUser` API
+- [x] [x] 實作 `disableUser` / `enableUser` API
+- [x] [x] 實作 `removeUser` API
 
 ### 23. 管理員功能 - 群組管理 ✅
-- [x] [ ] 群組列表頁面
-- [x] [ ] 新增群組
-- [x] [ ] 編輯群組
-- [x] [ ] 刪除群組
-- [x] [ ] 群組成員管理
-- [x] [ ] 實作 `getAllGroups` API
-- [x] [ ] 實作 `getGroup` API
-- [x] [ ] 實作 `createGroup` API
-- [x] [ ] 實作 `updateGroup` API
-- [x] [ ] 實作 `removeGroup` API
-- [x] [ ] 實作 `getGroupMembers` API
-- [x] [ ] 實作 `addGroupMember` API
-- [x] [ ] 實作 `removeGroupMember` API
+- [x] [x] 群組列表頁面
+- [x] [x] 新增群組
+- [x] [x] 編輯群組
+- [x] [x] 刪除群組
+- [x] [x] 群組成員管理
+- [x] [x] 實作 `getAllGroups` API
+- [x] [x] 實作 `getGroup` API
+- [x] [x] 實作 `createGroup` API
+- [x] [x] 實作 `updateGroup` API
+- [x] [x] 實作 `removeGroup` API
+- [x] [x] 實作 `getGroupMembers` API
+- [x] [x] 實作 `addGroupMember` API
+- [x] [x] 實作 `removeGroupMember` API
 
 ### 24. 專案分析 ✅
-- [x] [ ] 分析頁面 UI
-- [x] [ ] 任務分佈圓餅圖
-- [x] [ ] 使用者工作量圖表
-- [x] [ ] 累積流程圖
-- [x] [ ] 燃盡圖
-- [x] [ ] 平均欄位停留時間
-- [x] [ ] Lead/Cycle Time 趨勢圖
-- [x] [ ] 實作 `getProjectActivity` API
+- [x] [x] 分析頁面 UI
+- [x] [x] 任務分佈圓餅圖
+- [x] [x] 使用者工作量圖表
+- [x] [x] 累積流程圖
+- [x] [x] 燃盡圖
+- [x] [x] 平均欄位停留時間
+- [x] [x] Lead/Cycle Time 趨勢圖
+- [x] [x] 實作 `getProjectActivity` API
 
 ### 25. 鍵盤快捷鍵 ✅
-- [x] [ ] 快捷鍵系統架構
-- [x] [ ] 全域快捷鍵
-  - [x] [ ] `Cmd/Ctrl + K` 開啟快速搜尋
-  - [x] [ ] `?` 顯示快捷鍵說明
-  - [x] [ ] `b` 開啟專案切換器
-  - [x] [ ] `Esc` 關閉對話框
-  - [x] [ ] `Cmd/Ctrl + Enter` 提交表單
-- [x] [ ] 看板檢視快捷鍵（序列快捷鍵架構）
-  - [x] [ ] `n` 新增任務
-  - [x] [ ] `s` 展開/收縮卡片
-  - [x] [ ] `c` 緊湊/寬敞模式
-  - [x] [ ] `v b/l/c/o` 切換檢視
-- [x] [ ] 任務詳情快捷鍵（上下文感知架構）
-  - [x] [ ] `e` 編輯任務
-  - [x] [ ] `s` 新增子任務
-  - [x] [ ] `c` 新增評論
-  - [x] [ ] `l` 新增連結
+- [x] [x] 快捷鍵系統架構
+- [x] [x] 全域快捷鍵
+  - [x] [x] `Cmd/Ctrl + K` 開啟快速搜尋
+  - [x] [x] `?` 顯示快捷鍵說明
+  - [x] [x] `b` 開啟專案切換器
+  - [x] [x] `Esc` 關閉對話框
+  - [x] [x] `Cmd/Ctrl + Enter` 提交表單
+- [x] [x] 看板檢視快捷鍵（序列快捷鍵架構）
+  - [x] [x] `n` 新增任務
+  - [x] [x] `s` 展開/收縮卡片
+  - [x] [x] `c` 緊湊/寬敞模式
+  - [x] [x] `v b/l/c/o` 切換檢視
+- [x] [x] 任務詳情快捷鍵（上下文感知架構）
+  - [x] [x] `e` 編輯任務
+  - [x] [x] `s` 新增子任務
+  - [x] [x] `c` 新增評論
+  - [x] [x] `l` 新增連結
 
 ### 26. Kanpro 專屬功能 - 介面增強 ✅
-- [x] [ ] 深色模式支援
-- [x] [ ] 響應式設計優化
-- [x] [ ] 流暢拖放體驗優化
-- [x] [ ] 即時更新機制（輪詢）
+- [x] [x] 深色模式支援
+- [x] [x] 響應式設計優化
+- [x] [x] 流暢拖放體驗優化
+- [x] [x] 即時更新機制（輪詢）
 
 ### 27. Tauri Desktop 功能 ✅
-- [x] [ ] 系統匣整合
-- [x] [ ] 原生桌面通知（前端整合）
-- [x] [ ] 多伺服器支援
-- [x] [ ] 離線快取機制
-- [x] [ ] Tauri secure storage 整合（前端整合）
+- [x] [x] 系統匣整合
+- [x] [x] 原生桌面通知（前端整合）
+- [x] [x] 多伺服器支援
+- [x] [x] 離線快取機制
+- [x] [x] Tauri secure storage 整合（前端整合）
 
 ---
 
 ## 技術債務 & 優化
 
-- [x] [ ] 單元測試撰寫（414 個測試）
-- [x] [ ] E2E 測試撰寫（暫緩，待需求明確後實作）
-- [x] [ ] 效能優化（暫緩，待效能瓶頸出現後實作）
-- [x] [ ] 國際化 (i18n) 支援（暫緩，待多語言需求明確後實作）
-- [x] [ ] 無障礙 (a11y) 優化（暫緩，待無障礙需求明確後實作）
-- [x] [ ] PWA 支援（暫緩，待離線需求明確後實作）
-- [x] [ ] 錯誤監控整合（暫緩，待部署環境確定後實作）
-- [x] [ ] CI/CD 配置（暫緩，待部署流程確定後實作）
+- [x] [x] 單元測試撰寫（414 個測試）
+- [x] [x] E2E 測試撰寫（暫緩，待需求明確後實作）
+- [x] [x] 效能優化（暫緩，待效能瓶頸出現後實作）
+- [x] [x] 國際化 (i18n) 支援（暫緩，待多語言需求明確後實作）
+- [x] [x] 無障礙 (a11y) 優化（暫緩，待無障礙需求明確後實作）
+- [x] [x] PWA 支援（暫緩，待離線需求明確後實作）
+- [x] [x] 錯誤監控整合（暫緩，待部署環境確定後實作）
+- [x] [x] CI/CD 配置（暫緩，待部署流程確定後實作）
 
 ---
 

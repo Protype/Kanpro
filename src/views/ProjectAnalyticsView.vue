@@ -286,7 +286,8 @@ async function loadAnalytics() {
   error.value = null
 
   try {
-    const project = await projectsStore.getProject(projectId.value)
+    await projectsStore.fetchProjects()
+    const project = projectsStore.getProjectById(projectId.value)
     if (project) {
       projectName.value = project.name
     }
@@ -294,7 +295,7 @@ async function loadAnalytics() {
     await Promise.all([
       analyticsStore.fetchProjectActivity(projectId.value),
       boardStore.fetchBoard(projectId.value),
-      membersStore.fetchMembers(projectId.value)
+      membersStore.fetchProjectMembers(projectId.value)
     ])
   } catch (err) {
     error.value = err instanceof Error ? err.message : '載入分析資料失敗'
