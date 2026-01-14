@@ -70,17 +70,54 @@ const toggleApiUrlEdit = () => {
   isEditingApiUrl.value = !isEditingApiUrl.value
 }
 
+/**
+ * 檢查 URL 是否為跨域
+ */
+const isCrossOrigin = (url: string): boolean => {
+  if (url.startsWith('/')) return false
+  try {
+    const targetUrl = new URL(url)
+    return targetUrl.origin !== window.location.origin
+  } catch {
+    return false
+  }
+}
+
+/**
+ * 開發模式下轉換為代理路徑
+ */
+const getProxiedUrl = (url: string): string => {
+  // 開發模式下，跨域 URL 轉換為 /api 代理
+  if (import.meta.env.DEV && isCrossOrigin(url)) {
+    try {
+      const targetUrl = new URL(url)
+      // 使用 /api 代理，保留路徑部分
+      return '/api' + targetUrl.pathname
+    } catch {
+      return url
+    }
+  }
+  return url
+}
+
 const handleLogin = async () => {
   errorMessage.value = ''
 
   // 正規化 API URL（自動補上 jsonrpc.php）
-  const normalizedUrl = appConfig.normalizeApiUrl(apiUrl.value)
+  let normalizedUrl = appConfig.normalizeApiUrl(apiUrl.value)
 
   // 驗證 API URL 格式
   if (!isValidApiUrl(normalizedUrl)) {
     errorMessage.value = '請輸入有效的伺服器網址（如 /kanboard/ 或 http://...）'
     return
   }
+
+  // 記錄原始 URL 用於錯誤提示
+  const originalUrl = normalizedUrl
+  const wasCrossOrigin = isCrossOrigin(normalizedUrl)
+
+  // 開發模式下使用代理
+  normalizedUrl = getProxiedUrl(normalizedUrl)
 
   isLoading.value = true
 
@@ -92,16 +129,21 @@ const handleLogin = async () => {
       rememberMe: rememberMe.value
     })
 
-    // 登入成功後儲存 API URL 到 localStorage
-    appConfig.setApiUrl(normalizedUrl)
+    // 登入成功後儲存原始 API URL 到 localStorage（非代理路徑）
+    appConfig.setApiUrl(originalUrl)
 
     router.push('/')
   } catch (error) {
     if (error instanceof Error) {
       if (error.message.includes('401') || error.message.includes('Unauthorized')) {
         errorMessage.value = '帳號或密碼錯誤'
-      } else if (error.message.includes('Network') || error.message.includes('fetch')) {
-        errorMessage.value = '無法連線到伺服器'
+      } else if (error.message.includes('Network') || error.message.includes('fetch') || error.message.includes('Failed')) {
+        // 跨域請求失敗，可能是 CORS 問題
+        if (wasCrossOrigin && !import.meta.env.DEV) {
+          errorMessage.value = '無法連線到伺服器（可能是 CORS 未設定，請確認伺服器已啟用跨域存取）'
+        } else {
+          errorMessage.value = '無法連線到伺服器'
+        }
       } else {
         errorMessage.value = error.message || '登入失敗，請稍後再試'
       }
