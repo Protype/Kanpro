@@ -89,13 +89,8 @@ const isCrossOrigin = (url: string): boolean => {
 const getProxiedUrl = (url: string): string => {
   // 開發模式下，跨域 URL 轉換為 /api 代理
   if (import.meta.env.DEV && isCrossOrigin(url)) {
-    try {
-      const targetUrl = new URL(url)
-      // 使用 /api 代理，保留路徑部分
-      return '/api' + targetUrl.pathname
-    } catch {
-      return url
-    }
+    // 直接使用 /api/jsonrpc.php，由 vite 代理轉發到正確的伺服器
+    return '/api/jsonrpc.php'
   }
   return url
 }
