@@ -11,7 +11,9 @@
     "test:run": "vitest run",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build"
+    "tauri:build": "tauri build",
+    "seed": "node scripts/seeder.mjs",
+    "seed:clean": "node scripts/seeder.mjs --clean"
   },
   "dependencies": {
     "pinia": "^2.3.0",
