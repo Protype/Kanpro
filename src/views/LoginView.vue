@@ -23,8 +23,12 @@ const configLoading = ref(true)
 // 是否有 API URL（有值就顯示純文字模式）
 const hasApiUrl = computed(() => !!apiUrl.value)
 
-// 顯示的 API URL（用於純文字模式）
-const displayApiUrl = computed(() => apiUrl.value || '未設定')
+// 顯示的 API URL（用於純文字模式，移除 jsonrpc.php）
+const displayApiUrl = computed(() => {
+  if (!apiUrl.value) return '未設定'
+  // 移除結尾的 /jsonrpc.php 或 jsonrpc.php
+  return apiUrl.value.replace(/\/?jsonrpc\.php$/, '')
+})
 
 onMounted(async () => {
   // 初始化主題
@@ -98,34 +102,34 @@ const getProxiedUrl = (url: string): string => {
 const handleLogin = async () => {
   errorMessage.value = ''
 
-  // 正規化 API URL（自動補上 jsonrpc.php）
-  let normalizedUrl = appConfig.normalizeApiUrl(apiUrl.value)
+  // 記錄使用者輸入的原始 URL（不含 jsonrpc.php，用於儲存和顯示）
+  const userInputUrl = apiUrl.value.trim()
 
   // 驗證 API URL 格式
-  if (!isValidApiUrl(normalizedUrl)) {
+  if (!isValidApiUrl(userInputUrl)) {
     errorMessage.value = '請輸入有效的伺服器網址（如 /kanboard/ 或 http://...）'
     return
   }
 
-  // 記錄原始 URL 用於錯誤提示
-  const originalUrl = normalizedUrl
-  const wasCrossOrigin = isCrossOrigin(normalizedUrl)
+  // 正規化 API URL（自動補上 jsonrpc.php，用於實際呼叫）
+  let callUrl = appConfig.normalizeApiUrl(userInputUrl)
+  const wasCrossOrigin = isCrossOrigin(callUrl)
 
   // 開發模式下使用代理
-  normalizedUrl = getProxiedUrl(normalizedUrl)
+  callUrl = getProxiedUrl(callUrl)
 
   isLoading.value = true
 
   try {
     await authStore.login({
-      apiUrl: normalizedUrl,
+      apiUrl: callUrl,
       username: username.value,
       password: password.value,
       rememberMe: rememberMe.value
     })
 
-    // 登入成功後儲存原始 API URL 到 localStorage（非代理路徑）
-    appConfig.setApiUrl(originalUrl)
+    // 登入成功後儲存原始 URL（不含 jsonrpc.php）
+    appConfig.setApiUrl(userInputUrl)
 
     router.push('/')
   } catch (error) {
