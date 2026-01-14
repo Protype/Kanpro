@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useTheme } from '@/composables/useTheme'
+import { useAppConfig } from '@/composables/useAppConfig'
 import ThemeToggle from '@/components/ThemeToggle.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const theme = useTheme()
+const appConfig = useAppConfig()
 
 const apiUrl = ref('')
 const username = ref('')
@@ -15,16 +17,29 @@ const password = ref('')
 const rememberMe = ref(false)
 const isLoading = ref(false)
 const errorMessage = ref('')
+const isEditingApiUrl = ref(false)
+const configLoading = ref(true)
 
-onMounted(() => {
+// 是否有 API URL（有值就顯示純文字模式）
+const hasApiUrl = computed(() => !!apiUrl.value)
+
+// 顯示的 API URL（用於純文字模式）
+const displayApiUrl = computed(() => apiUrl.value || '未設定')
+
+onMounted(async () => {
   // 初始化主題
   theme.init()
 
-  // 從環境變數載入預設 API URL
-  const envApiUrl = import.meta.env.VITE_KANBOARD_API_URL
-  if (envApiUrl) {
-    apiUrl.value = envApiUrl
+  // 載入配置
+  await appConfig.loadConfig()
+
+  // 優先從 config 載入 API URL
+  const configuredUrl = appConfig.getApiUrl()
+  if (configuredUrl) {
+    apiUrl.value = configuredUrl
   }
+
+  configLoading.value = false
 })
 
 /**
@@ -48,12 +63,22 @@ const isValidApiUrl = (url: string): boolean => {
   }
 }
 
+/**
+ * 切換 API URL 編輯模式
+ */
+const toggleApiUrlEdit = () => {
+  isEditingApiUrl.value = !isEditingApiUrl.value
+}
+
 const handleLogin = async () => {
   errorMessage.value = ''
 
+  // 正規化 API URL（自動補上 jsonrpc.php）
+  const normalizedUrl = appConfig.normalizeApiUrl(apiUrl.value)
+
   // 驗證 API URL 格式
-  if (!isValidApiUrl(apiUrl.value)) {
-    errorMessage.value = '請輸入有效的伺服器網址（如 /api/jsonrpc.php 或 http://...）'
+  if (!isValidApiUrl(normalizedUrl)) {
+    errorMessage.value = '請輸入有效的伺服器網址（如 /kanboard/ 或 http://...）'
     return
   }
 
@@ -61,11 +86,15 @@ const handleLogin = async () => {
 
   try {
     await authStore.login({
-      apiUrl: apiUrl.value,
+      apiUrl: normalizedUrl,
       username: username.value,
       password: password.value,
       rememberMe: rememberMe.value
     })
+
+    // 登入成功後儲存 API URL 到 localStorage
+    appConfig.setApiUrl(normalizedUrl)
+
     router.push('/')
   } catch (error) {
     if (error instanceof Error) {
@@ -106,14 +135,50 @@ const handleLogin = async () => {
           <label for="apiUrl" class="block text-sm font-medium text-content-secondary mb-1">
             伺服器網址
           </label>
-          <input
-            id="apiUrl"
-            v-model="apiUrl"
-            type="text"
-            required
-            placeholder="/api/jsonrpc.php 或 http://your-kanboard-server/jsonrpc.php"
-            class="input"
-          />
+          <!-- 載入中 -->
+          <div v-if="configLoading" class="input bg-surface-tertiary animate-pulse">
+            載入中...
+          </div>
+          <!-- 有 URL 且非編輯模式時：顯示虛線底連結 + 編輯按鈕 -->
+          <div v-else-if="hasApiUrl && !isEditingApiUrl" class="flex items-center gap-2">
+            <a
+              :href="displayApiUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 border-b border-dashed border-current truncate"
+            >
+              {{ displayApiUrl }}
+            </a>
+            <button
+              type="button"
+              @click="toggleApiUrlEdit"
+              class="text-content-tertiary hover:text-content flex-shrink-0 cursor-pointer"
+              title="編輯"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+              </svg>
+            </button>
+          </div>
+          <!-- 無 URL 或編輯模式時：顯示輸入框 -->
+          <div v-else class="flex items-center gap-2">
+            <input
+              id="apiUrl"
+              v-model="apiUrl"
+              type="text"
+              required
+              placeholder="/kanboard/ 或 http://your-kanboard-server/"
+              class="input flex-1"
+            />
+            <button
+              v-if="hasApiUrl"
+              type="button"
+              @click="toggleApiUrlEdit"
+              class="btn-secondary text-sm px-3 py-2"
+            >
+              取消
+            </button>
+          </div>
         </div>
 
         <!-- 帳號 -->

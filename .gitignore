@@ -1,6 +1,7 @@
 # 本地環境設定
 .env.local
 .env.*.local
+public/config.json
 
 # 依賴套件
 node_modules/
