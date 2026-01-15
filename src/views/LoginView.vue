@@ -127,19 +127,21 @@ const handleLogin = async () => {
   } catch (error) {
     if (error instanceof Error) {
       if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-        errorMessage.value = '帳號或密碼錯誤'
+        // 使用者登入問題
+        errorMessage.value = '登入失敗，帳號或密碼錯誤'
       } else if (error.message.includes('Unexpected token') || error.message.includes('not valid JSON')) {
-        // 返回的不是 JSON，可能是 API 路徑錯誤
-        errorMessage.value = 'API 端點錯誤（伺服器返回非 JSON 格式，請確認網址是否正確）'
+        // 主機連線問題：API 路徑錯誤
+        errorMessage.value = '伺服器連線錯誤，API 端點返回非 JSON 格式（請確認網址是否正確）'
       } else if (error.message.includes('Network') || error.message.includes('fetch') || error.message.includes('Failed')) {
-        // 跨域請求失敗，可能是 CORS 問題
+        // 主機連線問題：網路錯誤
         if (wasCrossOrigin && !import.meta.env.DEV) {
-          errorMessage.value = '無法連線到伺服器（可能是 CORS 未設定，請確認伺服器已啟用跨域存取）'
+          errorMessage.value = '伺服器連線錯誤，可能是 CORS 未設定（請確認伺服器已啟用跨域存取）'
         } else {
-          errorMessage.value = '無法連線到伺服器'
+          errorMessage.value = '伺服器連線錯誤，無法連線到伺服器'
         }
       } else {
-        errorMessage.value = error.message || '登入失敗，請稍後再試'
+        // 其他登入問題
+        errorMessage.value = '登入失敗，' + (error.message || '請稍後再試')
       }
     } else {
       errorMessage.value = '登入失敗，請稍後再試'
