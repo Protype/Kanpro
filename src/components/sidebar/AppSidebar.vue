@@ -93,7 +93,7 @@ const goToGlobal = () => {
 <template>
   <aside
     :class="[
-      'flex flex-col bg-surface border-r border-edge transition-all duration-300 z-40',
+      'flex flex-col bg-surface transition-all duration-300 z-40',
       sidebarStore.isExpanded ? 'w-64' : 'w-16',
       sidebarStore.isMobileOpen
         ? 'fixed inset-y-0 left-0 translate-x-0'
@@ -101,7 +101,18 @@ const goToGlobal = () => {
     ]"
   >
     <!-- Header -->
-    <div class="flex items-center justify-between h-14 px-4 border-b border-edge">
+    <div class="flex items-center h-14 px-4 gap-3 border-b border-edge">
+      <button
+        @click="toggleSidebar"
+        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors cursor-pointer"
+        :title="sidebarStore.isExpanded ? '折疊側邊欄' : '展開側邊欄'"
+      >
+        <!-- Sidebar toggle icon -->
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <line x1="9" y1="3" x2="9" y2="21" />
+        </svg>
+      </button>
       <router-link
         v-if="sidebarStore.isExpanded"
         to="/"
@@ -109,32 +120,10 @@ const goToGlobal = () => {
       >
         Kanpro
       </router-link>
-      <button
-        @click="toggleSidebar"
-        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors cursor-pointer"
-        :title="sidebarStore.isExpanded ? '折疊側邊欄' : '展開側邊欄'"
-      >
-        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path
-            v-if="sidebarStore.isExpanded"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
-          />
-          <path
-            v-else
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M13 5l7 7-7 7M5 5l7 7-7 7"
-          />
-        </svg>
-      </button>
     </div>
 
     <!-- Content -->
-    <div class="flex-1 overflow-y-auto py-4">
+    <div class="flex-1 overflow-y-auto py-4 border-r border-edge">
       <!-- Project Mode: Back button and project name -->
       <div v-if="isProjectMode" class="px-3 mb-4">
         <button
