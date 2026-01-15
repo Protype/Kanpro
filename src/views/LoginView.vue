@@ -17,13 +17,9 @@ const password = ref('')
 const rememberMe = ref(false)
 const isLoading = ref(false)
 const errorMessage = ref('')
-const isEditingApiUrl = ref(false)
 const configLoading = ref(true)
 
-// 是否有 API URL（有值就顯示純文字模式）
-const hasApiUrl = computed(() => !!apiUrl.value)
-
-// 是否有 config.json 預設值（用於顯示重置按鈕）
+// 是否有 config.json 預設值（有值時鎖定不可編輯）
 const hasConfigFileUrl = computed(() => !!appConfig.configFileApiUrl.value)
 
 // 顯示的 API URL（用於純文字模式，移除 jsonrpc.php）
@@ -68,22 +64,6 @@ const isValidApiUrl = (url: string): boolean => {
   } catch {
     return false
   }
-}
-
-/**
- * 切換 API URL 編輯模式
- */
-const toggleApiUrlEdit = () => {
-  isEditingApiUrl.value = !isEditingApiUrl.value
-}
-
-/**
- * 重置 API URL 為 config.json 預設值
- */
-const handleResetApiUrl = () => {
-  appConfig.clearApiUrl()
-  apiUrl.value = appConfig.configFileApiUrl.value || ''
-  isEditingApiUrl.value = false
 }
 
 /**
@@ -195,54 +175,26 @@ const handleLogin = async () => {
           <div v-if="configLoading" class="input bg-surface-tertiary animate-pulse">
             載入中...
           </div>
-          <!-- 有 URL 且非編輯模式時：顯示虛線底連結 + 編輯按鈕 -->
-          <div v-else-if="hasApiUrl && !isEditingApiUrl" class="flex items-center gap-2">
-            <a
-              :href="displayApiUrl"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 border-b border-dashed border-current truncate"
-            >
-              {{ displayApiUrl }}
-            </a>
-            <button
-              type="button"
-              @click="toggleApiUrlEdit"
-              class="text-content-tertiary hover:text-content flex-shrink-0 cursor-pointer"
-              title="編輯"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-              </svg>
-            </button>
-          </div>
-          <!-- 無 URL 或編輯模式時：顯示輸入框 -->
-          <div v-else class="flex items-center gap-2">
-            <input
-              id="apiUrl"
-              v-model="apiUrl"
-              type="text"
-              required
-              placeholder="/kanboard/ 或 http://your-kanboard-server/"
-              class="input flex-1"
-            />
-            <button
-              v-if="hasConfigFileUrl"
-              type="button"
-              @click="handleResetApiUrl"
-              class="btn-secondary text-sm px-3 py-2"
-            >
-              重置
-            </button>
-            <button
-              v-if="hasApiUrl"
-              type="button"
-              @click="toggleApiUrlEdit"
-              class="btn-secondary text-sm px-3 py-2"
-            >
-              取消
-            </button>
-          </div>
+          <!-- config.json 有值時：顯示虛線底連結（不可編輯） -->
+          <a
+            v-else-if="hasConfigFileUrl"
+            :href="displayApiUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 border-b border-dashed border-current truncate inline-block"
+          >
+            {{ displayApiUrl }}
+          </a>
+          <!-- config.json 無值時：顯示輸入框 -->
+          <input
+            v-else
+            id="apiUrl"
+            v-model="apiUrl"
+            type="text"
+            required
+            placeholder="/kanboard/ 或 http://your-kanboard-server/"
+            class="input"
+          />
         </div>
 
         <!-- 帳號 -->
