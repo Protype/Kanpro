@@ -11,6 +11,8 @@ const authStore = useAuthStore()
 const theme = useTheme()
 const appConfig = useAppConfig()
 
+const REMEMBER_ME_KEY = 'kanpro_remember_me'
+
 const apiUrl = ref('')
 const username = ref('')
 const password = ref('')
@@ -32,6 +34,20 @@ const displayApiUrl = computed(() => {
 onMounted(async () => {
   // 初始化主題
   theme.init()
+
+  // 載入「記住我」設定
+  const savedRememberMe = localStorage.getItem(REMEMBER_ME_KEY)
+  if (savedRememberMe) {
+    try {
+      const parsed = JSON.parse(savedRememberMe)
+      if (parsed.rememberMe) {
+        rememberMe.value = true
+        username.value = parsed.username || ''
+      }
+    } catch {
+      // 忽略解析錯誤
+    }
+  }
 
   // 載入配置
   await appConfig.loadConfig()
@@ -122,6 +138,16 @@ const handleLogin = async () => {
 
     // 登入成功後儲存原始 URL（不含 jsonrpc.php）
     appConfig.setApiUrl(userInputUrl)
+
+    // 保存或清除「記住我」設定
+    if (rememberMe.value) {
+      localStorage.setItem(REMEMBER_ME_KEY, JSON.stringify({
+        rememberMe: true,
+        username: username.value
+      }))
+    } else {
+      localStorage.removeItem(REMEMBER_ME_KEY)
+    }
 
     router.push('/')
   } catch (error) {

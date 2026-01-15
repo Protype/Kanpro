@@ -24,6 +24,7 @@ interface SavedCredentials {
   accessToken: string
   refreshToken: string
   tokenExpiresAt: number
+  autoRefresh: boolean  // 是否自動刷新 token（由「記住我」控制）
 }
 
 export const useAuthStore = defineStore('auth', () => {
@@ -36,6 +37,7 @@ export const useAuthStore = defineStore('auth', () => {
   const accessToken = ref('')
   const refreshToken = ref('')
   const tokenExpiresAt = ref(0)
+  const autoRefresh = ref(true)  // 是否自動刷新 token
 
   // === 重新認證狀態 ===
   const isSessionLocked = ref(false)
@@ -64,7 +66,8 @@ export const useAuthStore = defineStore('auth', () => {
       username: username.value,
       accessToken: accessToken.value,
       refreshToken: refreshToken.value,
-      tokenExpiresAt: tokenExpiresAt.value
+      tokenExpiresAt: tokenExpiresAt.value,
+      autoRefresh: autoRefresh.value
     }
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(credentials))
@@ -80,6 +83,7 @@ export const useAuthStore = defineStore('auth', () => {
     accessToken.value = ''
     refreshToken.value = ''
     tokenExpiresAt.value = 0
+    autoRefresh.value = true
     isSessionLocked.value = false
   }
 
@@ -141,11 +145,10 @@ export const useAuthStore = defineStore('auth', () => {
     apiUrl.value = credentials.apiUrl
     username.value = credentials.username
     updateTokenState(tokenResponse)
+    autoRefresh.value = credentials.rememberMe ?? false
 
-    // 持久化
-    if (credentials.rememberMe) {
-      saveCredentials()
-    }
+    // 永遠保存 session
+    saveCredentials()
   }
 
   /**
@@ -200,7 +203,15 @@ export const useAuthStore = defineStore('auth', () => {
 
       // 檢查 token 是否過期
       const now = Math.floor(Date.now() / 1000)
-      if (credentials.tokenExpiresAt && credentials.tokenExpiresAt < now) {
+      const isExpired = credentials.tokenExpiresAt && credentials.tokenExpiresAt < now
+
+      if (isExpired) {
+        // 如果 autoRefresh 為 false，token 過期就不還原 session
+        if (credentials.autoRefresh === false) {
+          localStorage.removeItem(STORAGE_KEY)
+          return false
+        }
+
         // Token 已過期，嘗試使用 refresh token
         try {
           const newTokens = await jwtService.refreshToken(
@@ -234,6 +245,7 @@ export const useAuthStore = defineStore('auth', () => {
       accessToken.value = credentials.accessToken
       refreshToken.value = credentials.refreshToken
       tokenExpiresAt.value = credentials.tokenExpiresAt
+      autoRefresh.value = credentials.autoRefresh ?? true
 
       saveCredentials()
 
@@ -271,6 +283,10 @@ export const useAuthStore = defineStore('auth', () => {
    */
   async function ensureValidToken(): Promise<boolean> {
     if (isTokenExpiringSoon(accessToken.value, TOKEN_REFRESH_THRESHOLD)) {
+      // 如果 autoRefresh 為 false，不自動刷新，改為要求重新認證
+      if (!autoRefresh.value) {
+        return false
+      }
       return await refreshAccessToken()
     }
 
@@ -420,6 +436,7 @@ export const useAuthStore = defineStore('auth', () => {
     accessToken,
     refreshToken,
     tokenExpiresAt,
+    autoRefresh,
     isSessionLocked,
 
     // 計算屬性

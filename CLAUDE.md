@@ -33,7 +33,7 @@
 2. 在 issue 建立後，先 git branch 建立對應的開發分支，使用如 `feat/issue-{id}` 的命名格式進行撰寫
 3. 測試先行，進行 TDD 開發流程，從紅燈開始
 4. 你應該頻繁交付檔案變動，並詳細紀錄，git commit 必須使用如 `feat(ui): 說明` 這樣的語意化格式進行撰寫
-5. 開發完畢，一定要使用如 agent-browser, chrome-dev-tool 等工具進行實機測試，確保功能正常，測試時如需使用目前網站和 API 連線資訊，可依據 .env.local 進行設定
+5. 開發完畢，一定要使用如 agent-browser, chrome-dev-tool 等工具進行實機測試，確保功能正常，測試時如需使用目前網站和 API 連線資訊，可參考 LOCAL.md
 6. 實機測試完畢，必須對應 issue 建立完整的 PR，並使用如 `feat(ui): 說明` 這樣的語意化格式進行撰寫，在 PR 中針對程式碼的變動進行詳細說明
 
 ### 自動化強化開發方式
@@ -74,7 +74,7 @@ src-tauri/           # Tauri (Rust) 原生程式碼
 
 ## 本地開發設定
 
-本地端設定資訊存放於 `.env.local`（不進入版本控制），請參考 `.env.example` 建立。
+本地測試環境的連線資訊（API 位置、測試帳號密碼）存放於 `LOCAL.md`（不進入版本控制）。
 
 ## Kanboard API
 
