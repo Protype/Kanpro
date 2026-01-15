@@ -115,7 +115,11 @@ export const useAuthStore = defineStore('auth', () => {
    */
   async function login(credentials: LoginCredentials): Promise<void> {
     // 先檢查 JWT 外掛是否可用
-    const pluginInfo = await jwtService.checkPlugin(credentials.apiUrl)
+    const pluginInfo = await jwtService.checkPlugin(
+      credentials.apiUrl,
+      credentials.username,
+      credentials.password
+    )
 
     if (pluginInfo) {
       // JWT 模式

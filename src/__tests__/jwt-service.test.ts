@@ -56,14 +56,19 @@ describe('JWTAuthService', () => {
       vi.mocked(fetch).mockResolvedValue(mockSuccessResponse(pluginInfo) as Response)
 
       const service = createJWTAuthService()
-      const result = await service.checkPlugin(mockApiUrl)
+      const result = await service.checkPlugin(mockApiUrl, 'testuser', 'testpass')
 
       expect(result).toEqual(pluginInfo)
       expect(fetch).toHaveBeenCalledTimes(1)
       const [url, options] = vi.mocked(fetch).mock.calls[0]
       expect(url).toBe(mockApiUrl)
       expect(options?.method).toBe('POST')
-      expect(options?.headers).toEqual({ 'Content-Type': 'application/json' })
+      // 現在使用 Basic Auth
+      const expectedAuth = btoa('testuser:testpass')
+      expect(options?.headers).toEqual({
+        'Content-Type': 'application/json',
+        'Authorization': `Basic ${expectedAuth}`
+      })
       const body = JSON.parse(options?.body as string)
       expect(body.jsonrpc).toBe('2.0')
       expect(body.method).toBe('getJWTPlugin')
@@ -76,7 +81,7 @@ describe('JWTAuthService', () => {
       )
 
       const service = createJWTAuthService()
-      const result = await service.checkPlugin(mockApiUrl)
+      const result = await service.checkPlugin(mockApiUrl, 'testuser', 'testpass')
 
       expect(result).toBeNull()
     })
@@ -87,7 +92,7 @@ describe('JWTAuthService', () => {
       )
 
       const service = createJWTAuthService()
-      const result = await service.checkPlugin(mockApiUrl)
+      const result = await service.checkPlugin(mockApiUrl, 'testuser', 'testpass')
 
       expect(result).toBeNull()
     })
@@ -96,7 +101,7 @@ describe('JWTAuthService', () => {
       vi.mocked(fetch).mockRejectedValue(new Error('Network error'))
 
       const service = createJWTAuthService()
-      const result = await service.checkPlugin(mockApiUrl)
+      const result = await service.checkPlugin(mockApiUrl, 'testuser', 'testpass')
 
       expect(result).toBeNull()
     })

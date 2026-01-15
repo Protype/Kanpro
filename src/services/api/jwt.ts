@@ -27,9 +27,11 @@ export interface JWTAuthService {
   /**
    * 檢查 JWT 外掛是否可用
    * @param apiUrl API 端點
+   * @param username 使用者名稱
+   * @param password 密碼
    * @returns 外掛資訊，如果不可用則回傳 null
    */
-  checkPlugin(apiUrl: string): Promise<JWTPluginInfo | null>
+  checkPlugin(apiUrl: string, username: string, password: string): Promise<JWTPluginInfo | null>
 
   /**
    * 使用帳號密碼取得 JWT token
@@ -191,9 +193,9 @@ export function createJWTAuthService(): JWTAuthService {
   }
 
   return {
-    async checkPlugin(apiUrl: string): Promise<JWTPluginInfo | null> {
+    async checkPlugin(apiUrl: string, username: string, password: string): Promise<JWTPluginInfo | null> {
       try {
-        return await callWithoutAuth<JWTPluginInfo>(apiUrl, 'getJWTPlugin')
+        return await callWithBasicAuth<JWTPluginInfo>(apiUrl, 'getJWTPlugin', username, password)
       } catch {
         return null
       }
