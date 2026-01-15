@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { createKanboardClient, createJWTAuthService } from '@/services/api'
+import type { JWTTokenResponse } from '@/services/api/jwt'
 import { parseJWTPayload, isTokenExpiringSoon } from '@/utils/jwt'
 import type { User } from '@/types'
-import type { AuthMode } from '@/services/api'
 
 const STORAGE_KEY = 'kanpro_auth'
 const TOKEN_REFRESH_THRESHOLD = 300 // 5 分鐘
@@ -16,19 +16,14 @@ interface LoginCredentials {
 }
 
 /**
- * 儲存的認證資料
- * 注意：Basic Auth 模式不儲存密碼
+ * 儲存的認證資料（純 JWT 模式）
  */
 interface SavedCredentials {
   apiUrl: string
   username: string
-  authMode: AuthMode
-  // JWT 模式
-  accessToken?: string
-  refreshToken?: string
-  tokenExpiresAt?: number
-  // 舊版兼容（會在下次登入時轉換）
-  token?: string
+  accessToken: string
+  refreshToken: string
+  tokenExpiresAt: number
 }
 
 export const useAuthStore = defineStore('auth', () => {
@@ -37,16 +32,10 @@ export const useAuthStore = defineStore('auth', () => {
   const apiUrl = ref('')
   const username = ref('')
 
-  // === 認證模式 ===
-  const authMode = ref<AuthMode>('basic')
-
   // === JWT 狀態 ===
   const accessToken = ref('')
   const refreshToken = ref('')
   const tokenExpiresAt = ref(0)
-
-  // === 會話密碼（僅存於記憶體，不持久化）===
-  const sessionPassword = ref('')
 
   // === 重新認證狀態 ===
   const isSessionLocked = ref(false)
@@ -60,15 +49,9 @@ export const useAuthStore = defineStore('auth', () => {
 
   // === 計算屬性 ===
   const isAuthenticated = computed(() => !!user.value)
-  const isJWTMode = computed(() => authMode.value === 'jwt')
 
-  // 舊版兼容：token 屬性
-  const token = computed(() => {
-    if (authMode.value === 'jwt') {
-      return accessToken.value
-    }
-    return sessionPassword.value
-  })
+  // 舊版兼容：token 屬性（指向 accessToken）
+  const token = computed(() => accessToken.value)
 
   // === 私有方法 ===
 
@@ -79,15 +62,10 @@ export const useAuthStore = defineStore('auth', () => {
     const credentials: SavedCredentials = {
       apiUrl: apiUrl.value,
       username: username.value,
-      authMode: authMode.value
+      accessToken: accessToken.value,
+      refreshToken: refreshToken.value,
+      tokenExpiresAt: tokenExpiresAt.value
     }
-
-    if (authMode.value === 'jwt') {
-      credentials.accessToken = accessToken.value
-      credentials.refreshToken = refreshToken.value
-      credentials.tokenExpiresAt = tokenExpiresAt.value
-    }
-    // Basic Auth 模式不儲存密碼
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(credentials))
   }
@@ -99,41 +77,48 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null
     apiUrl.value = ''
     username.value = ''
-    authMode.value = 'basic'
     accessToken.value = ''
     refreshToken.value = ''
     tokenExpiresAt.value = 0
-    sessionPassword.value = ''
     isSessionLocked.value = false
+  }
+
+  /**
+   * 從 Token 回應更新狀態
+   * @returns 解析後的過期時間
+   */
+  function updateTokenState(tokenResponse: JWTTokenResponse): number {
+    const payload = parseJWTPayload(tokenResponse.access_token)
+    const expiresAt = payload.exp ?? 0
+
+    accessToken.value = tokenResponse.access_token
+    refreshToken.value = tokenResponse.refresh_token
+    tokenExpiresAt.value = expiresAt
+
+    return expiresAt
   }
 
   // === 公開方法 ===
 
   /**
-   * 登入
-   * 自動偵測 JWT 外掛，選擇認證模式
+   * 登入（純 JWT 模式）
+   * 若 JWT 外掛未安裝，拋出錯誤並提供安裝說明
    */
   async function login(credentials: LoginCredentials): Promise<void> {
-    // 先檢查 JWT 外掛是否可用
+    // 檢查 JWT 外掛是否可用
     const pluginInfo = await jwtService.checkPlugin(
       credentials.apiUrl,
       credentials.username,
       credentials.password
     )
 
-    if (pluginInfo) {
-      // JWT 模式
-      await loginWithJWT(credentials)
-    } else {
-      // Basic Auth 模式
-      await loginWithBasicAuth(credentials)
+    if (!pluginInfo) {
+      throw new Error(
+        'JWT 認證外掛未安裝。請先在 Kanboard 伺服器上安裝 JWTAuth 外掛：\n' +
+        'https://github.com/Protype/Kanboard-Plugin-JWTAuth'
+      )
     }
-  }
 
-  /**
-   * JWT 模式登入
-   */
-  async function loginWithJWT(credentials: LoginCredentials): Promise<void> {
     // 取得 JWT token
     const tokenResponse = await jwtService.getToken(
       credentials.apiUrl,
@@ -141,13 +126,11 @@ export const useAuthStore = defineStore('auth', () => {
       credentials.password
     )
 
-    // 解析 token 取得過期時間
-    const payload = parseJWTPayload(tokenResponse.access_token)
-
     // 使用 JWT 驗證身份
     const client = createKanboardClient({
       apiUrl: credentials.apiUrl,
       authMode: 'jwt',
+      username: credentials.username,
       accessToken: tokenResponse.access_token
     })
 
@@ -157,38 +140,9 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = result
     apiUrl.value = credentials.apiUrl
     username.value = credentials.username
-    authMode.value = 'jwt'
-    accessToken.value = tokenResponse.access_token
-    refreshToken.value = tokenResponse.refresh_token
-    tokenExpiresAt.value = payload.exp ?? 0
+    updateTokenState(tokenResponse)
 
     // 持久化
-    if (credentials.rememberMe) {
-      saveCredentials()
-    }
-  }
-
-  /**
-   * Basic Auth 模式登入
-   */
-  async function loginWithBasicAuth(credentials: LoginCredentials): Promise<void> {
-    const client = createKanboardClient({
-      apiUrl: credentials.apiUrl,
-      authMode: 'basic',
-      username: credentials.username,
-      password: credentials.password
-    })
-
-    const result = await client.call<User>('getMe')
-
-    // 更新狀態
-    user.value = result
-    apiUrl.value = credentials.apiUrl
-    username.value = credentials.username
-    authMode.value = 'basic'
-    sessionPassword.value = credentials.password
-
-    // 持久化（不儲存密碼）
     if (credentials.rememberMe) {
       saveCredentials()
     }
@@ -198,8 +152,8 @@ export const useAuthStore = defineStore('auth', () => {
    * 登出
    */
   async function logout(): Promise<void> {
-    // JWT 模式：撤銷 token
-    if (authMode.value === 'jwt' && accessToken.value) {
+    // 撤銷 token
+    if (accessToken.value) {
       try {
         await jwtService.revokeToken(
           apiUrl.value,
@@ -238,94 +192,36 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const credentials: SavedCredentials = JSON.parse(saved)
 
-      // 舊版資料轉換
-      if (credentials.token && !credentials.authMode) {
-        return await restoreLegacySession(credentials)
-      }
-
-      // JWT 模式恢復
-      if (credentials.authMode === 'jwt' && credentials.accessToken) {
-        return await restoreJWTSession(credentials)
-      }
-
-      // Basic Auth 模式恢復（需要重新登入）
-      if (credentials.authMode === 'basic') {
-        // Basic Auth 無法恢復（密碼未儲存）
-        // 設定 apiUrl 和 username 以便重新登入時預填
-        apiUrl.value = credentials.apiUrl
-        username.value = credentials.username
+      // 驗證必要欄位
+      if (!credentials.accessToken || !credentials.refreshToken) {
+        localStorage.removeItem(STORAGE_KEY)
         return false
       }
 
-      return false
-    } catch {
-      localStorage.removeItem(STORAGE_KEY)
-      return false
-    }
-  }
-
-  /**
-   * 恢復舊版 Session（向後兼容）
-   */
-  async function restoreLegacySession(credentials: SavedCredentials): Promise<boolean> {
-    if (!credentials.token) return false
-
-    try {
-      const client = createKanboardClient({
-        apiUrl: credentials.apiUrl,
-        username: credentials.username,
-        token: credentials.token
-      })
-
-      const result = await client.call<User>('getMe')
-
-      user.value = result
-      apiUrl.value = credentials.apiUrl
-      username.value = credentials.username
-      authMode.value = 'basic'
-      sessionPassword.value = credentials.token
-
-      return true
-    } catch {
-      localStorage.removeItem(STORAGE_KEY)
-      return false
-    }
-  }
-
-  /**
-   * 恢復 JWT Session
-   */
-  async function restoreJWTSession(credentials: SavedCredentials): Promise<boolean> {
-    if (!credentials.accessToken) return false
-
-    // 檢查 token 是否過期
-    const now = Math.floor(Date.now() / 1000)
-    if (credentials.tokenExpiresAt && credentials.tokenExpiresAt < now) {
-      // Token 已過期，嘗試使用 refresh token
-      if (credentials.refreshToken) {
+      // 檢查 token 是否過期
+      const now = Math.floor(Date.now() / 1000)
+      if (credentials.tokenExpiresAt && credentials.tokenExpiresAt < now) {
+        // Token 已過期，嘗試使用 refresh token
         try {
-          const newAccessToken = await jwtService.refreshToken(
+          const newTokens = await jwtService.refreshToken(
             credentials.apiUrl,
             credentials.refreshToken
           )
-          credentials.accessToken = newAccessToken
-          const payload = parseJWTPayload(newAccessToken)
+          const payload = parseJWTPayload(newTokens.access_token)
+          credentials.accessToken = newTokens.access_token
+          credentials.refreshToken = newTokens.refresh_token
           credentials.tokenExpiresAt = payload.exp ?? 0
         } catch {
           localStorage.removeItem(STORAGE_KEY)
           return false
         }
-      } else {
-        localStorage.removeItem(STORAGE_KEY)
-        return false
       }
-    }
 
-    // 驗證 token 有效性
-    try {
+      // 驗證 token 有效性
       const client = createKanboardClient({
         apiUrl: credentials.apiUrl,
         authMode: 'jwt',
+        username: credentials.username,
         accessToken: credentials.accessToken
       })
 
@@ -335,12 +231,10 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = result
       apiUrl.value = credentials.apiUrl
       username.value = credentials.username
-      authMode.value = 'jwt'
       accessToken.value = credentials.accessToken
-      refreshToken.value = credentials.refreshToken || ''
-      tokenExpiresAt.value = credentials.tokenExpiresAt || 0
+      refreshToken.value = credentials.refreshToken
+      tokenExpiresAt.value = credentials.tokenExpiresAt
 
-      // 更新儲存
       saveCredentials()
 
       return true
@@ -354,20 +248,15 @@ export const useAuthStore = defineStore('auth', () => {
    * 刷新 Access Token
    */
   async function refreshAccessToken(): Promise<boolean> {
-    if (!isJWTMode.value || !refreshToken.value) return false
+    if (!refreshToken.value) return false
 
     try {
-      const newAccessToken = await jwtService.refreshToken(
+      const newTokens = await jwtService.refreshToken(
         apiUrl.value,
         refreshToken.value
       )
 
-      const payload = parseJWTPayload(newAccessToken)
-
-      accessToken.value = newAccessToken
-      tokenExpiresAt.value = payload.exp ?? 0
-
-      // 更新持久化儲存
+      updateTokenState(newTokens)
       saveCredentials()
 
       return true
@@ -381,8 +270,6 @@ export const useAuthStore = defineStore('auth', () => {
    * 在 API 呼叫前調用
    */
   async function ensureValidToken(): Promise<boolean> {
-    if (!isJWTMode.value) return true
-
     if (isTokenExpiringSoon(accessToken.value, TOKEN_REFRESH_THRESHOLD)) {
       return await refreshAccessToken()
     }
@@ -418,33 +305,15 @@ export const useAuthStore = defineStore('auth', () => {
       throw new Error('Missing credentials')
     }
 
-    if (isJWTMode.value) {
-      // JWT 模式：重新取得 token
-      const tokenResponse = await jwtService.getToken(
-        apiUrl.value,
-        username.value,
-        password
-      )
+    // 重新取得 token
+    const tokenResponse = await jwtService.getToken(
+      apiUrl.value,
+      username.value,
+      password
+    )
 
-      const payload = parseJWTPayload(tokenResponse.access_token)
-
-      accessToken.value = tokenResponse.access_token
-      refreshToken.value = tokenResponse.refresh_token
-      tokenExpiresAt.value = payload.exp ?? 0
-
-      saveCredentials()
-    } else {
-      // Basic Auth 模式：驗證密碼
-      const client = createKanboardClient({
-        apiUrl: apiUrl.value,
-        authMode: 'basic',
-        username: username.value,
-        password: password
-      })
-
-      await client.call<User>('getMe')
-      sessionPassword.value = password
-    }
+    updateTokenState(tokenResponse)
+    saveCredentials()
 
     // 解除鎖定，通知所有等待者
     isSessionLocked.value = false
@@ -474,28 +343,15 @@ export const useAuthStore = defineStore('auth', () => {
       throw new Error('Not authenticated')
     }
 
-    if (authMode.value === 'jwt') {
-      if (!accessToken.value) {
-        throw new Error('No access token')
-      }
-
-      return createKanboardClient({
-        apiUrl: apiUrl.value,
-        authMode: 'jwt',
-        accessToken: accessToken.value
-      })
-    }
-
-    // Basic Auth 模式
-    if (!sessionPassword.value) {
-      throw new Error('Session expired, please login again')
+    if (!accessToken.value) {
+      throw new Error('No access token')
     }
 
     return createKanboardClient({
       apiUrl: apiUrl.value,
-      authMode: 'basic',
+      authMode: 'jwt',
       username: username.value,
-      password: sessionPassword.value
+      accessToken: accessToken.value
     })
   }
 
@@ -514,7 +370,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     // 確保 token 有效
     const valid = await ensureValidToken()
-    if (!valid && isJWTMode.value) {
+    if (!valid) {
       const reauthed = await requireReauth()
       if (!reauthed) {
         throw new Error('Authentication required')
@@ -544,13 +400,15 @@ export const useAuthStore = defineStore('auth', () => {
   function _setTestCredentials(credentials: {
     apiUrl: string
     username: string
-    password: string
-    mode?: AuthMode
+    password?: string  // 舊版相容：會被當作 accessToken
+    accessToken?: string
+    refreshToken?: string
   }): void {
     apiUrl.value = credentials.apiUrl
     username.value = credentials.username
-    sessionPassword.value = credentials.password
-    authMode.value = credentials.mode ?? 'basic'
+    // 舊版相容：password 會被當作 accessToken
+    accessToken.value = credentials.accessToken ?? credentials.password ?? ''
+    refreshToken.value = credentials.refreshToken ?? ''
   }
 
   return {
@@ -559,7 +417,6 @@ export const useAuthStore = defineStore('auth', () => {
     apiUrl,
     username,
     token,
-    authMode,
     accessToken,
     refreshToken,
     tokenExpiresAt,
@@ -567,7 +424,6 @@ export const useAuthStore = defineStore('auth', () => {
 
     // 計算屬性
     isAuthenticated,
-    isJWTMode,
 
     // 方法
     login,

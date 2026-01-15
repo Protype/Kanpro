@@ -21,34 +21,30 @@ export class KanboardError extends Error {
 }
 
 /**
- * 判斷是否為舊版配置格式
+ * 從配置取得認證密鑰
+ * 注意：Kanboard 的 JWT 認證使用 Basic Auth 格式（username:access_token）
  */
-function isLegacyConfig(config: KanboardClientConfig): config is { apiUrl: string; username: string; token: string } {
-  return 'token' in config && 'username' in config && !('authMode' in config)
+function getAuthSecret(config: KanboardClientConfig): string {
+  if ('authMode' in config) {
+    if (config.authMode === 'jwt') return config.accessToken
+    if (config.authMode === 'basic') return config.password
+  }
+
+  // 舊版兼容（Legacy）: 有 token 且無 authMode
+  if ('token' in config && 'username' in config) {
+    return config.token
+  }
+
+  throw new Error('Invalid client configuration')
 }
 
 /**
  * 取得認證標頭
  */
 function getAuthHeader(config: KanboardClientConfig): string {
-  // JWT 模式
-  if ('authMode' in config && config.authMode === 'jwt') {
-    return `Bearer ${config.accessToken}`
-  }
-
-  // Basic Auth 模式（新格式）
-  if ('authMode' in config && config.authMode === 'basic') {
-    const credentials = btoa(`${config.username}:${config.password}`)
-    return `Basic ${credentials}`
-  }
-
-  // 舊版兼容（Legacy）
-  if (isLegacyConfig(config)) {
-    const credentials = btoa(`${config.username}:${config.token}`)
-    return `Basic ${credentials}`
-  }
-
-  throw new Error('Invalid client configuration')
+  const secret = getAuthSecret(config)
+  const credentials = btoa(`${config.username}:${secret}`)
+  return `Basic ${credentials}`
 }
 
 /**

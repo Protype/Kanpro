@@ -53,10 +53,13 @@ export interface KanboardClientConfigBasic {
 
 /**
  * Kanboard 客戶端設定（JWT）
+ * 注意：Kanboard 的 JWT 認證使用 Basic Auth 格式（username:access_token）
  */
 export interface KanboardClientConfigJWT {
   apiUrl: string
   authMode: 'jwt'
+  /** 使用者名稱 */
+  username: string
   /** JWT Access Token */
   accessToken: string
 }

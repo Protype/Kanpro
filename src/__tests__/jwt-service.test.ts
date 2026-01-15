@@ -161,17 +161,21 @@ describe('JWTAuthService', () => {
   })
 
   describe('refreshToken', () => {
-    it('should return new access token', async () => {
+    it('should return new tokens (Token Rotation)', async () => {
       const newAccessToken = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMiLCJleHAiOjE3MzY5NjM2MDB9.sig'
+      const newRefreshToken = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMiLCJleHAiOjE3Mzk1NTIwMDB9.new'
 
       vi.mocked(fetch).mockResolvedValue(
-        mockSuccessResponse({ access_token: newAccessToken }) as Response
+        mockSuccessResponse({ access_token: newAccessToken, refresh_token: newRefreshToken }) as Response
       )
 
       const service = createJWTAuthService()
       const result = await service.refreshToken(mockApiUrl, 'refresh_token_here')
 
-      expect(result).toBe(newAccessToken)
+      expect(result).toEqual({
+        access_token: newAccessToken,
+        refresh_token: newRefreshToken
+      })
 
       // 驗證請求格式
       expect(fetch).toHaveBeenCalledTimes(1)

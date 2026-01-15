@@ -20,6 +20,8 @@ export interface JWTTokenResponse {
   refresh_token: string
 }
 
+export type { JWTTokenResponse as TokenPair }
+
 /**
  * JWT 認證服務介面
  */
@@ -43,12 +45,12 @@ export interface JWTAuthService {
   getToken(apiUrl: string, username: string, password: string): Promise<JWTTokenResponse>
 
   /**
-   * 使用 refresh_token 換取新的 access_token
+   * 使用 refresh_token 換取新的 token（Token Rotation）
    * @param apiUrl API 端點
    * @param refreshToken refresh token
-   * @returns 新的 access_token
+   * @returns 新的 access_token 和 refresh_token
    */
-  refreshToken(apiUrl: string, refreshToken: string): Promise<string>
+  refreshToken(apiUrl: string, refreshToken: string): Promise<JWTTokenResponse>
 
   /**
    * 撤銷 token
@@ -61,6 +63,14 @@ export interface JWTAuthService {
 }
 
 /**
+ * 認證方式類型
+ */
+type AuthHeader =
+  | { type: 'none' }
+  | { type: 'basic'; username: string; password: string }
+  | { type: 'bearer'; token: string }
+
+/**
  * 建立 JWT 認證服務
  */
 export function createJWTAuthService(): JWTAuthService {
@@ -69,11 +79,12 @@ export function createJWTAuthService(): JWTAuthService {
   const getNextId = () => ++requestId
 
   /**
-   * 發送 JSON-RPC 請求（無認證）
+   * 發送 JSON-RPC 請求（通用方法）
    */
-  async function callWithoutAuth<T>(
+  async function call<T>(
     apiUrl: string,
     method: string,
+    auth: AuthHeader,
     params?: Record<string, unknown>
   ): Promise<T> {
     const request: Record<string, unknown> = {
@@ -86,96 +97,19 @@ export function createJWTAuthService(): JWTAuthService {
       request.params = params
     }
 
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(request)
-    })
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
     }
 
-    const json = await response.json()
-
-    if ('error' in json) {
-      throw new Error(json.error.message)
-    }
-
-    return json.result as T
-  }
-
-  /**
-   * 發送 JSON-RPC 請求（Basic Auth）
-   */
-  async function callWithBasicAuth<T>(
-    apiUrl: string,
-    method: string,
-    username: string,
-    password: string,
-    params?: Record<string, unknown>
-  ): Promise<T> {
-    const request: Record<string, unknown> = {
-      jsonrpc: '2.0',
-      method,
-      id: getNextId()
-    }
-
-    if (params) {
-      request.params = params
-    }
-
-    const credentials = btoa(`${username}:${password}`)
-
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Basic ${credentials}`
-      },
-      body: JSON.stringify(request)
-    })
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-    }
-
-    const json = await response.json()
-
-    if ('error' in json) {
-      throw new Error(json.error.message)
-    }
-
-    return json.result as T
-  }
-
-  /**
-   * 發送 JSON-RPC 請求（Bearer Token）
-   */
-  async function callWithBearerToken<T>(
-    apiUrl: string,
-    method: string,
-    accessToken: string,
-    params?: Record<string, unknown>
-  ): Promise<T> {
-    const request: Record<string, unknown> = {
-      jsonrpc: '2.0',
-      method,
-      id: getNextId()
-    }
-
-    if (params) {
-      request.params = params
+    if (auth.type === 'basic') {
+      headers['Authorization'] = `Basic ${btoa(`${auth.username}:${auth.password}`)}`
+    } else if (auth.type === 'bearer') {
+      headers['Authorization'] = `Bearer ${auth.token}`
     }
 
     const response = await fetch(apiUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`
-      },
+      headers,
       body: JSON.stringify(request)
     })
 
@@ -195,7 +129,11 @@ export function createJWTAuthService(): JWTAuthService {
   return {
     async checkPlugin(apiUrl: string, username: string, password: string): Promise<JWTPluginInfo | null> {
       try {
-        return await callWithBasicAuth<JWTPluginInfo>(apiUrl, 'getJWTPlugin', username, password)
+        return await call<JWTPluginInfo>(
+          apiUrl,
+          'getJWTPlugin',
+          { type: 'basic', username, password }
+        )
       } catch {
         return null
       }
@@ -206,21 +144,20 @@ export function createJWTAuthService(): JWTAuthService {
       username: string,
       password: string
     ): Promise<JWTTokenResponse> {
-      return await callWithBasicAuth<JWTTokenResponse>(
+      return await call<JWTTokenResponse>(
         apiUrl,
         'getJWTToken',
-        username,
-        password
+        { type: 'basic', username, password }
       )
     },
 
-    async refreshToken(apiUrl: string, refreshToken: string): Promise<string> {
-      const result = await callWithoutAuth<{ access_token: string }>(
+    async refreshToken(apiUrl: string, refreshToken: string): Promise<JWTTokenResponse> {
+      return await call<JWTTokenResponse>(
         apiUrl,
         'refreshJWTToken',
+        { type: 'none' },
         { refresh_token: refreshToken }
       )
-      return result.access_token
     },
 
     async revokeToken(
@@ -229,10 +166,10 @@ export function createJWTAuthService(): JWTAuthService {
       tokenToRevoke: string
     ): Promise<boolean> {
       try {
-        await callWithBearerToken(
+        await call(
           apiUrl,
           'revokeJWTToken',
-          accessToken,
+          { type: 'bearer', token: accessToken },
           { token: tokenToRevoke }
         )
         return true
