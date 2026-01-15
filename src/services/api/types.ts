@@ -1,4 +1,9 @@
 /**
+ * 認證模式
+ */
+export type AuthMode = 'basic' | 'jwt'
+
+/**
  * JSON-RPC 2.0 請求格式
  */
 export interface JsonRpcRequest {
@@ -36,13 +41,43 @@ export interface JsonRpcErrorResponse {
 export type JsonRpcResponse<T = unknown> = JsonRpcSuccessResponse<T> | JsonRpcErrorResponse
 
 /**
- * Kanboard 客戶端設定
+ * Kanboard 客戶端設定（Basic Auth）
  */
-export interface KanboardClientConfig {
+export interface KanboardClientConfigBasic {
+  apiUrl: string
+  authMode: 'basic'
+  username: string
+  /** 密碼或 API Token */
+  password: string
+}
+
+/**
+ * Kanboard 客戶端設定（JWT）
+ */
+export interface KanboardClientConfigJWT {
+  apiUrl: string
+  authMode: 'jwt'
+  /** JWT Access Token */
+  accessToken: string
+}
+
+/**
+ * Kanboard 客戶端設定（舊版兼容）
+ * @deprecated 請使用 KanboardClientConfigBasic 或 KanboardClientConfigJWT
+ */
+export interface KanboardClientConfigLegacy {
   apiUrl: string
   username: string
   token: string
 }
+
+/**
+ * Kanboard 客戶端設定
+ */
+export type KanboardClientConfig =
+  | KanboardClientConfigBasic
+  | KanboardClientConfigJWT
+  | KanboardClientConfigLegacy
 
 /**
  * Kanboard 客戶端介面

@@ -2,11 +2,14 @@
 import { watch, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useSidebarStore } from '@/stores/sidebar'
+import { useAuthStore } from '@/stores/auth'
 import AppSidebar from '@/components/sidebar/AppSidebar.vue'
 import AppHeader from '@/components/header/AppHeader.vue'
+import ReauthModal from '@/components/ReauthModal.vue'
 
 const route = useRoute()
 const sidebarStore = useSidebarStore()
+const authStore = useAuthStore()
 
 const showSearchModal = ref(false)
 
@@ -93,5 +96,23 @@ const openSearchModal = () => {
         @click="sidebarStore.closeMobile"
       />
     </Transition>
+
+    <!-- Session Lock Overlay -->
+    <Transition
+      enter-active-class="transition-opacity ease-out duration-200"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition-opacity ease-in duration-150"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div
+        v-if="authStore.isSessionLocked"
+        class="fixed inset-0 bg-black/50 z-50 backdrop-blur-sm"
+      />
+    </Transition>
+
+    <!-- Reauth Modal -->
+    <ReauthModal />
   </div>
 </template>

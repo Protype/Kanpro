@@ -96,9 +96,9 @@ describe('CalendarView', () => {
 
     // Setup auth store
     const authStore = useAuthStore()
-    authStore.apiUrl = 'http://localhost/jsonrpc.php'
-    authStore.username = 'admin'
-    authStore.token = 'admin'
+    authStore._setTestCredentials({ apiUrl: 'http://localhost/jsonrpc.php',
+    username: 'admin',
+    password: 'admin' })
 
     // Setup router
     router.push('/projects/1/calendar')

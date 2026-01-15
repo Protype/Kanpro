@@ -52,7 +52,7 @@ describe('Auth Store', () => {
   })
 
   describe('login', () => {
-    it('should set user and credentials on successful login', async () => {
+    it('should set user and credentials on successful login (Basic Auth fallback)', async () => {
       const mockUser: User = {
         id: 1,
         username: 'admin',
@@ -62,11 +62,22 @@ describe('Auth Store', () => {
         is_active: true
       }
 
+      // First call: checkPlugin returns error (no JWT plugin)
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({
           jsonrpc: '2.0',
           id: 1,
+          error: { code: -32601, message: 'Method not found' }
+        })
+      })
+
+      // Second call: getMe for Basic Auth
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 2,
           result: mockUser
         })
       })
@@ -83,6 +94,7 @@ describe('Auth Store', () => {
       expect(store.isAuthenticated).toBe(true)
       expect(store.apiUrl).toBe('http://localhost/jsonrpc.php')
       expect(store.username).toBe('admin')
+      expect(store.authMode).toBe('basic')
     })
 
     it('should store credentials in localStorage when rememberMe is true', async () => {
@@ -95,11 +107,22 @@ describe('Auth Store', () => {
         is_active: true
       }
 
+      // checkPlugin returns error (no JWT plugin)
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({
           jsonrpc: '2.0',
           id: 1,
+          error: { code: -32601, message: 'Method not found' }
+        })
+      })
+
+      // getMe for Basic Auth
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 2,
           result: mockUser
         })
       })
@@ -117,6 +140,17 @@ describe('Auth Store', () => {
     })
 
     it('should throw AuthenticationError on invalid credentials', async () => {
+      // checkPlugin returns error (no JWT plugin)
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 1,
+          error: { code: -32601, message: 'Method not found' }
+        })
+      })
+
+      // getMe returns 401
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 401,
@@ -138,6 +172,7 @@ describe('Auth Store', () => {
     })
 
     it('should throw NetworkError on network failure', async () => {
+      // checkPlugin fails with network error
       mockFetch.mockRejectedValueOnce(new Error('Network error'))
 
       const store = useAuthStore()
@@ -166,11 +201,22 @@ describe('Auth Store', () => {
         is_active: true
       }
 
+      // checkPlugin returns error (no JWT plugin)
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({
           jsonrpc: '2.0',
           id: 1,
+          error: { code: -32601, message: 'Method not found' }
+        })
+      })
+
+      // getMe for Basic Auth
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 2,
           result: mockUser
         })
       })
@@ -186,7 +232,7 @@ describe('Auth Store', () => {
 
       expect(store.isAuthenticated).toBe(true)
 
-      store.logout()
+      await store.logout()
 
       expect(store.user).toBeNull()
       expect(store.isAuthenticated).toBe(false)
@@ -273,12 +319,22 @@ describe('Auth Store', () => {
         is_active: true
       }
 
-      // Login first
+      // checkPlugin returns error (no JWT plugin)
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({
           jsonrpc: '2.0',
           id: 1,
+          error: { code: -32601, message: 'Method not found' }
+        })
+      })
+
+      // Login - getMe for Basic Auth
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 2,
           result: mockUser
         })
       })
@@ -295,7 +351,7 @@ describe('Auth Store', () => {
         ok: true,
         json: () => Promise.resolve({
           jsonrpc: '2.0',
-          id: 2,
+          id: 3,
           result: true
         })
       })
@@ -310,7 +366,7 @@ describe('Auth Store', () => {
         ok: true,
         json: () => Promise.resolve({
           jsonrpc: '2.0',
-          id: 3,
+          id: 4,
           result: updatedUser
         })
       })
@@ -335,12 +391,22 @@ describe('Auth Store', () => {
         is_active: true
       }
 
-      // Login first
+      // checkPlugin returns error (no JWT plugin)
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({
           jsonrpc: '2.0',
           id: 1,
+          error: { code: -32601, message: 'Method not found' }
+        })
+      })
+
+      // Login - getMe for Basic Auth
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 2,
           result: mockUser
         })
       })
@@ -357,7 +423,7 @@ describe('Auth Store', () => {
         ok: true,
         json: () => Promise.resolve({
           jsonrpc: '2.0',
-          id: 2,
+          id: 3,
           result: true
         })
       })
@@ -367,7 +433,7 @@ describe('Auth Store', () => {
         ok: true,
         json: () => Promise.resolve({
           jsonrpc: '2.0',
-          id: 3,
+          id: 4,
           result: mockUser
         })
       })
@@ -376,8 +442,8 @@ describe('Auth Store', () => {
         name: 'Updated Name'
       })
 
-      // Check the second call (update)
-      const updateCallBody = JSON.parse(mockFetch.mock.calls[1][1].body)
+      // Check the third call (update) - first is checkPlugin, second is login getMe
+      const updateCallBody = JSON.parse(mockFetch.mock.calls[2][1].body)
       expect(updateCallBody.method).toBe('updateUser')
       expect(updateCallBody.params).toEqual({
         id: 1,

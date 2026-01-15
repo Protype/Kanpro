@@ -21,6 +21,37 @@ export class KanboardError extends Error {
 }
 
 /**
+ * 判斷是否為舊版配置格式
+ */
+function isLegacyConfig(config: KanboardClientConfig): config is { apiUrl: string; username: string; token: string } {
+  return 'token' in config && 'username' in config && !('authMode' in config)
+}
+
+/**
+ * 取得認證標頭
+ */
+function getAuthHeader(config: KanboardClientConfig): string {
+  // JWT 模式
+  if ('authMode' in config && config.authMode === 'jwt') {
+    return `Bearer ${config.accessToken}`
+  }
+
+  // Basic Auth 模式（新格式）
+  if ('authMode' in config && config.authMode === 'basic') {
+    const credentials = btoa(`${config.username}:${config.password}`)
+    return `Basic ${credentials}`
+  }
+
+  // 舊版兼容（Legacy）
+  if (isLegacyConfig(config)) {
+    const credentials = btoa(`${config.username}:${config.token}`)
+    return `Basic ${credentials}`
+  }
+
+  throw new Error('Invalid client configuration')
+}
+
+/**
  * 建立 Kanboard JSON-RPC 2.0 客戶端
  */
 export function createKanboardClient(config: KanboardClientConfig): KanboardClient {
@@ -42,13 +73,13 @@ export function createKanboardClient(config: KanboardClientConfig): KanboardClie
       request.params = params
     }
 
-    const credentials = btoa(`${config.username}:${config.token}`)
+    const authHeader = getAuthHeader(config)
 
     const response = await fetch(config.apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Basic ${credentials}`
+        'Authorization': authHeader
       },
       body: JSON.stringify(request)
     })

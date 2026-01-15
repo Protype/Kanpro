@@ -35,9 +35,9 @@ describe('TaskLinks Store', () => {
 
     // Setup auth store with credentials
     const authStore = useAuthStore()
-    authStore.apiUrl = 'http://localhost/jsonrpc.php'
-    authStore.username = 'admin'
-    authStore.token = 'admin'
+    authStore._setTestCredentials({ apiUrl: 'http://localhost/jsonrpc.php',
+    username: 'admin',
+    password: 'admin' })
   })
 
   afterEach(() => {
