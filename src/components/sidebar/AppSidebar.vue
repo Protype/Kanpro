@@ -115,12 +115,15 @@ const goToGlobal = () => {
     <!-- Content -->
     <div class="flex-1 overflow-y-auto py-4 border-r border-edge">
       <!-- Project Mode: Back button and project name -->
-      <div v-if="isProjectMode" class="px-3 mb-4">
+      <div v-if="isProjectMode" :class="['mb-4', sidebarStore.isExpanded ? 'px-3' : 'px-2']">
         <button
           @click="goToGlobal"
-          class="flex items-center gap-2 text-content-secondary hover:text-content text-sm mb-3 w-full cursor-pointer"
+          :class="[
+            'flex items-center text-content-secondary hover:text-content text-sm mb-3 w-full cursor-pointer',
+            sidebarStore.isExpanded ? 'gap-2' : 'justify-center'
+          ]"
         >
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
           <span v-if="sidebarStore.isExpanded">返回總覽</span>
@@ -142,7 +145,8 @@ const goToGlobal = () => {
             :key="item.name"
             @click="handleNavClick(item)"
             :class="[
-              'flex items-center gap-3 w-full px-3 py-2 rounded-md transition-colors cursor-pointer',
+              'flex items-center w-full py-2 rounded-md transition-colors cursor-pointer',
+              sidebarStore.isExpanded ? 'gap-3 px-3' : 'justify-center',
               isActive(item.route)
                 ? 'bg-accent text-content-inverse'
                 : 'text-content-secondary hover:bg-surface-hover hover:text-content'
@@ -181,7 +185,8 @@ const goToGlobal = () => {
             :key="item.name"
             @click="handleNavClick(item)"
             :class="[
-              'flex items-center gap-3 w-full px-3 py-2 rounded-md transition-colors cursor-pointer',
+              'flex items-center w-full py-2 rounded-md transition-colors cursor-pointer',
+              sidebarStore.isExpanded ? 'gap-3 px-3' : 'justify-center',
               isActiveView(item.name)
                 ? 'bg-accent text-content-inverse'
                 : 'text-content-secondary hover:bg-surface-hover hover:text-content'
@@ -213,7 +218,8 @@ const goToGlobal = () => {
             :key="item.name"
             @click="handleNavClick(item)"
             :class="[
-              'flex items-center gap-3 w-full px-3 py-2 rounded-md transition-colors cursor-pointer',
+              'flex items-center w-full py-2 rounded-md transition-colors cursor-pointer',
+              sidebarStore.isExpanded ? 'gap-3 px-3' : 'justify-center',
               isActiveView(item.name)
                 ? 'bg-accent text-content-inverse'
                 : 'text-content-secondary hover:bg-surface-hover hover:text-content'
@@ -263,7 +269,8 @@ const goToGlobal = () => {
             <button
               @click="handleProjectClick(project.id)"
               :class="[
-                'flex items-center gap-3 w-full px-3 py-2 rounded-md transition-colors cursor-pointer',
+                'flex items-center w-full py-2 rounded-md transition-colors cursor-pointer',
+                sidebarStore.isExpanded ? 'gap-3 px-3' : 'justify-center',
                 sidebarStore.currentProjectId === project.id
                   ? 'bg-surface-active text-content'
                   : 'text-content-secondary hover:bg-surface-hover hover:text-content'
@@ -328,7 +335,7 @@ const goToGlobal = () => {
     </div>
 
     <!-- Footer: Toggle Button -->
-    <div class="border-t border-edge border-r border-edge p-3">
+    <div :class="['border-t border-edge border-r border-edge p-3', sidebarStore.isExpanded ? '' : 'flex justify-center']">
       <button
         @click="toggleSidebar"
         class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors cursor-pointer"
