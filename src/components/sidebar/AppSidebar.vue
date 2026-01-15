@@ -101,24 +101,14 @@ const goToGlobal = () => {
     ]"
   >
     <!-- Header -->
-    <div class="flex items-center h-14 px-4 gap-3 border-b border-edge">
-      <button
-        @click="toggleSidebar"
-        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors cursor-pointer"
-        :title="sidebarStore.isExpanded ? '折疊側邊欄' : '展開側邊欄'"
-      >
-        <!-- Sidebar toggle icon -->
-        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-          <rect x="3" y="3" width="18" height="18" rx="2" />
-          <line x1="9" y1="3" x2="9" y2="21" />
-        </svg>
-      </button>
+    <div class="flex items-center h-14 px-4 border-b border-edge">
       <router-link
-        v-if="sidebarStore.isExpanded"
         to="/"
         class="text-xl font-bold text-content hover:text-accent transition-colors"
+        :class="{ 'mx-auto': !sidebarStore.isExpanded }"
       >
-        Kanpro
+        <span v-if="sidebarStore.isExpanded">Kanpro</span>
+        <span v-else class="text-base">K</span>
       </router-link>
     </div>
 
@@ -337,5 +327,18 @@ const goToGlobal = () => {
       </div>
     </div>
 
+    <!-- Footer: Toggle Button -->
+    <div class="border-t border-edge border-r border-edge p-3">
+      <button
+        @click="toggleSidebar"
+        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors cursor-pointer"
+        :title="sidebarStore.isExpanded ? '折疊側邊欄' : '展開側邊欄'"
+      >
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <line x1="9" y1="3" x2="9" y2="21" />
+        </svg>
+      </button>
+    </div>
   </aside>
 </template>
