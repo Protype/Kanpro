@@ -23,6 +23,9 @@ const configLoading = ref(true)
 // 是否有 API URL（有值就顯示純文字模式）
 const hasApiUrl = computed(() => !!apiUrl.value)
 
+// 是否有 config.json 預設值（用於顯示重置按鈕）
+const hasConfigFileUrl = computed(() => !!appConfig.configFileApiUrl.value)
+
 // 顯示的 API URL（用於純文字模式，移除 jsonrpc.php）
 const displayApiUrl = computed(() => {
   if (!apiUrl.value) return '未設定'
@@ -72,6 +75,15 @@ const isValidApiUrl = (url: string): boolean => {
  */
 const toggleApiUrlEdit = () => {
   isEditingApiUrl.value = !isEditingApiUrl.value
+}
+
+/**
+ * 重置 API URL 為 config.json 預設值
+ */
+const handleResetApiUrl = () => {
+  appConfig.clearApiUrl()
+  apiUrl.value = appConfig.configFileApiUrl.value || ''
+  isEditingApiUrl.value = false
 }
 
 /**
@@ -214,6 +226,14 @@ const handleLogin = async () => {
               placeholder="/kanboard/ 或 http://your-kanboard-server/"
               class="input flex-1"
             />
+            <button
+              v-if="hasConfigFileUrl"
+              type="button"
+              @click="handleResetApiUrl"
+              class="btn-secondary text-sm px-3 py-2"
+            >
+              重置
+            </button>
             <button
               v-if="hasApiUrl"
               type="button"
