@@ -14,6 +14,18 @@ const showThemeMenu = ref(false)
 const displayName = computed(() => authStore.user?.name || authStore.user?.username || '')
 const avatarInitial = computed(() => displayName.value.charAt(0).toUpperCase())
 
+// 根據使用者名稱產生一致的背景色（與 Kanboard 相似的演算法）
+const getAvatarColor = (name: string): string => {
+  let hash = 0
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  const hue = Math.abs(hash % 360)
+  return `hsl(${hue}, 65%, 45%)`
+}
+
+const avatarBgColor = computed(() => getAvatarColor(displayName.value))
+
 // Kanboard avatar URLs
 // apiUrl 可能包含 /jsonrpc.php，需要移除
 const baseUrl = computed(() => {
@@ -100,7 +112,8 @@ onUnmounted(() => {
       />
       <div
         v-else
-        class="w-8 h-8 rounded-full bg-accent text-content-inverse flex items-center justify-center text-sm font-medium"
+        class="w-8 h-8 rounded-full text-white flex items-center justify-center text-sm font-medium"
+        :style="{ backgroundColor: avatarBgColor }"
       >
         {{ avatarInitial }}
       </div>
@@ -143,7 +156,8 @@ onUnmounted(() => {
             />
             <div
               v-else
-              class="w-10 h-10 rounded-full bg-accent text-content-inverse flex items-center justify-center text-base font-medium"
+              class="w-10 h-10 rounded-full text-white flex items-center justify-center text-base font-medium"
+              :style="{ backgroundColor: avatarBgColor }"
             >
               {{ avatarInitial }}
             </div>
