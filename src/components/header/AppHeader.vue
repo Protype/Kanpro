@@ -1,22 +1,13 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
 import { useSidebarStore } from '@/stores/sidebar'
-import ThemeToggle from '@/components/ThemeToggle.vue'
 import NotificationsDropdown from '@/components/NotificationsDropdown.vue'
+import UserDropdown from '@/components/header/UserDropdown.vue'
 
 const emit = defineEmits<{
   'open-search': []
 }>()
 
-const router = useRouter()
-const authStore = useAuthStore()
 const sidebarStore = useSidebarStore()
-
-const handleLogout = async () => {
-  await authStore.logout()
-  router.push('/login')
-}
 
 const openSearch = () => {
   emit('open-search')
@@ -28,7 +19,7 @@ const toggleMobileSidebar = () => {
 </script>
 
 <template>
-  <header class="h-14 bg-surface border-b border-edge flex items-center px-4 gap-4 flex-shrink-0">
+  <header class="h-14 bg-surface border-b border-edge flex items-center px-4 gap-3 flex-shrink-0">
     <!-- Mobile Menu Button -->
     <button
       @click="toggleMobileSidebar"
@@ -54,23 +45,10 @@ const toggleMobileSidebar = () => {
       <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-xs bg-surface-tertiary rounded">⌘K</kbd>
     </button>
 
-    <!-- Theme Toggle -->
-    <ThemeToggle />
-
     <!-- Notifications -->
     <NotificationsDropdown />
 
-    <!-- User Info -->
-    <div class="flex items-center gap-3">
-      <span class="hidden sm:inline text-content-secondary text-sm">
-        {{ authStore.user?.name || authStore.user?.username }}
-      </span>
-      <button
-        @click="handleLogout"
-        class="btn-secondary btn-sm"
-      >
-        登出
-      </button>
-    </div>
+    <!-- User Dropdown -->
+    <UserDropdown />
   </header>
 </template>
