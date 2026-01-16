@@ -153,31 +153,11 @@ export const useAuthStore = defineStore('auth', () => {
 
   /**
    * 登出
+   * 注意：不主動撤銷 token，因為當 token 過期/無效時，
+   * 伺服器返回 401 + WWW-Authenticate 會觸發瀏覽器原生認證對話框。
+   * Token 會自動過期，且本地狀態已清除，安全性不受影響。
    */
   async function logout(): Promise<void> {
-    // 撤銷 token
-    if (accessToken.value) {
-      try {
-        await jwtService.revokeToken(
-          apiUrl.value,
-          username.value,
-          accessToken.value,
-          accessToken.value
-        )
-        // 也撤銷 refresh token
-        if (refreshToken.value) {
-          await jwtService.revokeToken(
-            apiUrl.value,
-            username.value,
-            accessToken.value,
-            refreshToken.value
-          )
-        }
-      } catch {
-        // 撤銷失敗不影響登出
-      }
-    }
-
     // 清除狀態
     clearState()
 
