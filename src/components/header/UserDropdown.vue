@@ -14,6 +14,27 @@ const showThemeMenu = ref(false)
 const displayName = computed(() => authStore.user?.name || authStore.user?.username || '')
 const avatarInitial = computed(() => displayName.value.charAt(0).toUpperCase())
 
+// Kanboard avatar URLs
+// apiUrl 可能包含 /jsonrpc.php，需要移除
+const baseUrl = computed(() => {
+  if (!authStore.apiUrl) return null
+  return authStore.apiUrl.replace(/\/?jsonrpc\.php$/, '')
+})
+
+const avatarUrl = computed(() => {
+  if (!authStore.user?.id || !baseUrl.value) return null
+  return `${baseUrl.value}/?controller=AvatarFileController&action=image&user_id=${authStore.user.id}&size=32`
+})
+
+const avatarUrlLarge = computed(() => {
+  if (!authStore.user?.id || !baseUrl.value) return null
+  return `${baseUrl.value}/?controller=AvatarFileController&action=image&user_id=${authStore.user.id}&size=48`
+})
+
+// Track avatar load errors
+const avatarError = ref(false)
+const avatarLargeError = ref(false)
+
 const toggleDropdown = () => {
   isOpen.value = !isOpen.value
   if (!isOpen.value) {
@@ -70,7 +91,17 @@ onUnmounted(() => {
       class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-surface-hover transition-colors"
     >
       <!-- Avatar -->
-      <div class="w-8 h-8 rounded-full bg-accent text-content-inverse flex items-center justify-center text-sm font-medium">
+      <img
+        v-if="avatarUrl && !avatarError"
+        :src="avatarUrl"
+        :alt="displayName"
+        class="w-8 h-8 rounded-full object-cover"
+        @error="avatarError = true"
+      />
+      <div
+        v-else
+        class="w-8 h-8 rounded-full bg-accent text-content-inverse flex items-center justify-center text-sm font-medium"
+      >
         {{ avatarInitial }}
       </div>
       <!-- Name (hidden on mobile) -->
@@ -103,7 +134,17 @@ onUnmounted(() => {
         <!-- User Info Header -->
         <div class="px-4 py-3 border-b border-edge bg-surface-secondary">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-accent text-content-inverse flex items-center justify-center text-base font-medium">
+            <img
+              v-if="avatarUrlLarge && !avatarLargeError"
+              :src="avatarUrlLarge"
+              :alt="displayName"
+              class="w-10 h-10 rounded-full object-cover"
+              @error="avatarLargeError = true"
+            />
+            <div
+              v-else
+              class="w-10 h-10 rounded-full bg-accent text-content-inverse flex items-center justify-center text-base font-medium"
+            >
               {{ avatarInitial }}
             </div>
             <div class="flex-1 min-w-0">
