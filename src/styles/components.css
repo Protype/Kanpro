@@ -18,23 +18,23 @@
 
   /* === Buttons === */
   .btn {
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-md font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-md font-medium bg-accent text-content-inverse hover:bg-accent-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-md font-medium bg-accent text-content-inverse cursor-pointer hover:bg-accent-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-md font-medium bg-surface-tertiary text-content hover:bg-surface-hover border border-edge focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-edge disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-md font-medium bg-surface-tertiary text-content cursor-pointer hover:bg-surface-hover border border-edge focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-edge disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-md font-medium bg-transparent text-content-secondary hover:bg-surface-hover hover:text-content focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-edge disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-md font-medium bg-transparent text-content-secondary cursor-pointer hover:bg-surface-hover hover:text-content focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-edge disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-danger {
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-md font-medium bg-error text-white hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-error disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-md font-medium bg-error text-white cursor-pointer hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-error disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-sm {

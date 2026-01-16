@@ -66,6 +66,11 @@
     @apply bg-surface text-content transition-colors duration-200;
   }
 
+  /* All buttons should have pointer cursor */
+  button {
+    @apply cursor-pointer;
+  }
+
   /* Smooth transitions for theme switching */
   * {
     @apply transition-colors duration-200;
