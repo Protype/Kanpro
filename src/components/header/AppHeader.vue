@@ -13,8 +13,8 @@ const router = useRouter()
 const authStore = useAuthStore()
 const sidebarStore = useSidebarStore()
 
-const handleLogout = () => {
-  authStore.logout()
+const handleLogout = async () => {
+  await authStore.logout()
   router.push('/login')
 }
 
