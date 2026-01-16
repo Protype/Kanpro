@@ -247,7 +247,7 @@ const goToGlobal = () => {
       <div class="mt-6 px-3">
         <div
           v-if="sidebarStore.isExpanded"
-          class="flex items-center justify-between mb-2"
+          class="flex items-center justify-between mb-3"
         >
           <span class="text-xs font-medium text-content-tertiary uppercase tracking-wider">
             專案
@@ -260,76 +260,44 @@ const goToGlobal = () => {
           </router-link>
         </div>
 
-        <!-- Projects List -->
-        <div class="space-y-1">
-          <div
+        <!-- Projects List - Card Style -->
+        <div :class="sidebarStore.isExpanded ? 'space-y-2' : 'space-y-2'">
+          <button
             v-for="project in projectsStore.activeProjects.slice(0, 10)"
             :key="project.id"
+            @click="handleProjectClick(project.id)"
+            :class="[
+              'w-full rounded-lg transition-all duration-200 cursor-pointer',
+              sidebarStore.isExpanded
+                ? 'p-3 text-left bg-surface-secondary border border-edge hover:shadow-md hover:-translate-y-0.5'
+                : 'p-2 flex justify-center hover:bg-surface-hover',
+              sidebarStore.currentProjectId === project.id
+                ? 'ring-2 ring-accent shadow-md'
+                : ''
+            ]"
           >
-            <button
-              @click="handleProjectClick(project.id)"
-              :class="[
-                'flex items-center w-full py-2 rounded-md transition-colors cursor-pointer',
-                sidebarStore.isExpanded ? 'gap-3 px-3' : 'justify-center',
-                sidebarStore.currentProjectId === project.id
-                  ? 'bg-surface-active text-content'
-                  : 'text-content-secondary hover:bg-surface-hover hover:text-content'
-              ]"
-            >
-              <!-- Folder Icon -->
-              <svg class="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <!-- Collapsed: Icon only -->
+            <template v-if="!sidebarStore.isExpanded">
+              <svg class="w-5 h-5 text-content-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
               </svg>
-              <span v-if="sidebarStore.isExpanded" class="truncate">{{ project.name }}</span>
-              <!-- Expand/Collapse Button -->
-              <button
-                v-if="sidebarStore.isExpanded && !isProjectMode"
-                @click="toggleProjectExpand(project.id, $event)"
-                class="ml-auto p-1 text-content-tertiary hover:text-content-secondary cursor-pointer"
-              >
-                <svg
-                  class="w-4 h-4 transition-transform"
-                  :class="{ 'rotate-90': sidebarStore.isProjectExpanded(project.id) }"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </template>
+            <!-- Expanded: Card content -->
+            <template v-else>
+              <div class="flex items-center gap-2 mb-1">
+                <svg class="w-4 h-4 text-accent flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                 </svg>
-              </button>
-            </button>
-
-            <!-- Expanded Project Sub-navigation -->
-            <div
-              v-if="sidebarStore.isExpanded && sidebarStore.isProjectExpanded(project.id) && !isProjectMode"
-              class="ml-6 mt-1 space-y-1"
-            >
-              <router-link
-                :to="`/projects/${project.id}/activity`"
-                class="flex items-center gap-2 px-3 py-1.5 text-sm text-content-tertiary hover:text-content-secondary rounded-md hover:bg-surface-hover cursor-pointer"
-              >
-                專案動態
-              </router-link>
-              <router-link
-                :to="`/projects/${project.id}`"
-                class="flex items-center gap-2 px-3 py-1.5 text-sm text-content-tertiary hover:text-content-secondary rounded-md hover:bg-surface-hover cursor-pointer"
-              >
-                列表
-              </router-link>
-              <router-link
-                :to="`/projects/${project.id}/board`"
-                class="flex items-center gap-2 px-3 py-1.5 text-sm text-content-tertiary hover:text-content-secondary rounded-md hover:bg-surface-hover cursor-pointer"
-              >
-                看板
-              </router-link>
-              <router-link
-                :to="`/projects/${project.id}/calendar`"
-                class="flex items-center gap-2 px-3 py-1.5 text-sm text-content-tertiary hover:text-content-secondary rounded-md hover:bg-surface-hover cursor-pointer"
-              >
-                行事曆
-              </router-link>
-            </div>
-          </div>
+                <span class="text-sm font-medium text-content truncate">{{ project.name }}</span>
+              </div>
+              <p v-if="project.description" class="text-xs text-content-tertiary truncate">
+                {{ project.description }}
+              </p>
+              <p v-else class="text-xs text-content-tertiary">
+                無描述
+              </p>
+            </template>
+          </button>
         </div>
       </div>
     </div>
