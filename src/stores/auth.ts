@@ -160,6 +160,7 @@ export const useAuthStore = defineStore('auth', () => {
       try {
         await jwtService.revokeToken(
           apiUrl.value,
+          username.value,
           accessToken.value,
           accessToken.value
         )
@@ -167,6 +168,7 @@ export const useAuthStore = defineStore('auth', () => {
         if (refreshToken.value) {
           await jwtService.revokeToken(
             apiUrl.value,
+            username.value,
             accessToken.value,
             refreshToken.value
           )
@@ -216,6 +218,8 @@ export const useAuthStore = defineStore('auth', () => {
         try {
           const newTokens = await jwtService.refreshToken(
             credentials.apiUrl,
+            credentials.username,
+            credentials.accessToken,
             credentials.refreshToken
           )
           const payload = parseJWTPayload(newTokens.access_token)
@@ -265,6 +269,8 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const newTokens = await jwtService.refreshToken(
         apiUrl.value,
+        username.value,
+        accessToken.value,
         refreshToken.value
       )
 

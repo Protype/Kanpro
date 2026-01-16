@@ -729,6 +729,20 @@ assignee:me due:today status:open
 POST {kanboard_url}/jsonrpc.php
 ```
 
+### JWTAuth 外掛認證規格
+
+Kanpro 使用 JWTAuth 外掛進行認證，所有 API 呼叫必須使用 **HTTP Basic Auth** 格式：
+
+| 方法 | 認證格式 | 說明 |
+|------|----------|------|
+| `getJWTToken` | `username:password` | 登入取得 token |
+| `getJWTPlugin` | `username:password` | 檢查外掛狀態 |
+| `refreshJWTToken` | `username:access_token` | 刷新 token |
+| `revokeJWTToken` | `username:access_token` | 撤銷 token |
+| 其他 API | `username:access_token` | 一般 API 呼叫 |
+
+**重要**：不可使用 Bearer token 或無認證方式，否則伺服器回傳 401 + `WWW-Authenticate: Basic` 會觸發瀏覽器原生認證對話框。
+
 ---
 
 ## 附錄：優先級規劃

@@ -47,28 +47,30 @@ export interface JWTAuthService {
   /**
    * 使用 refresh_token 換取新的 token（Token Rotation）
    * @param apiUrl API 端點
+   * @param username 使用者名稱
+   * @param accessToken 用於認證的 access token
    * @param refreshToken refresh token
    * @returns 新的 access_token 和 refresh_token
    */
-  refreshToken(apiUrl: string, refreshToken: string): Promise<JWTTokenResponse>
+  refreshToken(apiUrl: string, username: string, accessToken: string, refreshToken: string): Promise<JWTTokenResponse>
 
   /**
    * 撤銷 token
    * @param apiUrl API 端點
+   * @param username 使用者名稱
    * @param accessToken 用於認證的 access token
    * @param tokenToRevoke 要撤銷的 token
    * @returns 是否成功撤銷
    */
-  revokeToken(apiUrl: string, accessToken: string, tokenToRevoke: string): Promise<boolean>
+  revokeToken(apiUrl: string, username: string, accessToken: string, tokenToRevoke: string): Promise<boolean>
 }
 
 /**
  * 認證方式類型
+ * 注意：Kanboard JWTAuth 外掛僅支援 Basic Auth 格式
  */
 type AuthHeader =
-  | { type: 'none' }
   | { type: 'basic'; username: string; password: string }
-  | { type: 'bearer'; token: string }
 
 /**
  * 建立 JWT 認證服務
@@ -98,13 +100,8 @@ export function createJWTAuthService(): JWTAuthService {
     }
 
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json'
-    }
-
-    if (auth.type === 'basic') {
-      headers['Authorization'] = `Basic ${btoa(`${auth.username}:${auth.password}`)}`
-    } else if (auth.type === 'bearer') {
-      headers['Authorization'] = `Bearer ${auth.token}`
+      'Content-Type': 'application/json',
+      'Authorization': `Basic ${btoa(`${auth.username}:${auth.password}`)}`
     }
 
     const response = await fetch(apiUrl, {
@@ -151,17 +148,18 @@ export function createJWTAuthService(): JWTAuthService {
       )
     },
 
-    async refreshToken(apiUrl: string, refreshToken: string): Promise<JWTTokenResponse> {
+    async refreshToken(apiUrl: string, username: string, accessToken: string, refreshToken: string): Promise<JWTTokenResponse> {
       return await call<JWTTokenResponse>(
         apiUrl,
         'refreshJWTToken',
-        { type: 'none' },
+        { type: 'basic', username, password: accessToken },
         { refresh_token: refreshToken }
       )
     },
 
     async revokeToken(
       apiUrl: string,
+      username: string,
       accessToken: string,
       tokenToRevoke: string
     ): Promise<boolean> {
@@ -169,7 +167,7 @@ export function createJWTAuthService(): JWTAuthService {
         await call(
           apiUrl,
           'revokeJWTToken',
-          { type: 'bearer', token: accessToken },
+          { type: 'basic', username, password: accessToken },
           { token: tokenToRevoke }
         )
         return true

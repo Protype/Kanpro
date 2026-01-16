@@ -170,19 +170,23 @@ describe('JWTAuthService', () => {
       )
 
       const service = createJWTAuthService()
-      const result = await service.refreshToken(mockApiUrl, 'refresh_token_here')
+      const result = await service.refreshToken(mockApiUrl, 'testuser', 'current_access_token', 'refresh_token_here')
 
       expect(result).toEqual({
         access_token: newAccessToken,
         refresh_token: newRefreshToken
       })
 
-      // 驗證請求格式
+      // 驗證使用 Basic Auth（username:access_token）
+      const expectedAuth = btoa('testuser:current_access_token')
       expect(fetch).toHaveBeenCalledTimes(1)
       const [url, options] = vi.mocked(fetch).mock.calls[0]
       expect(url).toBe(mockApiUrl)
       expect(options?.method).toBe('POST')
-      expect(options?.headers).toEqual({ 'Content-Type': 'application/json' })
+      expect(options?.headers).toEqual({
+        'Content-Type': 'application/json',
+        'Authorization': `Basic ${expectedAuth}`
+      })
       const body = JSON.parse(options?.body as string)
       expect(body.jsonrpc).toBe('2.0')
       expect(body.method).toBe('refreshJWTToken')
@@ -197,7 +201,7 @@ describe('JWTAuthService', () => {
 
       const service = createJWTAuthService()
 
-      await expect(service.refreshToken(mockApiUrl, 'invalid_token'))
+      await expect(service.refreshToken(mockApiUrl, 'testuser', 'access', 'invalid_token'))
         .rejects.toThrow('Invalid or expired refresh token')
     })
 
@@ -208,7 +212,7 @@ describe('JWTAuthService', () => {
 
       const service = createJWTAuthService()
 
-      await expect(service.refreshToken(mockApiUrl, 'token'))
+      await expect(service.refreshToken(mockApiUrl, 'testuser', 'access', 'token'))
         .rejects.toThrow('HTTP 500: Internal Server Error')
     })
   })
@@ -220,20 +224,22 @@ describe('JWTAuthService', () => {
       const service = createJWTAuthService()
       const result = await service.revokeToken(
         mockApiUrl,
+        'testuser',
         'access_token_here',
         'token_to_revoke'
       )
 
       expect(result).toBe(true)
 
-      // 驗證使用 Bearer token
+      // 驗證使用 Basic Auth（username:access_token）
+      const expectedAuth = btoa('testuser:access_token_here')
       expect(fetch).toHaveBeenCalledTimes(1)
       const [url, options] = vi.mocked(fetch).mock.calls[0]
       expect(url).toBe(mockApiUrl)
       expect(options?.method).toBe('POST')
       expect(options?.headers).toEqual({
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer access_token_here'
+        'Authorization': `Basic ${expectedAuth}`
       })
       const body = JSON.parse(options?.body as string)
       expect(body.jsonrpc).toBe('2.0')
@@ -248,7 +254,7 @@ describe('JWTAuthService', () => {
       )
 
       const service = createJWTAuthService()
-      const result = await service.revokeToken(mockApiUrl, 'access', 'invalid')
+      const result = await service.revokeToken(mockApiUrl, 'testuser', 'access', 'invalid')
 
       expect(result).toBe(false)
     })
@@ -259,7 +265,7 @@ describe('JWTAuthService', () => {
       )
 
       const service = createJWTAuthService()
-      const result = await service.revokeToken(mockApiUrl, 'access', 'token')
+      const result = await service.revokeToken(mockApiUrl, 'testuser', 'access', 'token')
 
       expect(result).toBe(false)
     })
@@ -268,7 +274,7 @@ describe('JWTAuthService', () => {
       vi.mocked(fetch).mockRejectedValue(new Error('Network error'))
 
       const service = createJWTAuthService()
-      const result = await service.revokeToken(mockApiUrl, 'access', 'token')
+      const result = await service.revokeToken(mockApiUrl, 'testuser', 'access', 'token')
 
       expect(result).toBe(false)
     })
