@@ -2,7 +2,7 @@
 import { useSidebarStore } from '@/stores/sidebar'
 import NotificationsDropdown from '@/components/NotificationsDropdown.vue'
 import UserDropdown from '@/components/header/UserDropdown.vue'
-import { FolderPlus, CircleCheckBig, Search, Menu } from 'lucide-vue-next'
+import { FontAwesomeIcon } from '@/plugins/fontawesome'
 
 const emit = defineEmits<{
   'open-search': []
@@ -36,37 +36,37 @@ const toggleMobileSidebar = () => {
       @click="toggleMobileSidebar"
       class="lg:hidden p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md"
     >
-      <Menu class="w-5 h-5" />
+      <FontAwesomeIcon icon="fa-solid fa-bars" class="w-5 h-5" />
     </button>
 
     <!-- Quick Actions (Left side) -->
-    <div class="hidden lg:flex items-center gap-2">
+    <div class="hidden lg:flex items-center gap-1">
       <!-- Create Project Button -->
       <button
         @click="openCreateProject"
-        class="flex items-center gap-1.5 px-2.5 py-1.5 text-sm text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
+        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
+        title="新增專案"
       >
-        <FolderPlus class="w-4 h-4" />
-        <span>專案</span>
+        <FontAwesomeIcon icon="fa-solid fa-folder-plus" class="w-4 h-4" />
       </button>
 
       <!-- Create Task Button -->
       <button
         @click="openCreateTask"
-        class="flex items-center gap-1.5 px-2.5 py-1.5 text-sm text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
+        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
+        title="新增任務"
       >
-        <CircleCheckBig class="w-4 h-4" />
-        <span>任務</span>
+        <FontAwesomeIcon icon="fa-solid fa-list-check" class="w-4 h-4" />
       </button>
 
       <!-- Search Button -->
       <button
         @click="openSearch"
-        class="flex items-center gap-2 px-3 py-1.5 text-sm text-content-tertiary bg-surface-secondary hover:bg-surface-hover rounded-md transition-colors"
+        class="flex items-center gap-2 px-3 py-1.5 text-sm text-content-tertiary bg-surface-secondary hover:bg-surface-hover rounded-md transition-colors ml-1"
       >
-        <Search class="w-4 h-4" />
-        <span class="hidden sm:inline">搜尋</span>
-        <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-xs bg-surface-tertiary rounded">⌘K</kbd>
+        <FontAwesomeIcon icon="fa-solid fa-magnifying-glass" class="w-4 h-4" />
+        <span>搜尋</span>
+        <kbd class="px-1.5 py-0.5 text-xs bg-surface-tertiary rounded">⌘K</kbd>
       </button>
     </div>
 
