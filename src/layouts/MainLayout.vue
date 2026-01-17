@@ -16,6 +16,8 @@ const authStore = useAuthStore()
 const showCommandBar = ref(false)
 const commandBarMode = ref<'search' | 'add'>('search')
 const showCreateProjectModal = ref(false)
+const lastCmdKTime = ref(0)
+const DOUBLE_PRESS_THRESHOLD = 300 // ms
 
 // Update sidebar mode based on route
 watch(
@@ -42,11 +44,29 @@ watch(
 
 // Keyboard shortcut handler
 const handleKeydown = (e: KeyboardEvent) => {
-  // Cmd/Ctrl + K to open command bar in search mode
+  // Cmd/Ctrl + K for command bar
   if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
     e.preventDefault()
-    commandBarMode.value = 'search'
-    showCommandBar.value = true
+
+    const now = Date.now()
+    const timeSinceLastPress = now - lastCmdKTime.value
+    const isDoublePress = timeSinceLastPress < DOUBLE_PRESS_THRESHOLD
+    lastCmdKTime.value = now
+
+    if (showCommandBar.value) {
+      // CommandBar is open: toggle mode
+      commandBarMode.value = commandBarMode.value === 'search' ? 'add' : 'search'
+    } else {
+      // CommandBar is closed
+      if (isDoublePress) {
+        // Double press: open in add mode
+        commandBarMode.value = 'add'
+      } else {
+        // Single press: open in search mode
+        commandBarMode.value = 'search'
+      }
+      showCommandBar.value = true
+    }
   }
 }
 

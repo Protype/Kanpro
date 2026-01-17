@@ -100,6 +100,13 @@ watch(() => props.isOpen, (open) => {
   }
 })
 
+// Watch for mode changes from parent (Cmd+K toggle)
+watch(() => props.initialMode, (newMode) => {
+  if (props.isOpen && newMode !== mode.value) {
+    mode.value = newMode
+  }
+})
+
 watch(inputValue, (value) => {
   if (mode.value === 'search') {
     // Debounce search
@@ -144,11 +151,6 @@ const switchMode = (newMode: CommandMode) => {
 const handleKeydown = (e: KeyboardEvent) => {
   if (e.key === 'Escape') {
     handleClose()
-  }
-  // Tab to switch modes
-  if (e.key === 'Tab') {
-    e.preventDefault()
-    mode.value = mode.value === 'search' ? 'add' : 'search'
   }
 }
 
@@ -312,7 +314,7 @@ onUnmounted(() => {
               />
               <div class="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
                 <kbd class="px-2 py-1 text-xs bg-surface-tertiary text-content-tertiary rounded border border-edge">
-                  Tab
+                  ⌘K
                 </kbd>
                 <kbd class="px-2 py-1 text-xs bg-surface-tertiary text-content-tertiary rounded border border-edge">
                   ESC
