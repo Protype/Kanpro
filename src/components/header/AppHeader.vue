@@ -6,6 +6,7 @@ import UserDropdown from '@/components/header/UserDropdown.vue'
 const emit = defineEmits<{
   'open-search': []
   'open-create-project': []
+  'open-create-task': []
 }>()
 
 const sidebarStore = useSidebarStore()
@@ -16,6 +17,10 @@ const openSearch = () => {
 
 const openCreateProject = () => {
   emit('open-create-project')
+}
+
+const openCreateTask = () => {
+  emit('open-create-task')
 }
 
 const toggleMobileSidebar = () => {
@@ -35,17 +40,28 @@ const toggleMobileSidebar = () => {
       </svg>
     </button>
 
-    <!-- Spacer -->
-    <div class="flex-1" />
-
-    <!-- Create Project Button -->
+    <!-- Create Project Button (Left side) -->
     <button
       @click="openCreateProject"
-      class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
+      class="hidden lg:flex p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
       title="新增專案"
     >
       <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+      </svg>
+    </button>
+
+    <!-- Spacer -->
+    <div class="flex-1" />
+
+    <!-- Create Task Button (Right side) -->
+    <button
+      @click="openCreateTask"
+      class="p-2 text-content-tertiary hover:text-accent hover:bg-surface-hover rounded-md transition-colors"
+      title="新增任務"
+    >
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
       </svg>
     </button>
 

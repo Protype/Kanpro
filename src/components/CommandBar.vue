@@ -13,9 +13,11 @@ type CommandMode = 'search' | 'add'
 const props = withDefaults(defineProps<{
   isOpen?: boolean
   projectId?: number
+  initialMode?: 'search' | 'add'
 }>(), {
   isOpen: false,
-  projectId: 0
+  projectId: 0,
+  initialMode: 'search'
 })
 
 const emit = defineEmits<{
@@ -88,8 +90,9 @@ watch(() => props.isOpen, (open) => {
   if (open) {
     inputValue.value = ''
     searchStore.clearSearch()
-    // Default to search mode
-    mode.value = 'search'
+    errorMessage.value = ''
+    // Use initial mode from props
+    mode.value = props.initialMode
     // Focus input when modal opens
     nextTick(() => {
       inputRef.value?.focus()

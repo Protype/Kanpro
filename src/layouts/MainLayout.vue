@@ -14,6 +14,7 @@ const sidebarStore = useSidebarStore()
 const authStore = useAuthStore()
 
 const showCommandBar = ref(false)
+const commandBarMode = ref<'search' | 'add'>('search')
 const showCreateProjectModal = ref(false)
 
 // Update sidebar mode based on route
@@ -41,9 +42,10 @@ watch(
 
 // Keyboard shortcut handler
 const handleKeydown = (e: KeyboardEvent) => {
-  // Cmd/Ctrl + K to open command bar
+  // Cmd/Ctrl + K to open command bar in search mode
   if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
     e.preventDefault()
+    commandBarMode.value = 'search'
     showCommandBar.value = true
   }
 }
@@ -61,6 +63,12 @@ const handleCommandBarClose = () => {
 }
 
 const openCommandBar = () => {
+  commandBarMode.value = 'search'
+  showCommandBar.value = true
+}
+
+const openCreateTask = () => {
+  commandBarMode.value = 'add'
   showCommandBar.value = true
 }
 
@@ -81,7 +89,11 @@ const handleCreateProjectClose = () => {
     <!-- Main Content Area -->
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
       <!-- Header -->
-      <AppHeader @open-search="openCommandBar" @open-create-project="openCreateProjectModal" />
+      <AppHeader
+        @open-search="openCommandBar"
+        @open-create-project="openCreateProjectModal"
+        @open-create-task="openCreateTask"
+      />
 
       <!-- Page Content -->
       <main class="flex-1 overflow-auto">
@@ -133,6 +145,7 @@ const handleCreateProjectClose = () => {
     <CommandBar
       :is-open="showCommandBar"
       :project-id="sidebarStore.currentProjectId || 0"
+      :initial-mode="commandBarMode"
       @close="handleCommandBarClose"
     />
   </div>
