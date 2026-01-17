@@ -6,12 +6,15 @@ import { useAuthStore } from '@/stores/auth'
 import AppSidebar from '@/components/sidebar/AppSidebar.vue'
 import AppHeader from '@/components/header/AppHeader.vue'
 import ReauthModal from '@/components/ReauthModal.vue'
+import CreateProjectModal from '@/components/CreateProjectModal.vue'
+import CommandBar from '@/components/CommandBar.vue'
 
 const route = useRoute()
 const sidebarStore = useSidebarStore()
 const authStore = useAuthStore()
 
-const showSearchModal = ref(false)
+const showCommandBar = ref(false)
+const showCreateProjectModal = ref(false)
 
 // Update sidebar mode based on route
 watch(
@@ -38,10 +41,10 @@ watch(
 
 // Keyboard shortcut handler
 const handleKeydown = (e: KeyboardEvent) => {
-  // Cmd/Ctrl + K to open search
+  // Cmd/Ctrl + K to open command bar
   if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
     e.preventDefault()
-    showSearchModal.value = true
+    showCommandBar.value = true
   }
 }
 
@@ -53,12 +56,20 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown)
 })
 
-const handleSearchModalClose = () => {
-  showSearchModal.value = false
+const handleCommandBarClose = () => {
+  showCommandBar.value = false
 }
 
-const openSearchModal = () => {
-  showSearchModal.value = true
+const openCommandBar = () => {
+  showCommandBar.value = true
+}
+
+const openCreateProjectModal = () => {
+  showCreateProjectModal.value = true
+}
+
+const handleCreateProjectClose = () => {
+  showCreateProjectModal.value = false
 }
 </script>
 
@@ -70,14 +81,11 @@ const openSearchModal = () => {
     <!-- Main Content Area -->
     <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
       <!-- Header -->
-      <AppHeader @open-search="openSearchModal" />
+      <AppHeader @open-search="openCommandBar" @open-create-project="openCreateProjectModal" />
 
       <!-- Page Content -->
       <main class="flex-1 overflow-auto">
-        <router-view
-          :show-search-modal="showSearchModal"
-          @close-search-modal="handleSearchModalClose"
-        />
+        <router-view />
       </main>
     </div>
 
@@ -114,5 +122,18 @@ const openSearchModal = () => {
 
     <!-- Reauth Modal -->
     <ReauthModal />
+
+    <!-- Create Project Modal -->
+    <CreateProjectModal
+      :is-open="showCreateProjectModal"
+      @close="handleCreateProjectClose"
+    />
+
+    <!-- Command Bar -->
+    <CommandBar
+      :is-open="showCommandBar"
+      :project-id="sidebarStore.currentProjectId || 0"
+      @close="handleCommandBarClose"
+    />
   </div>
 </template>
