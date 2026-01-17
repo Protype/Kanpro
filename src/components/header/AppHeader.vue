@@ -1,25 +1,27 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
 import { useSidebarStore } from '@/stores/sidebar'
-import ThemeToggle from '@/components/ThemeToggle.vue'
 import NotificationsDropdown from '@/components/NotificationsDropdown.vue'
+import UserDropdown from '@/components/header/UserDropdown.vue'
+import { FontAwesomeIcon } from '@/plugins/fontawesome'
 
 const emit = defineEmits<{
   'open-search': []
+  'open-create-project': []
+  'open-create-task': []
 }>()
 
-const router = useRouter()
-const authStore = useAuthStore()
 const sidebarStore = useSidebarStore()
-
-const handleLogout = () => {
-  authStore.logout()
-  router.push('/login')
-}
 
 const openSearch = () => {
   emit('open-search')
+}
+
+const openCreateProject = () => {
+  emit('open-create-project')
+}
+
+const openCreateTask = () => {
+  emit('open-create-task')
 }
 
 const toggleMobileSidebar = () => {
@@ -28,49 +30,53 @@ const toggleMobileSidebar = () => {
 </script>
 
 <template>
-  <header class="h-14 bg-surface border-b border-edge flex items-center px-4 gap-4 flex-shrink-0">
+  <header class="h-14 bg-surface border-b border-edge flex items-center px-4 gap-3 flex-shrink-0">
     <!-- Mobile Menu Button -->
     <button
       @click="toggleMobileSidebar"
       class="lg:hidden p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md"
     >
-      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
+      <FontAwesomeIcon icon="fa-solid fa-bars" class="w-5 h-5" />
     </button>
+
+    <!-- Quick Actions (Left side) -->
+    <div class="hidden lg:flex items-center gap-1">
+      <!-- Create Project Button -->
+      <button
+        @click="openCreateProject"
+        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors text-base"
+        title="新增專案"
+      >
+        <FontAwesomeIcon icon="fa-solid fa-folder-plus" />
+      </button>
+
+      <!-- Create Task Button -->
+      <button
+        @click="openCreateTask"
+        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors text-sm"
+        title="新增任務"
+      >
+        <FontAwesomeIcon icon="fa-solid fa-circle-plus" />
+      </button>
+
+      <!-- Search Button -->
+      <button
+        @click="openSearch"
+        class="flex items-center gap-2 px-3 py-1.5 text-sm text-content-tertiary bg-surface-secondary hover:bg-surface-hover rounded-md transition-colors ml-1"
+      >
+        <FontAwesomeIcon icon="fa-solid fa-magnifying-glass" class="w-4 h-4" />
+        <span>搜尋</span>
+        <kbd class="px-1.5 py-0.5 text-xs bg-surface-tertiary rounded">⌘K</kbd>
+      </button>
+    </div>
 
     <!-- Spacer -->
     <div class="flex-1" />
 
-    <!-- Search Button -->
-    <button
-      @click="openSearch"
-      class="flex items-center gap-2 px-3 py-1.5 text-sm text-content-tertiary bg-surface-secondary hover:bg-surface-hover rounded-md transition-colors"
-    >
-      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-      </svg>
-      <span class="hidden sm:inline">搜尋</span>
-      <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-xs bg-surface-tertiary rounded">⌘K</kbd>
-    </button>
-
-    <!-- Theme Toggle -->
-    <ThemeToggle />
-
     <!-- Notifications -->
     <NotificationsDropdown />
 
-    <!-- User Info -->
-    <div class="flex items-center gap-3">
-      <span class="hidden sm:inline text-content-secondary text-sm">
-        {{ authStore.user?.name || authStore.user?.username }}
-      </span>
-      <button
-        @click="handleLogout"
-        class="btn-secondary btn-sm"
-      >
-        登出
-      </button>
-    </div>
+    <!-- User Dropdown -->
+    <UserDropdown />
   </header>
 </template>

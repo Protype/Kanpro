@@ -93,7 +93,7 @@ const goToGlobal = () => {
 <template>
   <aside
     :class="[
-      'flex flex-col bg-surface transition-all duration-300 z-40',
+      'group flex flex-col bg-surface transition-all duration-300 z-40',
       sidebarStore.isExpanded ? 'w-64' : 'w-16',
       sidebarStore.isMobileOpen
         ? 'fixed inset-y-0 left-0 translate-x-0'
@@ -101,7 +101,7 @@ const goToGlobal = () => {
     ]"
   >
     <!-- Header -->
-    <div class="flex items-center h-14 px-4 border-b border-edge">
+    <div class="relative flex items-center h-14 px-4 border-r border-edge">
       <router-link
         to="/"
         class="text-xl font-bold text-content hover:text-accent transition-colors"
@@ -110,6 +110,23 @@ const goToGlobal = () => {
         <span v-if="sidebarStore.isExpanded">Kanpro</span>
         <span v-else class="text-base">K</span>
       </router-link>
+      <!-- Toggle Button (hover 時顯示) -->
+      <button
+        @click="toggleSidebar"
+        class="absolute -right-3 top-1/2 -translate-y-1/2 p-1 bg-surface border border-edge rounded-full text-content-tertiary hover:text-content-secondary hover:bg-surface-hover transition-all cursor-pointer z-10 opacity-0 group-hover:opacity-100"
+        :title="sidebarStore.isExpanded ? '折疊側邊欄' : '展開側邊欄'"
+      >
+        <svg
+          class="w-4 h-4 transition-transform"
+          :class="{ 'rotate-180': !sidebarStore.isExpanded }"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
     </div>
 
     <!-- Content -->
@@ -302,18 +319,5 @@ const goToGlobal = () => {
       </div>
     </div>
 
-    <!-- Footer: Toggle Button -->
-    <div :class="['border-t border-edge border-r border-edge p-3', sidebarStore.isExpanded ? '' : 'flex justify-center']">
-      <button
-        @click="toggleSidebar"
-        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors cursor-pointer"
-        :title="sidebarStore.isExpanded ? '折疊側邊欄' : '展開側邊欄'"
-      >
-        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-          <rect x="3" y="3" width="18" height="18" rx="2" />
-          <line x1="9" y1="3" x2="9" y2="21" />
-        </svg>
-      </button>
-    </div>
   </aside>
 </template>
