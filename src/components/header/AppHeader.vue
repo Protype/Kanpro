@@ -40,30 +40,33 @@ const toggleMobileSidebar = () => {
       </svg>
     </button>
 
-    <!-- Create Project Button (Left side) -->
-    <button
-      @click="openCreateProject"
-      class="hidden lg:flex p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
-      title="新增專案"
-    >
-      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-      </svg>
-    </button>
+    <!-- Quick Actions (Left side) -->
+    <div class="hidden lg:flex items-center gap-1">
+      <!-- Create Project Button -->
+      <button
+        @click="openCreateProject"
+        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
+        title="新增專案"
+      >
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+        </svg>
+      </button>
+
+      <!-- Create Task Button -->
+      <button
+        @click="openCreateTask"
+        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
+        title="新增任務"
+      >
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+        </svg>
+      </button>
+    </div>
 
     <!-- Spacer -->
     <div class="flex-1" />
-
-    <!-- Create Task Button (Right side) -->
-    <button
-      @click="openCreateTask"
-      class="p-2 text-content-tertiary hover:text-accent hover:bg-surface-hover rounded-md transition-colors"
-      title="新增任務"
-    >
-      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-      </svg>
-    </button>
 
     <!-- Search Button -->
     <button
