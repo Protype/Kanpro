@@ -43,6 +43,9 @@ watch(
 )
 
 // Keyboard shortcut handler
+// New behavior:
+// - Single press ⌘K → New task mode
+// - Double press ⌘K+K → Search mode
 const handleKeydown = (e: KeyboardEvent) => {
   // Cmd/Ctrl + K for command bar
   if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -54,16 +57,22 @@ const handleKeydown = (e: KeyboardEvent) => {
     lastCmdKTime.value = now
 
     if (showCommandBar.value) {
-      // CommandBar is open: toggle mode
-      commandBarMode.value = commandBarMode.value === 'search' ? 'add' : 'search'
+      // CommandBar is open
+      if (isDoublePress) {
+        // Double press while open: switch to search mode
+        commandBarMode.value = 'search'
+      } else {
+        // Single press while open: toggle mode
+        commandBarMode.value = commandBarMode.value === 'search' ? 'add' : 'search'
+      }
     } else {
       // CommandBar is closed
       if (isDoublePress) {
-        // Double press: open in add mode
-        commandBarMode.value = 'add'
-      } else {
-        // Single press: open in search mode
+        // Double press: open in search mode
         commandBarMode.value = 'search'
+      } else {
+        // Single press: open in add mode (new default)
+        commandBarMode.value = 'add'
       }
       showCommandBar.value = true
     }

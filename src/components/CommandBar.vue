@@ -5,7 +5,13 @@ import { useSearchStore } from '@/stores/search'
 import { useSidebarStore } from '@/stores/sidebar'
 import { useProjectsStore } from '@/stores/projects'
 import { useTasksStore } from '@/stores/tasks'
+import { useMembersStore } from '@/stores/members'
+import { useTagsStore } from '@/stores/tags'
+import { useColumnsStore } from '@/stores/columns'
 import { parseInput, getCurrentSymbol } from '@/composables/useSymbolParser'
+import { useCommandBarDropdown, type DropdownOption } from '@/composables/useCommandBarDropdown'
+import TokenizedInput, { type InputToken } from '@/components/TokenizedInput.vue'
+import SymbolDropdown from '@/components/SymbolDropdown.vue'
 import type { Task } from '@/types'
 
 type CommandMode = 'search' | 'add'
@@ -30,15 +36,27 @@ const searchStore = useSearchStore()
 const sidebarStore = useSidebarStore()
 const projectsStore = useProjectsStore()
 const tasksStore = useTasksStore()
+const membersStore = useMembersStore()
+const tagsStore = useTagsStore()
+const columnsStore = useColumnsStore()
+
+// Dropdown composable
+const dropdown = useCommandBarDropdown()
 
 // State
 const mode = ref<CommandMode>('search')
 const inputValue = ref('')
-const inputRef = ref<HTMLInputElement | null>(null)
+const inputRef = ref<InstanceType<typeof TokenizedInput> | null>(null)
+const searchInputRef = ref<HTMLInputElement | null>(null)
 const debounceTimer = ref<ReturnType<typeof setTimeout> | null>(null)
 const isSubmitting = ref(false)
 const errorMessage = ref('')
 const cursorPosition = ref(0)
+const showHelp = ref(false)
+
+// Token state for add mode
+const tokens = ref<InputToken[]>([])
+const textInput = ref('')
 
 // Computed
 const currentProjectId = computed(() => props.projectId || sidebarStore.currentProjectId || 0)
@@ -52,7 +70,11 @@ const parsedInput = computed(() => parseInput(inputValue.value))
 
 const activeSymbol = computed(() => {
   if (mode.value !== 'add') return null
-  return getCurrentSymbol(inputValue.value, cursorPosition.value)
+  return getCurrentSymbol(textInput.value, cursorPosition.value)
+})
+
+const showDropdown = computed(() => {
+  return mode.value === 'add' && activeSymbol.value !== null && dropdown.filteredOptions.value.length > 0
 })
 
 const placeholder = computed(() => {
@@ -61,6 +83,15 @@ const placeholder = computed(() => {
   }
   return '輸入任務標題... (使用 ^ @ # 快速設定)'
 })
+
+// Combined input value for task creation
+const combinedInputValue = computed(() => {
+  // Combine tokens back into input string for parsing
+  const tokenParts = tokens.value.map(t => `${t.symbol}${t.value.includes(' ') ? `"${t.value}"` : t.value}`)
+  return [...tokenParts, textInput.value].join(' ')
+})
+
+const combinedParsedInput = computed(() => parseInput(combinedInputValue.value))
 
 const colorClasses: Record<string, string> = {
   yellow: 'bg-yellow-500',
@@ -85,18 +116,56 @@ const getColorClass = (colorId: string) => {
   return colorClasses[colorId] || 'bg-yellow-500'
 }
 
+// Focus the appropriate input based on mode
+const focusInput = () => {
+  nextTick(() => {
+    if (mode.value === 'search') {
+      searchInputRef.value?.focus()
+    } else {
+      inputRef.value?.focus()
+    }
+  })
+}
+
+// Load data for dropdowns
+const loadDropdownData = async () => {
+  if (!currentProjectId.value) return
+
+  // Load in parallel
+  await Promise.all([
+    membersStore.fetchProjectMembers(currentProjectId.value),
+    tagsStore.fetchProjectTags(currentProjectId.value),
+    columnsStore.fetchColumns(currentProjectId.value)
+  ])
+}
+
 // Watchers
 watch(() => props.isOpen, (open) => {
   if (open) {
     inputValue.value = ''
+    textInput.value = ''
+    tokens.value = []
     searchStore.clearSearch()
     errorMessage.value = ''
+    dropdown.reset()
     // Use initial mode from props
     mode.value = props.initialMode
+    // Load dropdown data
+    loadDropdownData()
+
+    // Auto-add current project as locked token in add mode
+    if (props.initialMode === 'add' && currentProject.value) {
+      tokens.value = [{
+        type: 'symbol',
+        symbol: '^',
+        value: currentProject.value.name,
+        display: currentProject.value.name,
+        locked: true
+      }]
+    }
+
     // Focus input when modal opens
-    nextTick(() => {
-      inputRef.value?.focus()
-    })
+    focusInput()
   }
 })
 
@@ -124,13 +193,28 @@ watch(inputValue, (value) => {
   }
 })
 
+// Watch textInput for symbol detection
+watch(textInput, (value) => {
+  if (mode.value !== 'add') return
+
+  const symbol = getCurrentSymbol(value, cursorPosition.value)
+  if (symbol) {
+    dropdown.loadOptions(symbol.symbol.symbol, currentProjectId.value)
+    dropdown.filterOptions(symbol.query)
+  } else {
+    dropdown.reset()
+  }
+})
+
 watch(mode, () => {
   // Clear input when mode changes
   inputValue.value = ''
+  textInput.value = ''
+  tokens.value = []
   searchStore.clearSearch()
-  nextTick(() => {
-    inputRef.value?.focus()
-  })
+  dropdown.reset()
+  // Focus the appropriate input for the new mode
+  focusInput()
 })
 
 // Methods
@@ -144,18 +228,98 @@ const handleSelect = (task: Task) => {
   emit('close')
 }
 
-const switchMode = (newMode: CommandMode) => {
-  mode.value = newMode
-}
-
 const handleKeydown = (e: KeyboardEvent) => {
   if (e.key === 'Escape') {
     handleClose()
   }
 }
 
+// Handle dropdown selection
+const handleDropdownSelect = (option: DropdownOption) => {
+  if (!activeSymbol.value) return
+
+  const symbol = activeSymbol.value.symbol?.symbol || ''
+
+  // Create token
+  const newToken: InputToken = {
+    type: 'symbol',
+    symbol,
+    value: option.value,
+    display: option.label
+  }
+
+  tokens.value.push(newToken)
+
+  // Remove the symbol and query from text input
+  const beforeSymbol = textInput.value.slice(0, activeSymbol.value.startIndex)
+  const afterCursor = textInput.value.slice(cursorPosition.value)
+  textInput.value = beforeSymbol + afterCursor
+
+  // Reset dropdown
+  dropdown.reset()
+
+  // Focus input
+  nextTick(() => {
+    inputRef.value?.focus()
+  })
+}
+
+// Handle keyboard navigation in dropdown
+const handleArrowDown = () => {
+  if (showDropdown.value) {
+    dropdown.moveDown()
+  }
+}
+
+const handleArrowUp = () => {
+  if (showDropdown.value) {
+    dropdown.moveUp()
+  }
+}
+
+const handleTab = () => {
+  if (showDropdown.value) {
+    const selected = dropdown.getSelectedOption()
+    if (selected) {
+      handleDropdownSelect(selected)
+    } else if (dropdown.canCreateNew.value && activeSymbol.value) {
+      // For tags, create new tag with the query value
+      const newToken: InputToken = {
+        type: 'symbol',
+        symbol: activeSymbol.value.symbol?.symbol || '',
+        value: activeSymbol.value.query,
+        display: activeSymbol.value.query
+      }
+      tokens.value.push(newToken)
+
+      // Clear query from text input
+      const beforeSymbol = textInput.value.slice(0, activeSymbol.value.startIndex)
+      const afterCursor = textInput.value.slice(cursorPosition.value)
+      textInput.value = beforeSymbol + afterCursor
+
+      dropdown.reset()
+    }
+  }
+}
+
+const handleRemoveToken = (index: number) => {
+  tokens.value.splice(index, 1)
+}
+
+const handleUnlockToken = (index: number) => {
+  // Unlock the token (change from locked to unlocked)
+  if (tokens.value[index]) {
+    tokens.value[index].locked = false
+  }
+}
+
+const handleCursorChange = (position: number) => {
+  cursorPosition.value = position
+}
+
 const handleSubmitAdd = async () => {
-  if (!parsedInput.value.title.trim() || isSubmitting.value) return
+  const parsed = combinedParsedInput.value
+  if (!parsed.title.trim() || isSubmitting.value) return
 
   // Check if we have a project
   const projectId = currentProjectId.value
@@ -170,9 +334,9 @@ const handleSubmitAdd = async () => {
   try {
     const taskId = await tasksStore.createTask({
       project_id: projectId,
-      title: parsedInput.value.title,
-      priority: parsedInput.value.priority,
-      date_due: parsedInput.value.dueDate
+      title: parsed.title,
+      priority: parsed.priority,
+      date_due: parsed.dueDate
       // Note: tags, assignee, column need to be resolved to IDs
       // This is a simplified version - full implementation would lookup IDs
     })
@@ -189,19 +353,19 @@ const handleSubmitAdd = async () => {
   }
 }
 
-const handleInputChange = (e: Event) => {
-  const target = e.target as HTMLInputElement
-  cursorPosition.value = target.selectionStart || 0
+const handleSubmit = () => {
+  if (showDropdown.value) {
+    const selected = dropdown.getSelectedOption()
+    if (selected) {
+      handleDropdownSelect(selected)
+      return
+    }
+  }
+  handleSubmitAdd()
 }
 
-const handleInputKeyup = (e: KeyboardEvent) => {
-  const target = e.target as HTMLInputElement
-  cursorPosition.value = target.selectionStart || 0
-}
-
-const handleInputClick = (e: MouseEvent) => {
-  const target = e.target as HTMLInputElement
-  cursorPosition.value = target.selectionStart || 0
+const toggleHelp = () => {
+  showHelp.value = !showHelp.value
 }
 
 onUnmounted(() => {
@@ -228,105 +392,113 @@ onUnmounted(() => {
       <!-- Modal -->
       <div class="flex min-h-full items-start justify-center pt-[12vh] px-4">
         <div
-          class="relative bg-surface rounded-xl shadow-2xl w-full max-w-2xl border border-edge overflow-hidden"
+          class="relative bg-surface rounded-xl shadow-2xl w-full max-w-2xl border border-edge overflow-visible"
           @click.stop
         >
-          <!-- Mode Switcher -->
-          <div class="flex border-b border-edge">
-            <button
-              @click="switchMode('search')"
-              :class="[
-                'flex-1 px-4 py-3 text-sm font-medium transition-colors',
-                mode === 'search'
-                  ? 'text-accent bg-surface-secondary border-b-2 border-accent -mb-px'
-                  : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-hover'
-              ]"
-            >
-              <div class="flex items-center justify-center gap-2">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                搜尋
-              </div>
-            </button>
-            <button
-              @click="switchMode('add')"
-              :class="[
-                'flex-1 px-4 py-3 text-sm font-medium transition-colors',
-                mode === 'add'
-                  ? 'text-accent bg-surface-secondary border-b-2 border-accent -mb-px'
-                  : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-hover'
-              ]"
-            >
-              <div class="flex items-center justify-center gap-2">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                新增任務
-              </div>
-            </button>
-          </div>
-
           <!-- Input Area -->
           <div class="p-4">
-            <div class="relative">
+            <!-- Search Mode Input -->
+            <div v-if="mode === 'search'" class="relative">
               <svg
-                :class="[
-                  'absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5',
-                  mode === 'search' ? 'text-content-tertiary' : 'text-accent'
-                ]"
+                class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-content-tertiary"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
               >
                 <path
-                  v-if="mode === 'search'"
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="2"
                   d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                 />
+              </svg>
+              <input
+                ref="searchInputRef"
+                data-testid="command-bar-input"
+                v-model="inputValue"
+                type="text"
+                class="w-full pl-12 pr-20 py-4 bg-surface-secondary border border-edge rounded-lg text-lg text-content placeholder:text-content-tertiary focus:outline-none"
+                :placeholder="placeholder"
+                @keydown="handleKeydown"
+              />
+              <div class="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
+                <button
+                  @click="toggleHelp"
+                  class="w-6 h-6 flex items-center justify-center rounded hover:bg-surface-hover text-content-tertiary hover:text-content transition-colors"
+                  title="顯示說明"
+                >
+                  ?
+                </button>
+                <kbd class="px-2 py-1 text-xs bg-surface-tertiary text-content-tertiary rounded border border-edge">
+                  ESC
+                </kbd>
+              </div>
+            </div>
+
+            <!-- Add Mode Input (Tokenized) - styled like search mode -->
+            <div v-else class="relative">
+              <!-- Plus icon -->
+              <svg
+                class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-content-tertiary"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
                 <path
-                  v-else
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="2"
                   d="M12 4v16m8-8H4"
                 />
               </svg>
-              <input
+              <!-- TokenizedInput styled to match search input -->
+              <TokenizedInput
                 ref="inputRef"
-                data-testid="command-bar-input"
-                v-model="inputValue"
-                type="text"
-                :class="[
-                  'w-full pl-12 pr-20 py-4 bg-surface-secondary border border-edge rounded-lg',
-                  'text-lg text-content placeholder:text-content-tertiary',
-                  'focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent'
-                ]"
+                :tokens="tokens"
+                v-model:textInput="textInput"
                 :placeholder="placeholder"
                 :disabled="isSubmitting"
-                @keydown="handleKeydown"
-                @keyup="handleInputKeyup"
-                @input="handleInputChange"
-                @click="handleInputClick"
-                @keyup.enter="mode === 'add' && handleSubmitAdd()"
+                class="!pl-12 !pr-20 !py-4"
+                @remove-token="handleRemoveToken"
+                @unlock-token="handleUnlockToken"
+                @cursor-change="handleCursorChange"
+                @submit="handleSubmit"
+                @close="handleClose"
+                @arrow-up="handleArrowUp"
+                @arrow-down="handleArrowDown"
+                @tab="handleTab"
               />
+              <!-- Buttons positioned inside -->
               <div class="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
-                <kbd class="px-2 py-1 text-xs bg-surface-tertiary text-content-tertiary rounded border border-edge">
-                  ⌘K
-                </kbd>
+                <button
+                  @click="toggleHelp"
+                  class="w-6 h-6 flex items-center justify-center rounded hover:bg-surface-hover text-content-tertiary hover:text-content transition-colors"
+                  title="顯示說明"
+                >
+                  ?
+                </button>
                 <kbd class="px-2 py-1 text-xs bg-surface-tertiary text-content-tertiary rounded border border-edge">
                   ESC
                 </kbd>
               </div>
+              <!-- Symbol Dropdown -->
+              <SymbolDropdown
+                :options="dropdown.filteredOptions.value"
+                :selected-index="dropdown.selectedIndex.value"
+                :visible="showDropdown"
+                :symbol-type="activeSymbol?.symbol?.symbol || ''"
+                :empty-message="dropdown.emptyMessage.value"
+                :can-create-new="dropdown.canCreateNew.value"
+                @select="handleDropdownSelect"
+                class="left-0 right-0 top-full"
+              />
             </div>
           </div>
 
           <!-- Search Mode Content -->
           <template v-if="mode === 'search'">
-            <!-- Search Tips (when no query) -->
-            <div v-if="!inputValue && !searchStore.results.length" class="px-4 pb-4 text-sm text-content-tertiary">
+            <!-- Search Tips (when no query and help is shown) -->
+            <div v-if="!inputValue && showHelp" class="px-4 pb-4 text-sm text-content-tertiary">
               <p class="font-medium mb-2 text-content-secondary">搜尋語法提示：</p>
               <div class="grid grid-cols-2 gap-2">
                 <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs">status:open</code> 開啟中</div>
@@ -395,86 +567,17 @@ onUnmounted(() => {
 
           <!-- Add Task Mode Content -->
           <template v-else>
-            <!-- Error Message -->
-            <div v-if="errorMessage" class="mx-4 mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-              <p class="text-sm text-red-600">{{ errorMessage }}</p>
-            </div>
-
-            <!-- Parsed Input Preview -->
-            <div v-if="parsedInput.symbols.length > 0" class="px-4 pb-4">
-              <div class="flex flex-wrap gap-2">
-                <span
-                  v-for="sym in parsedInput.symbols"
-                  :key="sym.startIndex"
-                  class="inline-flex items-center gap-1 px-2 py-1 bg-surface-tertiary rounded text-sm"
-                >
-                  <code class="text-accent">{{ sym.symbol }}</code>
-                  <span class="text-content">{{ sym.value }}</span>
-                </span>
-              </div>
-            </div>
-
-            <!-- Symbol Hints (when no input) -->
-            <div v-if="!inputValue" class="px-4 pb-4 text-sm text-content-tertiary">
+            <!-- Help Tips (when help is shown) -->
+            <div v-if="showHelp" class="px-4 pb-4 text-sm text-content-tertiary">
               <p class="font-medium mb-2 text-content-secondary">快速輸入提示：</p>
               <div class="grid grid-cols-2 gap-2">
-                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-accent">^</code> 選擇專案</div>
-                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-accent">@</code> 指派人員</div>
-                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-accent">#</code> 標籤</div>
-                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-accent">:</code> 欄位</div>
-                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-accent">!</code> 優先級</div>
-                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-accent">&gt;</code> 到期日</div>
+                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-blue-500">^</code> 選擇專案</div>
+                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-green-500">@</code> 指派人員</div>
+                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-purple-500">#</code> 標籤（可新增）</div>
+                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-orange-500">:</code> 欄位</div>
+                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-red-500">!</code> 優先級</div>
+                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-cyan-500">&gt;</code> 到期日</div>
               </div>
-            </div>
-
-            <!-- Active Symbol Hint -->
-            <div v-if="activeSymbol" class="px-4 pb-4">
-              <div class="p-3 bg-surface-secondary rounded-lg border border-edge">
-                <p class="text-sm text-content-secondary">
-                  <code class="text-accent mr-1">{{ activeSymbol.symbol?.symbol }}</code>
-                  {{ activeSymbol.symbol?.description }}
-                  <span v-if="activeSymbol.query" class="text-content-tertiary ml-2">
-                    「{{ activeSymbol.query }}」
-                  </span>
-                </p>
-              </div>
-            </div>
-
-            <!-- Current Project Context -->
-            <div v-if="currentProject" class="px-4 pb-4">
-              <div class="flex items-center gap-2 text-sm text-content-tertiary">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                </svg>
-                <span>新增至：<span class="text-content font-medium">{{ currentProject.name }}</span></span>
-              </div>
-            </div>
-            <div v-else-if="!currentProjectId" class="px-4 pb-4">
-              <div class="flex items-center gap-2 text-sm text-amber-600">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <span>請先進入專案頁面或使用 <code class="bg-amber-100 px-1 rounded">^專案名稱</code> 指定專案</span>
-              </div>
-            </div>
-
-            <!-- Submit Button -->
-            <div class="px-4 pb-4">
-              <button
-                @click="handleSubmitAdd"
-                :disabled="!parsedInput.title.trim() || isSubmitting || !currentProjectId"
-                class="w-full py-3 bg-accent text-white font-medium rounded-lg hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                <svg v-if="isSubmitting" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <svg v-else class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                {{ isSubmitting ? '建立中...' : '建立任務' }}
-                <kbd v-if="!isSubmitting" class="ml-2 px-1.5 py-0.5 text-xs bg-white/20 rounded">Enter</kbd>
-              </button>
             </div>
           </template>
         </div>
