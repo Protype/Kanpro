@@ -44,19 +44,19 @@ const toggleMobileSidebar = () => {
       <!-- Create Project Button -->
       <button
         @click="openCreateProject"
-        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
+        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors text-base"
         title="新增專案"
       >
-        <FontAwesomeIcon icon="fa-solid fa-folder-plus" class="w-4 h-4" />
+        <FontAwesomeIcon icon="fa-solid fa-folder-plus" />
       </button>
 
       <!-- Create Task Button -->
       <button
         @click="openCreateTask"
-        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
+        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors text-sm"
         title="新增任務"
       >
-        <FontAwesomeIcon icon="fa-solid fa-list-check" class="w-4 h-4" />
+        <FontAwesomeIcon icon="fa-solid fa-circle-plus" />
       </button>
 
       <!-- Search Button -->
