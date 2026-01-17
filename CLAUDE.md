@@ -2,6 +2,14 @@
 
 本檔案為 Claude Code (claude.ai/code) 在此代碼庫中工作時提供指導。
 
+## 專案說明
+
+本專案為 Kanpro，是開源專案管理軟體 kanboard 的前端介面軟體化實作專案，旨在提供更佳的使用體驗。
+
+沿襲 Kanboard 的核心精神，並遵循 Kanban / Scrum 等敏捷開發方法論。
+
+採用 Vue 3 + TypeScript 進行開發，後面串接 Kanboard 的 API 服務。
+
 ## 語言規範
 
 - 使用繁體中文 (zh-tw) 進行溝通
