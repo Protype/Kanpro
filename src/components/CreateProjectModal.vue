@@ -173,63 +173,29 @@ onMounted(() => {
 
         <!-- Modal Container -->
         <div class="flex min-h-full items-center justify-center p-4">
-          <!-- Modal -->
-          <form
-            @submit.prevent="handleSubmit"
-            class="relative bg-surface rounded-lg shadow-xl border border-edge transition-all duration-300 ease-out flex flex-col"
-            :class="showAdvanced ? 'w-[720px] max-w-[90vw]' : 'w-full max-w-md'"
-            @click.stop
-          >
-            <!-- Header -->
-            <div class="flex border-b border-edge">
-              <!-- Main Header -->
-              <div class="flex-1 flex items-center justify-between p-4 h-14">
+          <!-- Wrapper for modal + floating toggle button -->
+          <div class="relative">
+            <!-- Modal -->
+            <form
+              @submit.prevent="handleSubmit"
+              class="relative bg-surface rounded-lg shadow-xl border border-edge flex flex-col modal-width-transition"
+              :style="{ width: showAdvanced ? '720px' : '448px', maxWidth: '90vw' }"
+              @click.stop
+            >
+              <!-- Header (shared) -->
+              <div class="flex items-center justify-between p-4 h-14 border-b border-edge">
                 <h3 class="text-lg font-semibold text-content">新增專案</h3>
-                <div class="flex items-center">
-                  <!-- Close Button -->
-                  <button
-                    type="button"
-                    @click="handleClose"
-                    class="text-content-tertiary hover:text-content-secondary transition-colors"
-                    :disabled="isSubmitting"
-                  >
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                  <!-- Expand Advanced Button (attached to close button) -->
-                  <button
-                    v-if="!showAdvanced"
-                    type="button"
-                    @click="toggleAdvanced"
-                    class="ml-1 w-7 h-7 bg-surface-secondary border border-edge rounded flex items-center justify-center text-content-tertiary hover:text-accent hover:border-accent transition-colors"
-                    title="進階設定"
-                  >
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              <!-- Advanced Header -->
-              <div
-                v-if="showAdvanced"
-                class="w-80 flex items-center justify-between p-4 h-14 border-l border-edge bg-surface-secondary/50"
-              >
-                <h4 class="text-sm font-semibold text-content">進階設定</h4>
-                <!-- Collapse Button (left arrow) -->
                 <button
                   type="button"
-                  @click="showAdvanced = false"
+                  @click="handleClose"
                   class="text-content-tertiary hover:text-content-secondary transition-colors"
-                  title="收合進階設定"
+                  :disabled="isSubmitting"
                 >
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
-            </div>
 
               <!-- Content Area -->
               <div class="flex flex-1 min-h-0">
@@ -493,6 +459,20 @@ onMounted(() => {
                 </button>
               </div>
             </form>
+
+            <!-- Floating Toggle Button (outside modal, always visible) -->
+            <button
+              type="button"
+              @click="toggleAdvanced"
+              class="absolute top-4 -right-3 translate-x-full w-8 h-8 bg-surface border border-edge rounded-lg shadow-md flex items-center justify-center text-content-tertiary hover:text-accent hover:border-accent transition-all z-10"
+              :class="showAdvanced ? 'bg-accent/10 text-accent border-accent' : ''"
+              :title="showAdvanced ? '收合進階設定' : '展開進階設定'"
+            >
+              <svg class="w-4 h-4 transition-transform duration-200" :class="showAdvanced ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </Transition>
@@ -509,6 +489,11 @@ onMounted(() => {
 .modal-enter-from,
 .modal-leave-to {
   opacity: 0;
+}
+
+/* Modal Width Transition */
+.modal-width-transition {
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Slide Transition for Advanced Panel */
