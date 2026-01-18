@@ -192,7 +192,7 @@ onMounted(() => {
                 <button
                   type="button"
                   @click="toggleAdvanced"
-                  class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors"
+                  class="flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded transition-colors"
                   :class="showAdvanced
                     ? 'bg-surface-tertiary text-content-secondary'
                     : 'bg-surface-secondary text-content-tertiary hover:text-content-secondary'"
