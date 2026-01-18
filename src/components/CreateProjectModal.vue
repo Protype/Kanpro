@@ -179,7 +179,7 @@ onMounted(() => {
             class="relative bg-surface rounded-lg shadow-xl border border-edge flex flex-col modal-transition overflow-hidden"
             :style="{
               width: showAdvanced ? '720px' : '448px',
-              height: showAdvanced ? '520px' : '420px',
+              height: showAdvanced ? '540px' : '480px',
               maxWidth: '90vw'
             }"
             @click.stop
