@@ -176,8 +176,12 @@ onMounted(() => {
           <!-- Modal -->
           <form
             @submit.prevent="handleSubmit"
-            class="relative bg-surface rounded-lg shadow-xl border border-edge flex flex-col modal-transition"
-            :style="{ width: showAdvanced ? '720px' : '448px', maxWidth: '90vw' }"
+            class="relative bg-surface rounded-lg shadow-xl border border-edge flex flex-col modal-transition overflow-hidden"
+            :style="{
+              width: showAdvanced ? '720px' : '448px',
+              height: showAdvanced ? '520px' : '420px',
+              maxWidth: '90vw'
+            }"
             @click.stop
           >
             <!-- Header -->
@@ -188,18 +192,15 @@ onMounted(() => {
                 <button
                   type="button"
                   @click="toggleAdvanced"
-                  class="flex items-center gap-1.5 px-2 py-1 text-xs font-medium rounded-md transition-colors"
+                  class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors"
                   :class="showAdvanced
                     ? 'bg-accent/10 text-accent'
                     : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary'"
                 >
-                  <!-- Sliders/Adjustments Icon -->
-                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-                  </svg>
                   <span>進階設定</span>
-                  <svg class="w-3 h-3 transition-transform duration-200" :class="showAdvanced ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  <!-- Chevron: > when collapsed, < when expanded -->
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="showAdvanced ? 'M15 19l-7-7 7-7' : 'M9 5l7 7-7 7'" />
                   </svg>
                 </button>
               </div>
@@ -495,10 +496,10 @@ onMounted(() => {
   opacity: 0;
 }
 
-/* Modal Size Transition */
+/* Modal Size Transition - width and height animate simultaneously */
 .modal-transition {
-  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  min-height: 420px;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Slide Transition for Advanced Panel */
