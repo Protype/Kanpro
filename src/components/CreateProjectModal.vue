@@ -188,14 +188,11 @@ onMounted(() => {
             <div class="flex items-center justify-between p-4 h-14 border-b border-edge">
               <div class="flex items-center gap-3">
                 <h3 class="text-lg font-semibold text-content">新增專案</h3>
-                <!-- Advanced Settings Toggle -->
+                <!-- Advanced Settings Toggle (styled like search bar) -->
                 <button
                   type="button"
                   @click="toggleAdvanced"
-                  class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors"
-                  :class="showAdvanced
-                    ? 'bg-accent/10 text-accent'
-                    : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary'"
+                  class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full bg-surface-secondary text-content-tertiary hover:text-content-secondary transition-colors"
                 >
                   <span>進階設定</span>
                   <!-- Chevron: > when collapsed, < when expanded -->
