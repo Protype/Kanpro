@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
 import { useGroupsStore } from '@/stores/groups'
 import { useUsersStore } from '@/stores/users'
 import SearchModal from '@/components/SearchModal.vue'
@@ -16,7 +15,6 @@ const emit = defineEmits<{
 }>()
 
 const router = useRouter()
-const authStore = useAuthStore()
 const groupsStore = useGroupsStore()
 const usersStore = useUsersStore()
 

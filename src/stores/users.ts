@@ -61,7 +61,7 @@ export const useUsersStore = defineStore('users', () => {
     const authStore = useAuthStore()
     const client = authStore.getClient()
 
-    const result = await client.call<number>('createUser', params)
+    const result = await client.call<number>('createUser', params as unknown as Record<string, unknown>)
     return result
   }
 

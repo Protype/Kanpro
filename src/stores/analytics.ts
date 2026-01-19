@@ -1,7 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { useAuthStore } from './auth'
-import type { Activity, Task, Column, ProjectMember } from '@/types'
+import type { Activity, Task, ProjectMember } from '@/types'
+
+interface AnalyticsColumn {
+  id: number
+  title: string
+}
 
 export interface TaskDistribution {
   column: string
@@ -80,7 +85,7 @@ export const useAnalyticsStore = defineStore('analytics', () => {
     }
   }
 
-  function calculateTaskDistribution(tasks: Task[], columns: Column[]): TaskDistribution[] {
+  function calculateTaskDistribution(tasks: Task[], columns: AnalyticsColumn[]): TaskDistribution[] {
     return columns.map(column => ({
       column: column.title,
       count: tasks.filter(task => task.column_id === column.id).length
@@ -140,7 +145,7 @@ export const useAnalyticsStore = defineStore('analytics', () => {
 
   function calculateCumulativeFlow(
     tasks: Task[],
-    columns: Column[],
+    columns: AnalyticsColumn[],
     startDate: string,
     endDate: string
   ): CumulativeFlowData[] {
@@ -218,7 +223,7 @@ export const useAnalyticsStore = defineStore('analytics', () => {
     return result
   }
 
-  function calculateColumnTime(columns: Column[]): ColumnTimeData[] {
+  function calculateColumnTime(columns: AnalyticsColumn[]): ColumnTimeData[] {
     const columnTimes: Record<number, number[]> = {}
     columns.forEach(col => {
       columnTimes[col.id] = []
@@ -231,6 +236,8 @@ export const useAnalyticsStore = defineStore('analytics', () => {
       .filter(a => a.event_name === 'task.move.column')
       .forEach(activity => {
         const taskId = activity.task_id
+        if (taskId === undefined) return
+
         if (!taskMoves[taskId]) {
           taskMoves[taskId] = []
         }

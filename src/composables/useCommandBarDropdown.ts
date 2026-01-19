@@ -87,7 +87,7 @@ export function useCommandBarDropdown() {
   const hasOptions = computed(() => filteredOptions.value.length > 0)
 
   // Methods
-  function loadOptions(symbol: string, projectId: number) {
+  function loadOptions(symbol: string, _projectId: number) {
     currentSymbol.value = symbol
     selectedIndex.value = 0
     query.value = ''
@@ -135,7 +135,7 @@ export function useCommandBarDropdown() {
     const membersStore = useMembersStore()
     options.value = membersStore.members.map(m => ({
       id: m.id,
-      label: m.name,
+      label: m.name || m.username,
       value: m.username,
       type: 'assignee' as const
     }))

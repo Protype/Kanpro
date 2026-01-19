@@ -3,14 +3,12 @@ import { computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSidebarStore } from '@/stores/sidebar'
 import { useProjectsStore } from '@/stores/projects'
-import { useAuthStore } from '@/stores/auth'
 import { useBoardStore } from '@/stores/board'
 
 const route = useRoute()
 const router = useRouter()
 const sidebarStore = useSidebarStore()
 const projectsStore = useProjectsStore()
-const authStore = useAuthStore()
 const boardStore = useBoardStore()
 
 // Load projects on mount
@@ -78,11 +76,6 @@ const toggleSidebar = () => {
 
 const handleProjectClick = (projectId: number) => {
   router.push(`/projects/${projectId}`)
-}
-
-const toggleProjectExpand = (projectId: number, event: Event) => {
-  event.stopPropagation()
-  sidebarStore.toggleProjectExpanded(projectId)
 }
 
 const goToGlobal = () => {

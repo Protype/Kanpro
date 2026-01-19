@@ -84,7 +84,7 @@ const getProjectName = (projectId: number) => {
   return project?.name || `專案 #${projectId}`
 }
 
-const formatDate = (timestamp: number | null) => {
+const formatDate = (timestamp: number | null | undefined) => {
   if (!timestamp) return '-'
   return new Date(timestamp * 1000).toLocaleDateString('zh-TW')
 }
@@ -125,6 +125,29 @@ const toggleSort = (field: 'date_creation' | 'date_due' | 'priority') => {
 const getSortIcon = (field: string) => {
   if (sortBy.value !== field) return null
   return sortOrder.value === 'asc' ? '↑' : '↓'
+}
+
+// Color mapping helper
+const getColorValue = (colorId: string): string => {
+  const colors: Record<string, string> = {
+    yellow: '#eab308',
+    blue: '#3b82f6',
+    green: '#22c55e',
+    purple: '#a855f7',
+    red: '#ef4444',
+    orange: '#f97316',
+    grey: '#6b7280',
+    cyan: '#06b6d4',
+    lime: '#84cc16',
+    pink: '#ec4899',
+    teal: '#14b8a6',
+    amber: '#f59e0b',
+    brown: '#92400e',
+    deep_orange: '#c2410c',
+    dark_grey: '#374151',
+    white: '#ffffff'
+  }
+  return colors[colorId] || '#6b7280'
 }
 </script>
 
@@ -264,28 +287,3 @@ const getSortIcon = (field: string) => {
     />
   </div>
 </template>
-
-<script lang="ts">
-// Color mapping helper
-function getColorValue(colorId: string): string {
-  const colors: Record<string, string> = {
-    yellow: '#eab308',
-    blue: '#3b82f6',
-    green: '#22c55e',
-    purple: '#a855f7',
-    red: '#ef4444',
-    orange: '#f97316',
-    grey: '#6b7280',
-    cyan: '#06b6d4',
-    lime: '#84cc16',
-    pink: '#ec4899',
-    teal: '#14b8a6',
-    amber: '#f59e0b',
-    brown: '#92400e',
-    deep_orange: '#c2410c',
-    dark_grey: '#374151',
-    white: '#ffffff'
-  }
-  return colors[colorId] || '#6b7280'
-}
-</script>

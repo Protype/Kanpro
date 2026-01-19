@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useMembersStore } from '@/stores/members'
-import type { ProjectMember, User } from '@/types'
+import type { ProjectMember } from '@/types'
 
 const props = defineProps<{
   projectId: number
@@ -17,16 +17,6 @@ const isAdding = ref(false)
 const isSubmitting = ref(false)
 const selectedUserId = ref<number | null>(null)
 const selectedRole = ref<'project-manager' | 'project-member' | 'project-viewer'>('project-member')
-
-const roleLabels: Record<string, string> = {
-  'project-manager': '專案經理',
-  'project-member': '專案成員',
-  'project-viewer': '瀏覽者'
-}
-
-const getRoleLabel = (role: string): string => {
-  return roleLabels[role] || role
-}
 
 const getRoleBadgeClass = (role: string): string => {
   switch (role) {

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import TokenizedInput from '@/components/TokenizedInput.vue'
 import type { InputToken } from '@/components/TokenizedInput.vue'

@@ -75,7 +75,7 @@ export function useKeyboardShortcuts() {
     sequenceBuffer.push(key.toLowerCase())
 
     // Check if current buffer matches any registered sequence
-    for (const [seqKey, seq] of sequences.value.entries()) {
+    for (const [, seq] of sequences.value.entries()) {
       const bufferStr = sequenceBuffer.join('+')
       const seqStr = seq.keys.join('+').toLowerCase()
 

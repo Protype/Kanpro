@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useTasksStore } from '@/stores/tasks'
 import { useBoardStore } from '@/stores/board'
 import TaskDetailModal from '@/components/TaskDetailModal.vue'
@@ -16,7 +16,6 @@ const emit = defineEmits<{
 }>()
 
 const route = useRoute()
-const router = useRouter()
 const tasksStore = useTasksStore()
 const boardStore = useBoardStore()
 
@@ -100,7 +99,7 @@ const getTasksForDate = (date: Date): Task[] => {
   const endOfDay = startOfDay + 86400 - 1
 
   return tasksWithDueDate.value.filter(task => {
-    return task.date_due >= startOfDay && task.date_due <= endOfDay
+    return task.date_due && task.date_due >= startOfDay && task.date_due <= endOfDay
   })
 }
 

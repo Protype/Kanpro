@@ -66,8 +66,6 @@ const currentProject = computed(() => {
   return projectsStore.getProjectById(currentProjectId.value)
 })
 
-const parsedInput = computed(() => parseInput(inputValue.value))
-
 const activeSymbol = computed(() => {
   if (mode.value !== 'add') return null
   return getCurrentSymbol(textInput.value, cursorPosition.value)
@@ -198,7 +196,7 @@ watch(textInput, (value) => {
   if (mode.value !== 'add') return
 
   const symbol = getCurrentSymbol(value, cursorPosition.value)
-  if (symbol) {
+  if (symbol && symbol.symbol?.symbol) {
     dropdown.loadOptions(symbol.symbol.symbol, currentProjectId.value)
     dropdown.filterOptions(symbol.query)
   } else {

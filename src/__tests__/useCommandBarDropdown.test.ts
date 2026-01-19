@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
-import { useCommandBarDropdown, type DropdownOption } from '@/composables/useCommandBarDropdown'
+import { useCommandBarDropdown } from '@/composables/useCommandBarDropdown'
 import { useProjectsStore } from '@/stores/projects'
 import { useMembersStore } from '@/stores/members'
 import { useTagsStore } from '@/stores/tags'

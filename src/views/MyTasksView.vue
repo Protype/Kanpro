@@ -88,7 +88,7 @@ const getProjectName = (projectId: number) => {
   return project?.name || `專案 #${projectId}`
 }
 
-const formatDate = (timestamp: number | null) => {
+const formatDate = (timestamp: number | null | undefined) => {
   if (!timestamp) return '-'
   return new Date(timestamp * 1000).toLocaleDateString('zh-TW')
 }

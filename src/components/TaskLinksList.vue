@@ -2,7 +2,7 @@
 import { ref, watch, onMounted } from 'vue'
 import { useTaskLinksStore } from '@/stores/tasklinks'
 import { useTasksStore } from '@/stores/tasks'
-import type { Task, TaskLink } from '@/types'
+import type { Task } from '@/types'
 
 const props = defineProps<{
   taskId: number

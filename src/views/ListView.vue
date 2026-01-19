@@ -7,7 +7,7 @@ import TaskDetailModal from '@/components/TaskDetailModal.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import type { Task } from '@/types'
 
-const props = defineProps<{
+defineProps<{
   showSearchModal?: boolean
 }>()
 

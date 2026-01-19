@@ -200,14 +200,14 @@ const activityStats = computed(() => analyticsStore.getActivityStats())
 const activityByDay = computed(() => analyticsStore.calculateActivityByDay())
 
 const taskDistribution = computed(() => {
-  if (!boardStore.board) return []
-  const tasks = boardStore.board.columns.flatMap(col => col.tasks || [])
-  return analyticsStore.calculateTaskDistribution(tasks, boardStore.board.columns)
+  if (boardStore.columns.length === 0) return []
+  const tasks = boardStore.columns.flatMap(col => col.tasks || [])
+  return analyticsStore.calculateTaskDistribution(tasks, boardStore.columns)
 })
 
 const userWorkload = computed(() => {
-  if (!boardStore.board) return []
-  const tasks = boardStore.board.columns.flatMap(col => col.tasks || [])
+  if (boardStore.columns.length === 0) return []
+  const tasks = boardStore.columns.flatMap(col => col.tasks || [])
   return analyticsStore.calculateUserWorkload(tasks, membersStore.members)
 })
 
