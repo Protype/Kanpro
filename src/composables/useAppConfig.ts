@@ -29,7 +29,7 @@ export function useAppConfig() {
     if (configLoaded.value) return
 
     try {
-      const response = await fetch('/config.json')
+      const response = await fetch(`${import.meta.env.BASE_URL}config.json`)
       if (response.ok) {
         configFromFile.value = await response.json()
       }
