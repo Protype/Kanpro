@@ -185,22 +185,24 @@ const handleLogin = async () => {
       <ThemeToggle />
     </div>
 
-    <div class="max-w-md w-full card p-8 mx-4 relative">
-      <!-- 伺服器連結 icon（僅在 config 有設定時顯示） -->
-      <a
-        v-if="hasConfigFileUrl && !configLoading"
-        :href="displayApiUrl"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="absolute top-4 right-4 p-2 text-content-tertiary hover:text-content-secondary transition-colors"
-        title="開啟 Kanboard 伺服器"
-      >
-        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
-        </svg>
-      </a>
-
-      <h2 class="text-2xl font-bold text-center text-content mb-8">Kanpro</h2>
+    <div class="max-w-md w-full card p-8 mx-4">
+      <!-- 標題列 -->
+      <div class="flex items-center justify-center mb-8 relative">
+        <h2 class="text-2xl font-bold text-content">Kanpro</h2>
+        <!-- 伺服器連結 icon（僅在 config 有設定時顯示） -->
+        <a
+          v-if="hasConfigFileUrl && !configLoading"
+          :href="displayApiUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="absolute right-0 p-1 text-content-tertiary hover:text-content-secondary transition-colors"
+          title="開啟 Kanboard 伺服器"
+        >
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+          </svg>
+        </a>
+      </div>
 
       <!-- 錯誤訊息 -->
       <div v-if="errorMessage" class="alert-error mb-4">
