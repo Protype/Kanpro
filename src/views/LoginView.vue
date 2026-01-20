@@ -185,23 +185,22 @@ const handleLogin = async () => {
       <ThemeToggle />
     </div>
 
-    <div class="max-w-md w-full card p-8 mx-4 relative">
+    <div class="max-w-md w-full card p-8 mx-4">
       <!-- 標題列 -->
-      <div class="flex items-center justify-center mb-8">
+      <div class="flex items-center justify-center mb-8 relative">
         <h2 class="text-2xl font-bold text-content">Kanpro</h2>
+        <!-- 伺服器連結 icon（僅在 config 有設定時顯示，標題右側） -->
+        <a
+          v-if="hasConfigFileUrl && !configLoading"
+          :href="displayApiUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="absolute right-0 p-1 text-content-tertiary hover:text-content-secondary transition-colors"
+          title="開啟 Kanboard 伺服器"
+        >
+          <font-awesome-icon icon="server" class="w-5 h-5" />
+        </a>
       </div>
-
-      <!-- 伺服器連結 icon（僅在 config 有設定時顯示，右下角） -->
-      <a
-        v-if="hasConfigFileUrl && !configLoading"
-        :href="displayApiUrl"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="absolute bottom-3 right-3 p-1 text-content-tertiary hover:text-content-secondary transition-colors"
-        title="開啟 Kanboard 伺服器"
-      >
-        <font-awesome-icon icon="server" class="w-5 h-5" />
-      </a>
 
       <!-- 錯誤訊息 -->
       <div v-if="errorMessage" class="alert-error mb-4">
