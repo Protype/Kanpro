@@ -1,15 +1,13 @@
 <script setup lang="ts">
-import { computed, onMounted, watch } from 'vue'
+import { onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSidebarStore } from '@/stores/sidebar'
 import { useProjectsStore } from '@/stores/projects'
-import { useBoardStore } from '@/stores/board'
 
 const route = useRoute()
 const router = useRouter()
 const sidebarStore = useSidebarStore()
 const projectsStore = useProjectsStore()
-const boardStore = useBoardStore()
 
 // Load projects on mount
 onMounted(async () => {
@@ -18,25 +16,7 @@ onMounted(async () => {
   }
 })
 
-// Load current project info when in project mode
-watch(
-  () => sidebarStore.currentProjectId,
-  async (projectId) => {
-    if (projectId && !boardStore.project) {
-      await boardStore.fetchBoard(projectId)
-    }
-  },
-  { immediate: true }
-)
-
-const currentProject = computed(() => {
-  if (!sidebarStore.currentProjectId) return null
-  return projectsStore.projects.find(p => p.id === sidebarStore.currentProjectId) || boardStore.project
-})
-
-const isProjectMode = computed(() => sidebarStore.mode === 'project')
-
-// Navigation items for global mode
+// Navigation items
 const globalNavItems = [
   { name: 'dashboard', label: '儀表板', icon: 'dashboard', route: '/dashboard' },
   { name: 'activity', label: '動態總覽', icon: 'activity', route: '/activity' },
@@ -44,26 +24,8 @@ const globalNavItems = [
   { name: 'my-tasks', label: '我的任務', icon: 'user', route: '/my-tasks' }
 ]
 
-// Navigation items for project mode
-const projectNavItems = computed(() => {
-  const id = sidebarStore.currentProjectId
-  if (!id) return []
-  return [
-    { name: 'project-activity', label: '專案動態', icon: 'activity', route: `/projects/${id}/activity` },
-    { name: 'project-list', label: '列表', icon: 'list', route: `/projects/${id}`, isView: true },
-    { name: 'project-board', label: '看板', icon: 'board', route: `/projects/${id}/board`, isView: true },
-    { name: 'project-calendar', label: '行事曆', icon: 'calendar', route: `/projects/${id}/calendar`, isView: true },
-    { name: 'project-settings', label: '設定', icon: 'settings', route: `/projects/${id}/settings` },
-    { name: 'project-analytics', label: '分析', icon: 'chart', route: `/projects/${id}/analytics` }
-  ]
-})
-
 const isActive = (routePath: string) => {
   return route.path === routePath
-}
-
-const isActiveView = (routeName: string) => {
-  return route.name === routeName
 }
 
 const handleNavClick = (item: { route: string }) => {
@@ -76,10 +38,6 @@ const toggleSidebar = () => {
 
 const handleProjectClick = (projectId: number) => {
   router.push(`/projects/${projectId}`)
-}
-
-const goToGlobal = () => {
-  router.push('/')
 }
 </script>
 
@@ -119,110 +77,30 @@ const goToGlobal = () => {
 
     <!-- Content -->
     <div class="flex-1 overflow-y-auto py-4 border-r border-edge">
-      <!-- Project Mode: Back button and project name -->
-      <div v-if="isProjectMode" :class="['mb-4', sidebarStore.isExpanded ? 'px-3' : 'px-2']">
+      <!-- Navigation (always show global nav) -->
+      <nav class="px-3 space-y-1">
         <button
-          @click="goToGlobal"
+          v-for="item in globalNavItems"
+          :key="item.name"
+          @click="handleNavClick(item)"
           :class="[
-            'flex items-center text-content-secondary hover:text-content text-sm mb-3 w-full cursor-pointer',
-            sidebarStore.isExpanded ? 'gap-2' : 'justify-center'
+            'flex items-center w-full py-2 rounded-md transition-colors cursor-pointer',
+            sidebarStore.isExpanded ? 'gap-3 px-3' : 'justify-center',
+            isActive(item.route)
+              ? 'bg-accent text-content-inverse'
+              : 'text-content-secondary hover:bg-surface-hover hover:text-content'
           ]"
         >
-          <ph-icon icon="chevron-left" class="w-4 h-4 flex-shrink-0" />
-          <span v-if="sidebarStore.isExpanded">返回總覽</span>
+          <!-- Dashboard Icon -->
+          <ph-icon v-if="item.icon === 'dashboard'" icon="gauge" class="w-5 h-5 flex-shrink-0" />
+          <!-- Activity Icon -->
+          <ph-icon v-else-if="item.icon === 'activity'" icon="bolt" class="w-5 h-5 flex-shrink-0" />
+          <!-- Tasks Icon -->
+          <ph-icon v-else-if="item.icon === 'tasks'" icon="list-check" class="w-5 h-5 flex-shrink-0" />
+          <!-- User Icon -->
+          <ph-icon v-else-if="item.icon === 'user'" icon="user" class="w-5 h-5 flex-shrink-0" />
+          <span v-if="sidebarStore.isExpanded">{{ item.label }}</span>
         </button>
-        <h2
-          v-if="sidebarStore.isExpanded && currentProject"
-          class="text-lg font-semibold text-content truncate"
-        >
-          {{ currentProject.name }}
-        </h2>
-      </div>
-
-      <!-- Navigation -->
-      <nav class="px-3 space-y-1">
-        <!-- Global Navigation -->
-        <template v-if="!isProjectMode">
-          <button
-            v-for="item in globalNavItems"
-            :key="item.name"
-            @click="handleNavClick(item)"
-            :class="[
-              'flex items-center w-full py-2 rounded-md transition-colors cursor-pointer',
-              sidebarStore.isExpanded ? 'gap-3 px-3' : 'justify-center',
-              isActive(item.route)
-                ? 'bg-accent text-content-inverse'
-                : 'text-content-secondary hover:bg-surface-hover hover:text-content'
-            ]"
-          >
-            <!-- Dashboard Icon -->
-            <ph-icon v-if="item.icon === 'dashboard'" icon="gauge" class="w-5 h-5 flex-shrink-0" />
-            <!-- Activity Icon -->
-            <ph-icon v-else-if="item.icon === 'activity'" icon="bolt" class="w-5 h-5 flex-shrink-0" />
-            <!-- Tasks Icon -->
-            <ph-icon v-else-if="item.icon === 'tasks'" icon="list-check" class="w-5 h-5 flex-shrink-0" />
-            <!-- User Icon -->
-            <ph-icon v-else-if="item.icon === 'user'" icon="user" class="w-5 h-5 flex-shrink-0" />
-            <span v-if="sidebarStore.isExpanded">{{ item.label }}</span>
-          </button>
-        </template>
-
-        <!-- Project Navigation -->
-        <template v-else>
-          <!-- Task Views Section -->
-          <div v-if="sidebarStore.isExpanded" class="mb-2">
-            <span class="px-3 text-xs font-medium text-content-tertiary uppercase tracking-wider">
-              任務視圖
-            </span>
-          </div>
-          <button
-            v-for="item in projectNavItems.filter(i => i.isView)"
-            :key="item.name"
-            @click="handleNavClick(item)"
-            :class="[
-              'flex items-center w-full py-2 rounded-md transition-colors cursor-pointer',
-              sidebarStore.isExpanded ? 'gap-3 px-3' : 'justify-center',
-              isActiveView(item.name)
-                ? 'bg-accent text-content-inverse'
-                : 'text-content-secondary hover:bg-surface-hover hover:text-content'
-            ]"
-          >
-            <!-- List Icon -->
-            <ph-icon v-if="item.icon === 'list'" icon="list" class="w-5 h-5 flex-shrink-0" />
-            <!-- Board Icon -->
-            <ph-icon v-else-if="item.icon === 'board'" icon="table-columns" class="w-5 h-5 flex-shrink-0" />
-            <!-- Calendar Icon -->
-            <ph-icon v-else-if="item.icon === 'calendar'" icon="calendar" class="w-5 h-5 flex-shrink-0" />
-            <span v-if="sidebarStore.isExpanded">{{ item.label }}</span>
-          </button>
-
-          <!-- Other Project Items -->
-          <div v-if="sidebarStore.isExpanded" class="mt-4 mb-2">
-            <span class="px-3 text-xs font-medium text-content-tertiary uppercase tracking-wider">
-              專案
-            </span>
-          </div>
-          <button
-            v-for="item in projectNavItems.filter(i => !i.isView)"
-            :key="item.name"
-            @click="handleNavClick(item)"
-            :class="[
-              'flex items-center w-full py-2 rounded-md transition-colors cursor-pointer',
-              sidebarStore.isExpanded ? 'gap-3 px-3' : 'justify-center',
-              isActiveView(item.name)
-                ? 'bg-accent text-content-inverse'
-                : 'text-content-secondary hover:bg-surface-hover hover:text-content'
-            ]"
-          >
-            <!-- Activity Icon -->
-            <ph-icon v-if="item.icon === 'activity'" icon="bolt" class="w-5 h-5 flex-shrink-0" />
-            <!-- Settings Icon -->
-            <ph-icon v-else-if="item.icon === 'settings'" icon="gear" class="w-5 h-5 flex-shrink-0" />
-            <!-- Chart Icon -->
-            <ph-icon v-else-if="item.icon === 'chart'" icon="chart-bar" class="w-5 h-5 flex-shrink-0" />
-            <span v-if="sidebarStore.isExpanded">{{ item.label }}</span>
-          </button>
-        </template>
       </nav>
 
       <!-- Projects Section (always visible) -->
