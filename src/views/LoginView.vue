@@ -209,18 +209,12 @@ const handleLogin = async () => {
       </div>
 
       <form @submit.prevent="handleLogin" class="space-y-6">
-        <!-- 伺服器網址（僅在 config 無設定時顯示） -->
-        <div v-if="!hasConfigFileUrl">
+        <!-- 伺服器網址（載入完成且 config 無設定時顯示） -->
+        <div v-if="!configLoading && !hasConfigFileUrl">
           <label for="apiUrl" class="block text-sm font-medium text-content-secondary mb-1">
             伺服器網址
           </label>
-          <!-- 載入中 -->
-          <div v-if="configLoading" class="input bg-surface-tertiary animate-pulse">
-            載入中...
-          </div>
-          <!-- config.json 無值時：顯示輸入框 -->
           <input
-            v-else
             id="apiUrl"
             v-model="apiUrl"
             type="text"
