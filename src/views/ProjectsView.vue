@@ -52,7 +52,7 @@ const handleSearchSelect = (task: Task) => {
 
       <!-- Loading -->
       <div v-if="projectsStore.isLoading" class="flex justify-center py-12">
-        <font-awesome-icon icon="spinner" class="spinner h-8 w-8" />
+        <ph-icon icon="spinner" class="spinner h-8 w-8" />
       </div>
 
       <!-- Error -->
@@ -68,7 +68,7 @@ const handleSearchSelect = (task: Task) => {
 
       <!-- Empty State -->
       <div v-else-if="projectsStore.filteredProjects.length === 0" class="empty-state">
-        <font-awesome-icon icon="folder" class="empty-state-icon" />
+        <ph-icon icon="folder" class="empty-state-icon" />
         <p class="empty-state-description">
           {{ projectsStore.searchQuery ? '找不到符合的專案' : '尚無專案' }}
         </p>
@@ -109,14 +109,14 @@ const handleSearchSelect = (task: Task) => {
                 v-if="project.is_public"
                 class="flex items-center"
               >
-                <font-awesome-icon icon="globe" class="w-4 h-4 mr-1" />
+                <ph-icon icon="globe" class="w-4 h-4 mr-1" />
                 公開
               </span>
               <span
                 v-else
                 class="flex items-center"
               >
-                <font-awesome-icon icon="lock" class="w-4 h-4 mr-1" />
+                <ph-icon icon="lock" class="w-4 h-4 mr-1" />
                 私人
               </span>
             </div>

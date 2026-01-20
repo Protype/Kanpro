@@ -6,13 +6,13 @@
       :title="themeInfo.name"
     >
       <!-- Sun icon (light theme) -->
-      <font-awesome-icon
+      <ph-icon
         v-if="!isDark"
         icon="sun"
         class="h-5 w-5"
       />
       <!-- Moon icon (dark theme) -->
-      <font-awesome-icon
+      <ph-icon
         v-else
         icon="moon"
         class="h-5 w-5"
@@ -36,12 +36,12 @@
           >
             <!-- Theme icon -->
             <span class="flex-shrink-0">
-              <font-awesome-icon
+              <ph-icon
                 v-if="!theme.isDark"
                 icon="sun"
                 class="h-4 w-4"
               />
-              <font-awesome-icon
+              <ph-icon
                 v-else
                 icon="moon"
                 class="h-4 w-4"
@@ -55,7 +55,7 @@
             </span>
 
             <!-- Check mark -->
-            <font-awesome-icon
+            <ph-icon
               v-if="currentTheme === theme.id"
               icon="check"
               class="h-4 w-4 flex-shrink-0"

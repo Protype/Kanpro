@@ -132,7 +132,7 @@ onUnmounted(() => {
           <!-- Search Input -->
           <div class="p-4 border-b">
             <div class="relative">
-              <font-awesome-icon
+              <ph-icon
                 icon="magnifying-glass"
                 class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
               />
@@ -168,7 +168,7 @@ onUnmounted(() => {
 
           <!-- Loading -->
           <div v-if="searchStore.isSearching" class="p-4 text-center">
-            <font-awesome-icon icon="spinner" class="animate-spin h-6 w-6 text-blue-600 mx-auto" />
+            <ph-icon icon="spinner" class="animate-spin h-6 w-6 text-blue-600 mx-auto" />
           </div>
 
           <!-- Results -->
@@ -210,7 +210,7 @@ onUnmounted(() => {
             v-else-if="searchInput && !searchStore.isSearching && searchStore.results.length === 0"
             class="p-8 text-center text-gray-500"
           >
-            <font-awesome-icon icon="face-frown" class="w-12 h-12 mx-auto text-gray-300 mb-3" />
+            <ph-icon icon="face-frown" class="w-12 h-12 mx-auto text-gray-300 mb-3" />
             <p>找不到符合的任務</p>
             <p class="text-sm text-gray-400 mt-1">嘗試其他搜尋詞或搜尋語法</p>
           </div>

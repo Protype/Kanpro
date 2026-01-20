@@ -125,7 +125,7 @@ const handleRemoveCategory = async (category: Category) => {
 
     <!-- Loading -->
     <div v-if="categoriesStore.isLoading" class="text-center py-4">
-      <font-awesome-icon icon="spinner" class="animate-spin h-6 w-6 text-blue-600 mx-auto" />
+      <ph-icon icon="spinner" class="animate-spin h-6 w-6 text-blue-600 mx-auto" />
     </div>
 
     <div v-else class="space-y-3">
@@ -170,7 +170,7 @@ const handleRemoveCategory = async (category: Category) => {
             <div class="flex items-center gap-3">
               <!-- Category icon -->
               <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-                <font-awesome-icon icon="tag" class="w-4 h-4 text-gray-500" />
+                <ph-icon icon="tag" class="w-4 h-4 text-gray-500" />
               </div>
 
               <!-- Category info -->
@@ -188,14 +188,14 @@ const handleRemoveCategory = async (category: Category) => {
                 class="p-2 text-gray-400 hover:text-gray-600"
                 title="編輯"
               >
-                <font-awesome-icon icon="pen-to-square" class="w-4 h-4" />
+                <ph-icon icon="pen-to-square" class="w-4 h-4" />
               </button>
               <button
                 @click="handleRemoveCategory(category)"
                 class="p-2 text-gray-400 hover:text-red-500"
                 title="刪除"
               >
-                <font-awesome-icon icon="trash" class="w-4 h-4" />
+                <ph-icon icon="trash" class="w-4 h-4" />
               </button>
             </div>
           </div>

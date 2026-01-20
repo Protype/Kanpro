@@ -397,7 +397,7 @@ onUnmounted(() => {
           <div class="p-4">
             <!-- Search Mode Input -->
             <div v-if="mode === 'search'" class="relative">
-              <font-awesome-icon
+              <ph-icon
                 icon="magnifying-glass"
                 class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-content-tertiary"
               />
@@ -427,7 +427,7 @@ onUnmounted(() => {
             <!-- Add Mode Input (Tokenized) - styled like search mode -->
             <div v-else class="relative">
               <!-- Plus icon -->
-              <font-awesome-icon
+              <ph-icon
                 icon="plus"
                 class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-content-tertiary"
               />
@@ -492,7 +492,7 @@ onUnmounted(() => {
 
             <!-- Loading -->
             <div v-if="searchStore.isSearching" class="p-8 text-center">
-              <font-awesome-icon icon="spinner" class="animate-spin h-6 w-6 text-accent mx-auto" />
+              <ph-icon icon="spinner" class="animate-spin h-6 w-6 text-accent mx-auto" />
             </div>
 
             <!-- Results -->
@@ -534,7 +534,7 @@ onUnmounted(() => {
               v-else-if="inputValue && !searchStore.isSearching && searchStore.results.length === 0"
               class="p-8 text-center text-content-tertiary border-t border-edge"
             >
-              <font-awesome-icon icon="face-frown" class="w-12 h-12 mx-auto text-content-tertiary/30 mb-3" />
+              <ph-icon icon="face-frown" class="w-12 h-12 mx-auto text-content-tertiary/30 mb-3" />
               <p>找不到符合的任務</p>
               <p class="text-sm mt-1">嘗試其他搜尋詞或搜尋語法</p>
             </div>

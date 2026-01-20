@@ -104,7 +104,7 @@ defineExpose({
               class="text-gray-400 hover:text-gray-500"
               :disabled="isSubmitting"
             >
-              <font-awesome-icon icon="xmark" class="w-5 h-5" />
+              <ph-icon icon="xmark" class="w-5 h-5" />
             </button>
           </div>
 
@@ -199,7 +199,7 @@ defineExpose({
                 :disabled="!isValid || isSubmitting"
                 class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
               >
-                <font-awesome-icon v-if="isSubmitting" icon="spinner" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
+                <ph-icon v-if="isSubmitting" icon="spinner" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
                 {{ isSubmitting ? '建立中...' : '建立任務' }}
               </button>
             </div>

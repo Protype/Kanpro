@@ -116,7 +116,7 @@ const handleCreateTask = async (data: {
   <div class="h-full flex flex-col bg-surface-secondary">
     <!-- Loading -->
     <div v-if="boardStore.isLoading" class="flex-1 flex items-center justify-center">
-      <font-awesome-icon icon="spinner" class="animate-spin h-8 w-8 text-accent" />
+      <ph-icon icon="spinner" class="animate-spin h-8 w-8 text-accent" />
     </div>
 
     <!-- Error -->
@@ -154,7 +154,7 @@ const handleCreateTask = async (data: {
               class="text-content-tertiary hover:text-content-secondary"
               title="新增任務"
             >
-              <font-awesome-icon icon="plus" class="w-5 h-5" />
+              <ph-icon icon="plus" class="w-5 h-5" />
             </button>
           </div>
 

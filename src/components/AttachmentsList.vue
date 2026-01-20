@@ -163,7 +163,7 @@ const closePreview = () => {
 
     <!-- Loading -->
     <div v-if="attachmentsStore.isLoading || isUploading" class="text-center py-2">
-      <font-awesome-icon icon="spinner" class="animate-spin h-5 w-5 text-blue-600 mx-auto" />
+      <ph-icon icon="spinner" class="animate-spin h-5 w-5 text-blue-600 mx-auto" />
       <p v-if="isUploading" class="text-xs text-gray-500 mt-1">上傳中...</p>
     </div>
 
@@ -206,14 +206,14 @@ const closePreview = () => {
             class="p-1 text-gray-400 hover:text-blue-600"
             title="下載"
           >
-            <font-awesome-icon icon="download" class="w-4 h-4" />
+            <ph-icon icon="download" class="w-4 h-4" />
           </button>
           <button
             @click="handleRemove(attachment.id)"
             class="p-1 text-gray-400 hover:text-red-500"
             title="刪除"
           >
-            <font-awesome-icon icon="trash" class="w-4 h-4" />
+            <ph-icon icon="trash" class="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -239,7 +239,7 @@ const closePreview = () => {
             @click="closePreview"
             class="absolute top-2 right-2 text-white hover:text-gray-300"
           >
-            <font-awesome-icon icon="xmark" class="w-8 h-8" />
+            <ph-icon icon="xmark" class="w-8 h-8" />
           </button>
           <div class="text-center">
             <p class="text-white mb-2">{{ previewImage.name }}</p>

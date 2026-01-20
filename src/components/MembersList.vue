@@ -120,7 +120,7 @@ const handleChangeRole = async (member: ProjectMember, newRole: 'project-manager
 
     <!-- Loading -->
     <div v-if="membersStore.isLoading" class="text-center py-4">
-      <font-awesome-icon icon="spinner" class="animate-spin h-6 w-6 text-blue-600 mx-auto" />
+      <ph-icon icon="spinner" class="animate-spin h-6 w-6 text-blue-600 mx-auto" />
     </div>
 
     <div v-else class="space-y-3">
@@ -217,7 +217,7 @@ const handleChangeRole = async (member: ProjectMember, newRole: 'project-manager
               class="p-1 text-gray-400 hover:text-red-500 transition-colors"
               title="移除成員"
             >
-              <font-awesome-icon icon="trash" class="w-5 h-5" />
+              <ph-icon icon="trash" class="w-5 h-5" />
             </button>
           </div>
         </div>

@@ -132,7 +132,7 @@ watch(() => isOpen.value, (open) => {
       title="通知"
     >
       <!-- Bell Icon -->
-      <font-awesome-icon icon="bell" class="w-5 h-5" />
+      <ph-icon icon="bell" class="w-5 h-5" />
 
       <!-- Unread Badge -->
       <span
@@ -172,7 +172,7 @@ watch(() => isOpen.value, (open) => {
 
         <!-- Loading -->
         <div v-if="notificationsStore.isLoading" class="px-4 py-8 text-center">
-          <font-awesome-icon icon="spinner" class="animate-spin h-6 w-6 text-accent mx-auto" />
+          <ph-icon icon="spinner" class="animate-spin h-6 w-6 text-accent mx-auto" />
         </div>
 
         <!-- Activity List -->
@@ -194,7 +194,7 @@ watch(() => isOpen.value, (open) => {
                   notificationsStore.isRead(activity.id) ? 'bg-surface-tertiary text-content-secondary' : 'bg-accent/20 text-accent'
                 ]"
               >
-                <font-awesome-icon icon="clipboard-list" class="w-4 h-4" />
+                <ph-icon icon="clipboard-list" class="w-4 h-4" />
               </div>
 
               <!-- Content -->

@@ -176,7 +176,7 @@ const sortedSwimlanes = computed(() => {
 
     <!-- Loading -->
     <div v-if="swimlanesStore.isLoading" class="text-center py-4">
-      <font-awesome-icon icon="spinner" class="animate-spin h-6 w-6 text-blue-600 mx-auto" />
+      <ph-icon icon="spinner" class="animate-spin h-6 w-6 text-blue-600 mx-auto" />
     </div>
 
     <div v-else class="space-y-3">
@@ -238,7 +238,7 @@ const sortedSwimlanes = computed(() => {
                   class="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30"
                   title="上移"
                 >
-                  <font-awesome-icon icon="chevron-up" class="w-4 h-4" />
+                  <ph-icon icon="chevron-up" class="w-4 h-4" />
                 </button>
                 <button
                   @click="handleMoveDown(swimlane)"
@@ -246,7 +246,7 @@ const sortedSwimlanes = computed(() => {
                   class="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30"
                   title="下移"
                 >
-                  <font-awesome-icon icon="chevron-down" class="w-4 h-4" />
+                  <ph-icon icon="chevron-down" class="w-4 h-4" />
                 </button>
               </div>
 
@@ -274,22 +274,22 @@ const sortedSwimlanes = computed(() => {
                 class="p-2 text-gray-400 hover:text-gray-600"
                 :title="swimlane.is_active ? '停用' : '啟用'"
               >
-                <font-awesome-icon v-if="swimlane.is_active" icon="eye" class="w-4 h-4" />
-                <font-awesome-icon v-else icon="eye-slash" class="w-4 h-4" />
+                <ph-icon v-if="swimlane.is_active" icon="eye" class="w-4 h-4" />
+                <ph-icon v-else icon="eye-slash" class="w-4 h-4" />
               </button>
               <button
                 @click="startEditing(swimlane)"
                 class="p-2 text-gray-400 hover:text-gray-600"
                 title="編輯"
               >
-                <font-awesome-icon icon="pen-to-square" class="w-4 h-4" />
+                <ph-icon icon="pen-to-square" class="w-4 h-4" />
               </button>
               <button
                 @click="handleRemoveSwimlane(swimlane)"
                 class="p-2 text-gray-400 hover:text-red-500"
                 title="刪除"
               >
-                <font-awesome-icon icon="trash" class="w-4 h-4" />
+                <ph-icon icon="trash" class="w-4 h-4" />
               </button>
             </div>
           </div>

@@ -126,7 +126,7 @@ const getTagColor = (tagName: string): string => {
 
     <!-- Loading -->
     <div v-if="tagsStore.isLoading" class="text-center py-2">
-      <font-awesome-icon icon="spinner" class="animate-spin h-4 w-4 text-blue-600 mx-auto" />
+      <ph-icon icon="spinner" class="animate-spin h-4 w-4 text-blue-600 mx-auto" />
     </div>
 
     <div v-else>
@@ -161,7 +161,7 @@ const getTagColor = (tagName: string): string => {
               @click="removeTag(tag)"
               class="hover:opacity-70"
             >
-              <font-awesome-icon icon="xmark" class="w-3 h-3" />
+              <ph-icon icon="xmark" class="w-3 h-3" />
             </button>
           </span>
         </div>

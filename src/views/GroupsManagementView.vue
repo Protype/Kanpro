@@ -211,7 +211,7 @@ const handleSearchSelect = (task: Task) => {
       <!-- Error Alert -->
       <div v-if="error" class="alert-error mb-6">
         <div class="flex items-center gap-2">
-          <font-awesome-icon icon="triangle-exclamation" class="w-5 h-5" />
+          <ph-icon icon="triangle-exclamation" class="w-5 h-5" />
           <span>{{ error }}</span>
         </div>
       </div>
@@ -219,7 +219,7 @@ const handleSearchSelect = (task: Task) => {
       <!-- Success Alert -->
       <div v-if="successMessage" class="alert-success mb-6">
         <div class="flex items-center gap-2">
-          <font-awesome-icon icon="check" class="w-5 h-5" />
+          <ph-icon icon="check" class="w-5 h-5" />
           <span>{{ successMessage }}</span>
         </div>
       </div>
@@ -243,7 +243,7 @@ const handleSearchSelect = (task: Task) => {
 
       <!-- Loading -->
       <div v-if="groupsStore.isLoading" class="flex items-center justify-center py-12">
-        <font-awesome-icon icon="spinner" class="animate-spin h-8 w-8 text-accent" />
+        <ph-icon icon="spinner" class="animate-spin h-8 w-8 text-accent" />
       </div>
 
       <div v-else class="space-y-4">
@@ -303,7 +303,7 @@ const handleSearchSelect = (task: Task) => {
                 <div class="flex items-center gap-4">
                   <!-- Group icon -->
                   <div class="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
-                    <font-awesome-icon icon="user-group" class="w-5 h-5 text-accent" />
+                    <ph-icon icon="user-group" class="w-5 h-5 text-accent" />
                   </div>
 
                   <!-- Group info -->
@@ -322,7 +322,7 @@ const handleSearchSelect = (task: Task) => {
                     class="p-2 text-content-tertiary hover:text-content-secondary"
                     title="管理成員"
                   >
-                    <font-awesome-icon icon="users" class="w-5 h-5" />
+                    <ph-icon icon="users" class="w-5 h-5" />
                   </button>
                   <!-- Edit -->
                   <button
@@ -330,7 +330,7 @@ const handleSearchSelect = (task: Task) => {
                     class="p-2 text-content-tertiary hover:text-content-secondary"
                     title="編輯"
                   >
-                    <font-awesome-icon icon="pen-to-square" class="w-5 h-5" />
+                    <ph-icon icon="pen-to-square" class="w-5 h-5" />
                   </button>
                   <!-- Delete -->
                   <button
@@ -338,7 +338,7 @@ const handleSearchSelect = (task: Task) => {
                     class="p-2 text-content-tertiary hover:text-error"
                     title="刪除"
                   >
-                    <font-awesome-icon icon="trash" class="w-5 h-5" />
+                    <ph-icon icon="trash" class="w-5 h-5" />
                   </button>
                 </div>
               </div>
@@ -413,13 +413,13 @@ const handleSearchSelect = (task: Task) => {
                   @click="closeMembersModal"
                   class="text-content-tertiary hover:text-content-secondary"
                 >
-                  <font-awesome-icon icon="xmark" class="w-5 h-5" />
+                  <ph-icon icon="xmark" class="w-5 h-5" />
                 </button>
               </div>
 
               <!-- Loading -->
               <div v-if="isLoadingMembers" class="text-center py-8">
-                <font-awesome-icon icon="spinner" class="animate-spin h-6 w-6 text-accent mx-auto" />
+                <ph-icon icon="spinner" class="animate-spin h-6 w-6 text-accent mx-auto" />
               </div>
 
               <div v-else>
@@ -486,7 +486,7 @@ const handleSearchSelect = (task: Task) => {
                       class="p-1 text-content-tertiary hover:text-error"
                       title="移除"
                     >
-                      <font-awesome-icon icon="xmark" class="w-4 h-4" />
+                      <ph-icon icon="xmark" class="w-4 h-4" />
                     </button>
                   </div>
 

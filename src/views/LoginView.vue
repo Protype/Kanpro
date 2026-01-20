@@ -185,21 +185,22 @@ const handleLogin = async () => {
       <ThemeToggle />
     </div>
 
-    <div class="max-w-md w-full card p-8 mx-4">
+    <div class="max-w-md w-full card p-8 mx-4 relative">
+      <!-- 伺服器連結 icon（僅在 config 有設定時顯示，卡片右側跨線） -->
+      <a
+        v-if="hasConfigFileUrl && !configLoading"
+        :href="displayApiUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="absolute top-[37px] -right-3.5 w-7 h-7 rounded-full bg-surface border border-edge flex items-center justify-center text-content-tertiary/50 hover:text-content-tertiary hover:border-content-tertiary/30 transition-colors"
+        title="開啟 Kanboard 伺服器"
+      >
+        <ph-icon icon="hard-drives" class="w-4 h-4" />
+      </a>
+
       <!-- 標題列 -->
-      <div class="flex items-center justify-center mb-8 relative">
+      <div class="flex items-center justify-center mb-8">
         <h2 class="text-2xl font-bold text-content">Kanpro</h2>
-        <!-- 伺服器連結 icon（僅在 config 有設定時顯示，標題右側） -->
-        <a
-          v-if="hasConfigFileUrl && !configLoading"
-          :href="displayApiUrl"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="absolute right-0 top-[5px] p-1 text-content-tertiary hover:text-content-secondary transition-colors"
-          title="開啟 Kanboard 伺服器"
-        >
-          <font-awesome-icon icon="server" class="w-5 h-5" />
-        </a>
       </div>
 
       <!-- 錯誤訊息 -->
@@ -279,7 +280,7 @@ const handleLogin = async () => {
           class="btn-primary w-full"
         >
           <span v-if="isLoading" class="flex items-center justify-center">
-            <font-awesome-icon icon="spinner" class="animate-spin -ml-1 mr-2 h-4 w-4" />
+            <ph-icon icon="spinner" class="animate-spin -ml-1 mr-2 h-4 w-4" />
             登入中...
           </span>
           <span v-else>登入</span>

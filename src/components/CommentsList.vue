@@ -127,7 +127,7 @@ const canEditComment = (comment: Comment): boolean => {
 
     <!-- Loading -->
     <div v-if="commentsStore.isLoading" class="text-center py-4">
-      <font-awesome-icon icon="spinner" class="animate-spin h-5 w-5 text-blue-600 mx-auto" />
+      <ph-icon icon="spinner" class="animate-spin h-5 w-5 text-blue-600 mx-auto" />
     </div>
 
     <!-- Comments list -->
@@ -193,14 +193,14 @@ const canEditComment = (comment: Comment): boolean => {
               class="text-gray-400 hover:text-gray-600 p-1"
               title="編輯"
             >
-              <font-awesome-icon icon="pen-to-square" class="w-4 h-4" />
+              <ph-icon icon="pen-to-square" class="w-4 h-4" />
             </button>
             <button
               @click="handleRemoveComment(comment.id)"
               class="text-gray-400 hover:text-red-500 p-1"
               title="刪除"
             >
-              <font-awesome-icon icon="trash" class="w-4 h-4" />
+              <ph-icon icon="trash" class="w-4 h-4" />
             </button>
           </div>
         </div>

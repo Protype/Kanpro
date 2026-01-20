@@ -747,21 +747,24 @@ Kanpro 使用 JWTAuth 外掛進行認證，所有 API 呼叫必須使用 **HTTP 
 
 ## 附錄：圖示規範
 
-Kanpro 統一使用 **Font Awesome 7** 作為圖示庫，禁止使用 inline SVG。
+Kanpro 統一使用 **Phosphor Icons** 作為圖示庫，禁止使用 inline SVG。
 
 ### 使用方式
 
 ```vue
-<font-awesome-icon icon="icon-name" class="w-5 h-5" />
+<ph-icon icon="icon-name" class="w-5 h-5" />
 ```
 
 ### 圖示註冊
 
-所有使用的圖示需在 `src/plugins/fontawesome.ts` 中註冊：
+所有使用的圖示需在 `src/plugins/phosphor.ts` 中註冊：
 
 ```typescript
-import { faIconName } from '@fortawesome/free-solid-svg-icons'
-library.add(faIconName)
+import { PhIconName } from '@phosphor-icons/vue'
+
+export const iconComponents = {
+  'icon-name': PhIconName,
+}
 ```
 
 ### 圖示分類與命名
@@ -770,26 +773,26 @@ library.add(faIconName)
 |------|------|------|
 | **通用操作** | | |
 | | `plus` | 新增 |
-| | `xmark` | 關閉、取消、移除 |
+| | `x` | 關閉、取消、移除 |
 | | `check` | 確認、完成 |
 | | `spinner` | 載入中（搭配 `animate-spin`） |
-| | `pen-to-square` | 編輯 |
+| | `pencil` | 編輯 |
 | | `trash` | 刪除 |
 | | `download` | 下載 |
 | **導航** | | |
-| | `bars` | 漢堡選單 |
-| | `chevron-left/right/up/down` | 方向箭頭 |
-| | `right-from-bracket` | 登出 |
+| | `list` | 漢堡選單 |
+| | `caret-left/right/up/down` | 方向箭頭 |
+| | `sign-out` | 登出 |
 | **搜尋與新增** | | |
 | | `magnifying-glass` | 搜尋 |
-| | `circle-plus` | 圓形新增按鈕 |
+| | `plus-circle` | 圓形新增按鈕 |
 | | `folder-plus` | 新增專案/資料夾 |
 | **側邊欄導航** | | |
 | | `gauge` | 儀表板 |
-| | `bolt` | 活動 |
-| | `list-check` | 任務清單 |
+| | `lightning` | 活動 |
+| | `list-checks` | 任務清單 |
 | | `list` | 列表檢視 |
-| | `table-columns` | 看板檢視 |
+| | `columns` | 看板檢視 |
 | | `calendar` | 行事曆 |
 | | `gear` | 設定 |
 | | `chart-bar` | 分析 |
@@ -797,53 +800,71 @@ library.add(faIconName)
 | **使用者** | | |
 | | `user` | 單一使用者 |
 | | `users` | 多個使用者 |
-| | `user-group` | 群組 |
+| | `users-three` | 群組 |
 | | `bell` | 通知 |
 | **主題** | | |
 | | `sun` | 淺色主題 |
 | | `moon` | 深色主題 |
 | | `palette` | 主題選擇 |
 | **狀態** | | |
-| | `circle-check` | 成功 |
-| | `circle-xmark` | 失敗 |
-| | `triangle-exclamation` | 警告 |
-| | `circle-info` | 資訊 |
-| | `circle-question` | 說明 |
+| | `check-circle` | 成功 |
+| | `x-circle` | 失敗 |
+| | `warning` | 警告 |
+| | `info` | 資訊 |
+| | `question` | 說明 |
 | **任務相關** | | |
-| | `clipboard-list` | 任務清單 |
+| | `clipboard-text` | 任務清單 |
 | | `tag` | 標籤 |
 | | `paperclip` | 附件 |
-| | `comment` | 評論 |
+| | `chat-circle` | 評論 |
 | | `link` | 連結 |
 | **其他** | | |
 | | `eye` / `eye-slash` | 顯示/隱藏 |
-| | `grip-vertical` | 拖曳把手 |
-| | `server` | 伺服器 |
+| | `dots-six-vertical` | 拖曳把手 |
+| | `hard-drives` | 伺服器 |
 | | `globe` | 公開 |
 | | `lock` | 私人/鎖定 |
 
 ### 尺寸規範
 
-| class | 用途 |
-|-------|------|
-| `w-3 h-3` | 小型圖示（標籤內、行內） |
-| `w-4 h-4` | 按鈕內圖示 |
-| `w-5 h-5` | 標準圖示 |
-| `w-6 h-6` | 強調圖示 |
-| `w-8 h-8` | 載入狀態 |
-| `w-16 h-16` | 空狀態大圖示 |
+透過 `size` prop 或 Tailwind class 設定尺寸：
 
-### Regular vs Solid
+| 方式 | 範例 | 說明 |
+|------|------|------|
+| `size` prop | `<ph-icon icon="plus" :size="20" />` | 直接設定像素值 |
+| Tailwind class | `<ph-icon icon="plus" class="w-5 h-5" />` | 使用 Tailwind 尺寸 |
 
-- **Solid（預設）**：填滿風格，用於大多數場景
-- **Regular**：線條風格，用於需要較輕視覺的場景
+| 尺寸 | 用途 |
+|------|------|
+| 12px / `w-3 h-3` | 小型圖示（標籤內、行內） |
+| 16px / `w-4 h-4` | 按鈕內圖示 |
+| 20px / `w-5 h-5` | 標準圖示（預設） |
+| 24px / `w-6 h-6` | 強調圖示 |
+| 32px / `w-8 h-8` | 載入狀態 |
+| 64px / `w-16 h-16` | 空狀態大圖示 |
+
+### Weight 變體
+
+Phosphor Icons 支援多種 weight（粗細）變體：
+
+| Weight | 說明 | 用途 |
+|--------|------|------|
+| `thin` | 最細線條 | 裝飾性用途 |
+| `light` | 較細線條 | 輕盈感場景 |
+| `regular` | 標準（預設） | 大多數場景 |
+| `bold` | 較粗線條 | 強調用途 |
+| `fill` | 填滿風格 | 選中狀態、強調 |
+| `duotone` | 雙色調 | 特殊視覺效果 |
 
 ```vue
-<!-- Solid（預設） -->
-<font-awesome-icon icon="calendar" />
+<!-- Regular（預設） -->
+<ph-icon icon="calendar" />
 
-<!-- Regular -->
-<font-awesome-icon :icon="['far', 'calendar']" />
+<!-- Fill -->
+<ph-icon icon="calendar" weight="fill" />
+
+<!-- Bold -->
+<ph-icon icon="calendar" weight="bold" />
 ```
 
 ---

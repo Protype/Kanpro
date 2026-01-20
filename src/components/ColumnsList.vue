@@ -163,7 +163,7 @@ const handleMoveDown = async (column: Column) => {
 
     <!-- Loading -->
     <div v-if="columnsStore.isLoading" class="text-center py-4">
-      <font-awesome-icon icon="spinner" class="animate-spin h-6 w-6 text-accent mx-auto" />
+      <ph-icon icon="spinner" class="animate-spin h-6 w-6 text-accent mx-auto" />
     </div>
 
     <div v-else class="space-y-3">
@@ -235,7 +235,7 @@ const handleMoveDown = async (column: Column) => {
                   class="p-1 text-content-tertiary hover:text-content-secondary disabled:opacity-30"
                   title="上移"
                 >
-                  <font-awesome-icon icon="chevron-up" class="w-4 h-4" />
+                  <ph-icon icon="chevron-up" class="w-4 h-4" />
                 </button>
                 <button
                   @click="handleMoveDown(column)"
@@ -243,7 +243,7 @@ const handleMoveDown = async (column: Column) => {
                   class="p-1 text-content-tertiary hover:text-content-secondary disabled:opacity-30"
                   title="下移"
                 >
-                  <font-awesome-icon icon="chevron-down" class="w-4 h-4" />
+                  <ph-icon icon="chevron-down" class="w-4 h-4" />
                 </button>
               </div>
 
@@ -267,14 +267,14 @@ const handleMoveDown = async (column: Column) => {
                 class="p-2 text-content-tertiary hover:text-content-secondary"
                 title="編輯"
               >
-                <font-awesome-icon icon="pen-to-square" class="w-4 h-4" />
+                <ph-icon icon="pen-to-square" class="w-4 h-4" />
               </button>
               <button
                 @click="handleRemoveColumn(column)"
                 class="p-2 text-content-tertiary hover:text-error"
                 title="刪除"
               >
-                <font-awesome-icon icon="trash" class="w-4 h-4" />
+                <ph-icon icon="trash" class="w-4 h-4" />
               </button>
             </div>
           </div>

@@ -135,7 +135,7 @@ const handleClickTask = (taskId: number) => {
 
     <!-- Loading -->
     <div v-if="taskLinksStore.isLoading" class="text-center py-2">
-      <font-awesome-icon icon="spinner" class="animate-spin h-5 w-5 text-blue-600 mx-auto" />
+      <ph-icon icon="spinner" class="animate-spin h-5 w-5 text-blue-600 mx-auto" />
     </div>
 
     <div v-else class="space-y-2">
@@ -210,7 +210,7 @@ const handleClickTask = (taskId: number) => {
           class="p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
           title="刪除連結"
         >
-          <font-awesome-icon icon="xmark" class="w-4 h-4" />
+          <ph-icon icon="xmark" class="w-4 h-4" />
         </button>
       </div>
 

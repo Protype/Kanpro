@@ -204,7 +204,7 @@ watch(projectId, () => {
             @click="goToPrevMonth"
             class="p-1 hover:bg-surface-hover rounded text-content-secondary hover:text-content"
           >
-            <font-awesome-icon icon="chevron-left" class="w-5 h-5" />
+            <ph-icon icon="chevron-left" class="w-5 h-5" />
           </button>
           <span class="text-lg font-medium min-w-[140px] text-center text-content">
             {{ currentYear }} {{ currentMonthName }}
@@ -214,7 +214,7 @@ watch(projectId, () => {
             @click="goToNextMonth"
             class="p-1 hover:bg-surface-hover rounded text-content-secondary hover:text-content"
           >
-            <font-awesome-icon icon="chevron-right" class="w-5 h-5" />
+            <ph-icon icon="chevron-right" class="w-5 h-5" />
           </button>
         </div>
       </div>

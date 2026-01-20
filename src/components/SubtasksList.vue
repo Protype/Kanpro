@@ -123,7 +123,7 @@ const cancelAdd = () => {
 
     <!-- Loading -->
     <div v-if="subtasksStore.isLoading" class="text-center py-2">
-      <font-awesome-icon icon="spinner" class="animate-spin h-5 w-5 text-blue-600 mx-auto" />
+      <ph-icon icon="spinner" class="animate-spin h-5 w-5 text-blue-600 mx-auto" />
     </div>
 
     <!-- Subtasks list -->
@@ -161,7 +161,7 @@ const cancelAdd = () => {
           class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity"
           title="刪除子任務"
         >
-          <font-awesome-icon icon="xmark" class="w-4 h-4" />
+          <ph-icon icon="xmark" class="w-4 h-4" />
         </button>
       </div>
 

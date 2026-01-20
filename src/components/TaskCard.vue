@@ -81,7 +81,7 @@ function formatDate(timestamp?: number): string {
           isOverdue(task.date_due) ? 'text-red-600 font-medium' : ''
         ]"
       >
-        <font-awesome-icon icon="calendar" class="w-3 h-3 mr-1" />
+        <ph-icon icon="calendar" class="w-3 h-3 mr-1" />
         {{ formatDate(task.date_due) }}
       </div>
     </div>

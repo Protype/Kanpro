@@ -140,7 +140,7 @@ const getEventIcon = (eventName: string): string => {
 
       <!-- Loading -->
       <div v-if="isLoading" class="flex justify-center py-12">
-        <font-awesome-icon icon="spinner" class="animate-spin h-8 w-8 text-accent" />
+        <ph-icon icon="spinner" class="animate-spin h-8 w-8 text-accent" />
       </div>
 
       <!-- Error -->
@@ -161,23 +161,23 @@ const getEventIcon = (eventName: string): string => {
             <!-- Icon -->
             <div class="flex-shrink-0 w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent">
               <!-- Plus Icon -->
-              <font-awesome-icon v-if="getEventIcon(activity.event_name) === 'plus'" icon="plus" class="w-5 h-5" />
+              <ph-icon v-if="getEventIcon(activity.event_name) === 'plus'" icon="plus" class="w-5 h-5" />
               <!-- Check Icon -->
-              <font-awesome-icon v-else-if="getEventIcon(activity.event_name) === 'check'" icon="check" class="w-5 h-5" />
+              <ph-icon v-else-if="getEventIcon(activity.event_name) === 'check'" icon="check" class="w-5 h-5" />
               <!-- Refresh Icon -->
-              <font-awesome-icon v-else-if="getEventIcon(activity.event_name) === 'refresh'" icon="rotate" class="w-5 h-5" />
+              <ph-icon v-else-if="getEventIcon(activity.event_name) === 'refresh'" icon="rotate" class="w-5 h-5" />
               <!-- Arrow Icon -->
-              <font-awesome-icon v-else-if="getEventIcon(activity.event_name) === 'arrow'" icon="arrow-right" class="w-5 h-5" />
+              <ph-icon v-else-if="getEventIcon(activity.event_name) === 'arrow'" icon="arrow-right" class="w-5 h-5" />
               <!-- Chat Icon -->
-              <font-awesome-icon v-else-if="getEventIcon(activity.event_name) === 'chat'" icon="comment" class="w-5 h-5" />
+              <ph-icon v-else-if="getEventIcon(activity.event_name) === 'chat'" icon="comment" class="w-5 h-5" />
               <!-- List Icon -->
-              <font-awesome-icon v-else-if="getEventIcon(activity.event_name) === 'list'" icon="clipboard-check" class="w-5 h-5" />
+              <ph-icon v-else-if="getEventIcon(activity.event_name) === 'list'" icon="clipboard-check" class="w-5 h-5" />
               <!-- Attachment Icon -->
-              <font-awesome-icon v-else-if="getEventIcon(activity.event_name) === 'attachment'" icon="paperclip" class="w-5 h-5" />
+              <ph-icon v-else-if="getEventIcon(activity.event_name) === 'attachment'" icon="paperclip" class="w-5 h-5" />
               <!-- Link Icon -->
-              <font-awesome-icon v-else-if="getEventIcon(activity.event_name) === 'link'" icon="link" class="w-5 h-5" />
+              <ph-icon v-else-if="getEventIcon(activity.event_name) === 'link'" icon="link" class="w-5 h-5" />
               <!-- Default Activity Icon -->
-              <font-awesome-icon v-else icon="bolt" class="w-5 h-5" />
+              <ph-icon v-else icon="bolt" class="w-5 h-5" />
             </div>
 
             <!-- Content -->
@@ -199,7 +199,7 @@ const getEventIcon = (eventName: string): string => {
 
         <!-- Empty State -->
         <div v-if="activities.length === 0" class="bg-surface rounded-lg border border-edge p-12 text-center">
-          <font-awesome-icon icon="bolt" class="w-16 h-16 mx-auto mb-4 text-content-tertiary" />
+          <ph-icon icon="bolt" class="w-16 h-16 mx-auto mb-4 text-content-tertiary" />
           <p class="text-content-secondary">沒有近期活動</p>
         </div>
       </div>

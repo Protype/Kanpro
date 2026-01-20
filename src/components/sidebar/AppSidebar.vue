@@ -109,7 +109,7 @@ const goToGlobal = () => {
         class="absolute -right-3 top-1/2 -translate-y-1/2 p-1 bg-surface border border-edge rounded-full text-content-tertiary hover:text-content-secondary hover:bg-surface-hover transition-all cursor-pointer z-10 opacity-0 group-hover:opacity-100"
         :title="sidebarStore.isExpanded ? '折疊側邊欄' : '展開側邊欄'"
       >
-        <font-awesome-icon
+        <ph-icon
           icon="chevron-left"
           class="w-4 h-4 transition-transform"
           :class="{ 'rotate-180': !sidebarStore.isExpanded }"
@@ -128,7 +128,7 @@ const goToGlobal = () => {
             sidebarStore.isExpanded ? 'gap-2' : 'justify-center'
           ]"
         >
-          <font-awesome-icon icon="chevron-left" class="w-4 h-4 flex-shrink-0" />
+          <ph-icon icon="chevron-left" class="w-4 h-4 flex-shrink-0" />
           <span v-if="sidebarStore.isExpanded">返回總覽</span>
         </button>
         <h2
@@ -156,13 +156,13 @@ const goToGlobal = () => {
             ]"
           >
             <!-- Dashboard Icon -->
-            <font-awesome-icon v-if="item.icon === 'dashboard'" icon="gauge" class="w-5 h-5 flex-shrink-0" />
+            <ph-icon v-if="item.icon === 'dashboard'" icon="gauge" class="w-5 h-5 flex-shrink-0" />
             <!-- Activity Icon -->
-            <font-awesome-icon v-else-if="item.icon === 'activity'" icon="bolt" class="w-5 h-5 flex-shrink-0" />
+            <ph-icon v-else-if="item.icon === 'activity'" icon="bolt" class="w-5 h-5 flex-shrink-0" />
             <!-- Tasks Icon -->
-            <font-awesome-icon v-else-if="item.icon === 'tasks'" icon="list-check" class="w-5 h-5 flex-shrink-0" />
+            <ph-icon v-else-if="item.icon === 'tasks'" icon="list-check" class="w-5 h-5 flex-shrink-0" />
             <!-- User Icon -->
-            <font-awesome-icon v-else-if="item.icon === 'user'" icon="user" class="w-5 h-5 flex-shrink-0" />
+            <ph-icon v-else-if="item.icon === 'user'" icon="user" class="w-5 h-5 flex-shrink-0" />
             <span v-if="sidebarStore.isExpanded">{{ item.label }}</span>
           </button>
         </template>
@@ -188,11 +188,11 @@ const goToGlobal = () => {
             ]"
           >
             <!-- List Icon -->
-            <font-awesome-icon v-if="item.icon === 'list'" icon="list" class="w-5 h-5 flex-shrink-0" />
+            <ph-icon v-if="item.icon === 'list'" icon="list" class="w-5 h-5 flex-shrink-0" />
             <!-- Board Icon -->
-            <font-awesome-icon v-else-if="item.icon === 'board'" icon="table-columns" class="w-5 h-5 flex-shrink-0" />
+            <ph-icon v-else-if="item.icon === 'board'" icon="table-columns" class="w-5 h-5 flex-shrink-0" />
             <!-- Calendar Icon -->
-            <font-awesome-icon v-else-if="item.icon === 'calendar'" icon="calendar" class="w-5 h-5 flex-shrink-0" />
+            <ph-icon v-else-if="item.icon === 'calendar'" icon="calendar" class="w-5 h-5 flex-shrink-0" />
             <span v-if="sidebarStore.isExpanded">{{ item.label }}</span>
           </button>
 
@@ -215,11 +215,11 @@ const goToGlobal = () => {
             ]"
           >
             <!-- Activity Icon -->
-            <font-awesome-icon v-if="item.icon === 'activity'" icon="bolt" class="w-5 h-5 flex-shrink-0" />
+            <ph-icon v-if="item.icon === 'activity'" icon="bolt" class="w-5 h-5 flex-shrink-0" />
             <!-- Settings Icon -->
-            <font-awesome-icon v-else-if="item.icon === 'settings'" icon="gear" class="w-5 h-5 flex-shrink-0" />
+            <ph-icon v-else-if="item.icon === 'settings'" icon="gear" class="w-5 h-5 flex-shrink-0" />
             <!-- Chart Icon -->
-            <font-awesome-icon v-else-if="item.icon === 'chart'" icon="chart-bar" class="w-5 h-5 flex-shrink-0" />
+            <ph-icon v-else-if="item.icon === 'chart'" icon="chart-bar" class="w-5 h-5 flex-shrink-0" />
             <span v-if="sidebarStore.isExpanded">{{ item.label }}</span>
           </button>
         </template>
@@ -260,12 +260,12 @@ const goToGlobal = () => {
           >
             <!-- Collapsed: Icon only -->
             <template v-if="!sidebarStore.isExpanded">
-              <font-awesome-icon icon="folder" class="w-5 h-5 text-content-secondary" />
+              <ph-icon icon="folder" class="w-5 h-5 text-content-secondary" />
             </template>
             <!-- Expanded: Card content -->
             <template v-else>
               <div class="flex items-center gap-2 mb-1">
-                <font-awesome-icon icon="folder" class="w-4 h-4 text-accent flex-shrink-0" />
+                <ph-icon icon="folder" class="w-4 h-4 text-accent flex-shrink-0" />
                 <span class="text-sm font-medium text-content truncate">{{ project.name }}</span>
               </div>
               <p v-if="project.description" class="text-xs text-content-tertiary truncate">

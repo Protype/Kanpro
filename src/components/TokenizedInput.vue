@@ -165,9 +165,9 @@ defineExpose({ focus, inputRef })
         @click="handleTokenAction(index, $event)"
       >
         <!-- Lock icon for locked tokens -->
-        <font-awesome-icon v-if="token.locked" icon="lock" class="w-3 h-3" />
+        <ph-icon v-if="token.locked" icon="lock" class="w-3 h-3" />
         <!-- X icon for unlocked tokens -->
-        <font-awesome-icon v-else icon="xmark" class="w-3 h-3" />
+        <ph-icon v-else icon="xmark" class="w-3 h-3" />
       </button>
     </span>
 

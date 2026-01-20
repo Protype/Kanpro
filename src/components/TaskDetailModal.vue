@@ -226,7 +226,7 @@ const openTask = async () => {
                   class="text-content-tertiary hover:text-content-secondary"
                   title="編輯標題"
                 >
-                  <font-awesome-icon icon="pen-to-square" class="w-4 h-4" />
+                  <ph-icon icon="pen-to-square" class="w-4 h-4" />
                 </button>
               </div>
               <div v-else class="flex items-center gap-2">
@@ -244,13 +244,13 @@ const openTask = async () => {
                   :disabled="isUpdating"
                   class="text-success hover:opacity-80"
                 >
-                  <font-awesome-icon icon="check" class="w-5 h-5" />
+                  <ph-icon icon="check" class="w-5 h-5" />
                 </button>
                 <button
                   @click="cancelEditTitle"
                   class="text-content-tertiary hover:text-content-secondary"
                 >
-                  <font-awesome-icon icon="xmark" class="w-5 h-5" />
+                  <ph-icon icon="xmark" class="w-5 h-5" />
                 </button>
               </div>
             </div>
@@ -262,7 +262,7 @@ const openTask = async () => {
               class="text-content-tertiary hover:text-content-secondary ml-4"
               :disabled="isUpdating"
             >
-              <font-awesome-icon icon="xmark" class="w-6 h-6" />
+              <ph-icon icon="xmark" class="w-6 h-6" />
             </button>
           </div>
 

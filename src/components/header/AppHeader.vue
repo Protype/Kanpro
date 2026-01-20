@@ -2,7 +2,6 @@
 import { useSidebarStore } from '@/stores/sidebar'
 import NotificationsDropdown from '@/components/NotificationsDropdown.vue'
 import UserDropdown from '@/components/header/UserDropdown.vue'
-import { FontAwesomeIcon } from '@/plugins/fontawesome'
 
 const emit = defineEmits<{
   'open-search': []

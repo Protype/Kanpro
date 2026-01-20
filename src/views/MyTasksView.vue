@@ -190,7 +190,7 @@ const getColorValue = (colorId: string): string => {
 
       <!-- Loading -->
       <div v-if="isLoading" class="flex justify-center py-12">
-        <font-awesome-icon icon="spinner" class="animate-spin h-8 w-8 text-accent" />
+        <ph-icon icon="spinner" class="animate-spin h-8 w-8 text-accent" />
       </div>
 
       <!-- Error -->
@@ -285,7 +285,7 @@ const getColorValue = (colorId: string): string => {
 
         <!-- Empty State -->
         <div v-if="sortedTasks.length === 0" class="p-12 text-center text-content-secondary">
-          <font-awesome-icon icon="circle-check" class="w-16 h-16 mx-auto mb-4 text-content-tertiary" />
+          <ph-icon icon="circle-check" class="w-16 h-16 mx-auto mb-4 text-content-tertiary" />
           <p>沒有指派給你的任務</p>
           <p class="text-sm text-content-tertiary mt-1">太棒了！你已完成所有任務</p>
         </div>

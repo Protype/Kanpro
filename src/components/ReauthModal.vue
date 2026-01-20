@@ -53,7 +53,7 @@ const handleLogout = () => {
           <!-- Header -->
           <div class="p-6 pb-4 text-center">
             <div class="mx-auto w-12 h-12 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center mb-4">
-              <font-awesome-icon icon="lock" class="h-6 w-6 text-yellow-600 dark:text-yellow-500" />
+              <ph-icon icon="lock" class="h-6 w-6 text-yellow-600 dark:text-yellow-500" />
             </div>
             <h2 class="text-lg font-semibold text-content">Session 已過期</h2>
             <p class="mt-2 text-sm text-content-secondary">
@@ -107,7 +107,7 @@ const handleLogout = () => {
                 :disabled="isDisabled"
                 class="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               >
-                <font-awesome-icon
+                <ph-icon
                   v-if="isLoading"
                   icon="spinner"
                   class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"

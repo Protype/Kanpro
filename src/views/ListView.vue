@@ -178,7 +178,7 @@ const handleSearchSelect = (task: Task) => {
   <div class="h-full flex flex-col bg-surface-secondary">
     <!-- Loading -->
     <div v-if="tasksStore.isLoading" class="flex-1 flex items-center justify-center">
-      <font-awesome-icon icon="spinner" class="animate-spin h-8 w-8 text-accent" />
+      <ph-icon icon="spinner" class="animate-spin h-8 w-8 text-accent" />
     </div>
 
     <!-- Content -->

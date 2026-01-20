@@ -19,7 +19,7 @@
                 @click="$emit('close')"
                 class="text-content-tertiary hover:text-content-secondary"
               >
-                <font-awesome-icon icon="xmark" class="h-6 w-6" />
+                <ph-icon icon="xmark" class="h-6 w-6" />
               </button>
             </div>
 

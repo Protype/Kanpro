@@ -131,10 +131,10 @@
                 class="w-8 h-8 rounded-full flex items-center justify-center text-white"
                 :class="getActivityColor(activity.event_name)"
               >
-                <font-awesome-icon v-if="activity.event_name.includes('create')" icon="plus" class="h-4 w-4" />
-                <font-awesome-icon v-else-if="activity.event_name.includes('move')" icon="arrows-left-right" class="h-4 w-4" />
-                <font-awesome-icon v-else-if="activity.event_name.includes('close')" icon="check" class="h-4 w-4" />
-                <font-awesome-icon v-else icon="circle-info" class="h-4 w-4" />
+                <ph-icon v-if="activity.event_name.includes('create')" icon="plus" class="h-4 w-4" />
+                <ph-icon v-else-if="activity.event_name.includes('move')" icon="arrows-left-right" class="h-4 w-4" />
+                <ph-icon v-else-if="activity.event_name.includes('close')" icon="check" class="h-4 w-4" />
+                <ph-icon v-else icon="circle-info" class="h-4 w-4" />
               </div>
               <div class="flex-1">
                 <p class="text-sm text-content">{{ formatEventName(activity.event_name) }}</p>

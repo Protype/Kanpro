@@ -73,7 +73,7 @@ const handleSearchSelect = (task: Task) => {
       <!-- Error Alert -->
       <div v-if="error" class="alert-error mb-6">
         <div class="flex items-center gap-2">
-          <font-awesome-icon icon="triangle-exclamation" class="w-5 h-5" />
+          <ph-icon icon="triangle-exclamation" class="w-5 h-5" />
           <span>{{ error }}</span>
         </div>
       </div>
@@ -81,7 +81,7 @@ const handleSearchSelect = (task: Task) => {
       <!-- Success Alert -->
       <div v-if="successMessage" class="alert-success mb-6">
         <div class="flex items-center gap-2">
-          <font-awesome-icon icon="check" class="w-5 h-5" />
+          <ph-icon icon="check" class="w-5 h-5" />
           <span>{{ successMessage }}</span>
         </div>
       </div>

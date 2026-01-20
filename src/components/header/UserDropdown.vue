@@ -120,7 +120,7 @@ onUnmounted(() => {
       <!-- Name (hidden on mobile) -->
       <span class="hidden sm:inline text-sm text-content">{{ displayName }}</span>
       <!-- Chevron -->
-      <font-awesome-icon
+      <ph-icon
         icon="chevron-down"
         class="w-4 h-4 text-content-tertiary transition-transform"
         :class="{ 'rotate-180': isOpen }"
@@ -171,7 +171,7 @@ onUnmounted(() => {
             @click="goToSettings"
             class="w-full px-4 py-2 text-left text-sm text-content hover:bg-surface-hover transition-colors flex items-center gap-3"
           >
-            <font-awesome-icon icon="user" class="w-4 h-4 text-content-secondary" />
+            <ph-icon icon="user" class="w-4 h-4 text-content-secondary" />
             個人設定
           </button>
 
@@ -181,9 +181,9 @@ onUnmounted(() => {
               @click.stop="toggleThemeMenu"
               class="w-full px-4 py-2 text-left text-sm text-content hover:bg-surface-hover transition-colors flex items-center gap-3"
             >
-              <font-awesome-icon icon="palette" class="w-4 h-4 text-content-secondary" />
+              <ph-icon icon="palette" class="w-4 h-4 text-content-secondary" />
               <span class="flex-1">樣板風格</span>
-              <font-awesome-icon
+              <ph-icon
                 icon="chevron-right"
                 class="w-4 h-4 text-content-tertiary transition-transform"
                 :class="{ 'rotate-90': showThemeMenu }"
@@ -211,18 +211,18 @@ onUnmounted(() => {
                   :class="currentTheme === theme.id ? 'text-accent' : 'text-content'"
                 >
                   <!-- Theme icon -->
-                  <font-awesome-icon
+                  <ph-icon
                     v-if="!theme.isDark"
                     icon="sun"
                     class="w-4 h-4"
                   />
-                  <font-awesome-icon
+                  <ph-icon
                     v-else
                     icon="moon"
                     class="w-4 h-4"
                   />
                   <span class="flex-1">{{ theme.name }}</span>
-                  <font-awesome-icon
+                  <ph-icon
                     v-if="currentTheme === theme.id"
                     icon="check"
                     class="w-4 h-4"
@@ -239,7 +239,7 @@ onUnmounted(() => {
             @click="handleLogout"
             class="w-full px-4 py-2 text-left text-sm text-error hover:bg-surface-hover transition-colors flex items-center gap-3"
           >
-            <font-awesome-icon icon="right-from-bracket" class="w-4 h-4" />
+            <ph-icon icon="right-from-bracket" class="w-4 h-4" />
             登出
           </button>
         </div>

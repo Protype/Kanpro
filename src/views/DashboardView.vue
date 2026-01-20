@@ -78,7 +78,7 @@ const handleSearchSelect = (task: Task) => {
 
       <!-- Loading -->
       <div v-if="dashboardStore.isLoading" class="flex items-center justify-center py-12">
-        <font-awesome-icon icon="spinner" class="spinner h-8 w-8" />
+        <ph-icon icon="spinner" class="spinner h-8 w-8" />
       </div>
 
       <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -87,7 +87,7 @@ const handleSearchSelect = (task: Task) => {
           <!-- Overdue Tasks Alert -->
           <div v-if="dashboardStore.hasOverdueTasks" class="alert-error">
             <div class="flex items-center gap-2 mb-3">
-              <font-awesome-icon icon="triangle-exclamation" class="w-5 h-5" />
+              <ph-icon icon="triangle-exclamation" class="w-5 h-5" />
               <h2 class="text-lg font-semibold">逾期任務 ({{ dashboardStore.overdueTasks.length }})</h2>
             </div>
             <div class="space-y-2">
@@ -146,7 +146,7 @@ const handleSearchSelect = (task: Task) => {
                 </div>
               </div>
               <div v-if="dashboardStore.myTasks.length === 0" class="empty-state">
-                <font-awesome-icon icon="clipboard-list" class="empty-state-icon" />
+                <ph-icon icon="clipboard-list" class="empty-state-icon" />
                 <p class="empty-state-description">目前沒有指派給您的任務</p>
               </div>
             </div>

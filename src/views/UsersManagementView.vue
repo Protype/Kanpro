@@ -178,7 +178,7 @@ const handleSearchSelect = (task: Task) => {
       <!-- Error Alert -->
       <div v-if="error" class="alert-error mb-6">
         <div class="flex items-center gap-2">
-          <font-awesome-icon icon="triangle-exclamation" class="w-5 h-5" />
+          <ph-icon icon="triangle-exclamation" class="w-5 h-5" />
           <span>{{ error }}</span>
         </div>
       </div>
@@ -186,7 +186,7 @@ const handleSearchSelect = (task: Task) => {
       <!-- Success Alert -->
       <div v-if="successMessage" class="alert-success mb-6">
         <div class="flex items-center gap-2">
-          <font-awesome-icon icon="check" class="w-5 h-5" />
+          <ph-icon icon="check" class="w-5 h-5" />
           <span>{{ successMessage }}</span>
         </div>
       </div>
@@ -210,7 +210,7 @@ const handleSearchSelect = (task: Task) => {
 
       <!-- Loading -->
       <div v-if="usersStore.isLoading" class="flex items-center justify-center py-12">
-        <font-awesome-icon icon="spinner" class="animate-spin h-8 w-8 text-accent" />
+        <ph-icon icon="spinner" class="animate-spin h-8 w-8 text-accent" />
       </div>
 
       <div v-else class="space-y-4">
@@ -339,8 +339,8 @@ const handleSearchSelect = (task: Task) => {
                     class="p-2 text-content-tertiary hover:text-content-secondary disabled:opacity-30"
                     :title="user.is_active ? '停用' : '啟用'"
                   >
-                    <font-awesome-icon v-if="user.is_active" icon="ban" class="w-5 h-5" />
-                    <font-awesome-icon v-else icon="circle-check" class="w-5 h-5" />
+                    <ph-icon v-if="user.is_active" icon="ban" class="w-5 h-5" />
+                    <ph-icon v-else icon="circle-check" class="w-5 h-5" />
                   </button>
                   <!-- Edit -->
                   <button
@@ -348,7 +348,7 @@ const handleSearchSelect = (task: Task) => {
                     class="p-2 text-content-tertiary hover:text-content-secondary"
                     title="編輯"
                   >
-                    <font-awesome-icon icon="pen-to-square" class="w-5 h-5" />
+                    <ph-icon icon="pen-to-square" class="w-5 h-5" />
                   </button>
                   <!-- Delete -->
                   <button
@@ -357,7 +357,7 @@ const handleSearchSelect = (task: Task) => {
                     class="p-2 text-content-tertiary hover:text-error disabled:opacity-30"
                     title="刪除"
                   >
-                    <font-awesome-icon icon="trash" class="w-5 h-5" />
+                    <ph-icon icon="trash" class="w-5 h-5" />
                   </button>
                 </div>
               </div>
