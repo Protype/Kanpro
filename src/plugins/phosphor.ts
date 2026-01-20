@@ -21,6 +21,8 @@ import {
   PhMagnifyingGlass,
   PhPlusCircle,
   PhFolderPlus,
+  PhFolderSimplePlus,
+  PhCirclesThreePlus,
 
   // 側邊欄導航
   PhGauge,
@@ -130,6 +132,8 @@ export const iconComponents = {
   'plus-circle': PhPlusCircle,
   'circle-plus': PhPlusCircle,
   'folder-plus': PhFolderPlus,
+  'folder-simple-plus': PhFolderSimplePlus,
+  'circles-three-plus': PhCirclesThreePlus,
 
   // 側邊欄導航
   'gauge': PhGauge,

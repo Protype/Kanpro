@@ -35,7 +35,7 @@ const toggleMobileSidebar = () => {
       @click="toggleMobileSidebar"
       class="lg:hidden p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md"
     >
-      <FontAwesomeIcon icon="fa-solid fa-bars" class="w-5 h-5" />
+      <ph-icon icon="list" class="w-5 h-5" />
     </button>
 
     <!-- Quick Actions (Left side) -->
@@ -46,7 +46,7 @@ const toggleMobileSidebar = () => {
         class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors text-base"
         title="新增專案"
       >
-        <FontAwesomeIcon icon="fa-solid fa-folder-plus" />
+        <ph-icon icon="folder-simple-plus" weight="fill" class="w-5 h-5" />
       </button>
 
       <!-- Create Task Button -->
@@ -55,7 +55,7 @@ const toggleMobileSidebar = () => {
         class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors text-sm"
         title="新增任務"
       >
-        <FontAwesomeIcon icon="fa-solid fa-circle-plus" />
+        <ph-icon icon="plus-circle" weight="fill" class="w-[19px] h-[19px]" />
       </button>
 
       <!-- Search Button -->
@@ -63,7 +63,7 @@ const toggleMobileSidebar = () => {
         @click="openSearch"
         class="flex items-center gap-2 px-3 py-1.5 text-sm text-content-tertiary bg-surface-secondary hover:bg-surface-hover rounded-md transition-colors ml-1"
       >
-        <FontAwesomeIcon icon="fa-solid fa-magnifying-glass" class="w-4 h-4" />
+        <ph-icon icon="magnifying-glass" weight="bold" class="w-4 h-4" />
         <span>搜尋</span>
         <kbd class="px-1.5 py-0.5 text-xs bg-surface-tertiary rounded">⌘K</kbd>
       </button>
