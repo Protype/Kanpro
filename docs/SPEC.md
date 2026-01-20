@@ -745,6 +745,109 @@ Kanpro 使用 JWTAuth 外掛進行認證，所有 API 呼叫必須使用 **HTTP 
 
 ---
 
+## 附錄：圖示規範
+
+Kanpro 統一使用 **Font Awesome 7** 作為圖示庫，禁止使用 inline SVG。
+
+### 使用方式
+
+```vue
+<font-awesome-icon icon="icon-name" class="w-5 h-5" />
+```
+
+### 圖示註冊
+
+所有使用的圖示需在 `src/plugins/fontawesome.ts` 中註冊：
+
+```typescript
+import { faIconName } from '@fortawesome/free-solid-svg-icons'
+library.add(faIconName)
+```
+
+### 圖示分類與命名
+
+| 分類 | 圖示 | 用途 |
+|------|------|------|
+| **通用操作** | | |
+| | `plus` | 新增 |
+| | `xmark` | 關閉、取消、移除 |
+| | `check` | 確認、完成 |
+| | `spinner` | 載入中（搭配 `animate-spin`） |
+| | `pen-to-square` | 編輯 |
+| | `trash` | 刪除 |
+| | `download` | 下載 |
+| **導航** | | |
+| | `bars` | 漢堡選單 |
+| | `chevron-left/right/up/down` | 方向箭頭 |
+| | `right-from-bracket` | 登出 |
+| **搜尋與新增** | | |
+| | `magnifying-glass` | 搜尋 |
+| | `circle-plus` | 圓形新增按鈕 |
+| | `folder-plus` | 新增專案/資料夾 |
+| **側邊欄導航** | | |
+| | `gauge` | 儀表板 |
+| | `bolt` | 活動 |
+| | `list-check` | 任務清單 |
+| | `list` | 列表檢視 |
+| | `table-columns` | 看板檢視 |
+| | `calendar` | 行事曆 |
+| | `gear` | 設定 |
+| | `chart-bar` | 分析 |
+| | `folder` | 專案/資料夾 |
+| **使用者** | | |
+| | `user` | 單一使用者 |
+| | `users` | 多個使用者 |
+| | `user-group` | 群組 |
+| | `bell` | 通知 |
+| **主題** | | |
+| | `sun` | 淺色主題 |
+| | `moon` | 深色主題 |
+| | `palette` | 主題選擇 |
+| **狀態** | | |
+| | `circle-check` | 成功 |
+| | `circle-xmark` | 失敗 |
+| | `triangle-exclamation` | 警告 |
+| | `circle-info` | 資訊 |
+| | `circle-question` | 說明 |
+| **任務相關** | | |
+| | `clipboard-list` | 任務清單 |
+| | `tag` | 標籤 |
+| | `paperclip` | 附件 |
+| | `comment` | 評論 |
+| | `link` | 連結 |
+| **其他** | | |
+| | `eye` / `eye-slash` | 顯示/隱藏 |
+| | `grip-vertical` | 拖曳把手 |
+| | `server` | 伺服器 |
+| | `globe` | 公開 |
+| | `lock` | 私人/鎖定 |
+
+### 尺寸規範
+
+| class | 用途 |
+|-------|------|
+| `w-3 h-3` | 小型圖示（標籤內、行內） |
+| `w-4 h-4` | 按鈕內圖示 |
+| `w-5 h-5` | 標準圖示 |
+| `w-6 h-6` | 強調圖示 |
+| `w-8 h-8` | 載入狀態 |
+| `w-16 h-16` | 空狀態大圖示 |
+
+### Regular vs Solid
+
+- **Solid（預設）**：填滿風格，用於大多數場景
+- **Regular**：線條風格，用於需要較輕視覺的場景
+
+```vue
+<!-- Solid（預設） -->
+<font-awesome-icon icon="calendar" />
+
+<!-- Regular -->
+<font-awesome-icon :icon="['far', 'calendar']" />
+```
+
+---
+
 ## 附錄：優先級規劃
 
 | 階段 | 功能範圍 |

@@ -204,9 +204,7 @@ watch(projectId, () => {
             @click="goToPrevMonth"
             class="p-1 hover:bg-surface-hover rounded text-content-secondary hover:text-content"
           >
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
+            <font-awesome-icon icon="chevron-left" class="w-5 h-5" />
           </button>
           <span class="text-lg font-medium min-w-[140px] text-center text-content">
             {{ currentYear }} {{ currentMonthName }}
@@ -216,9 +214,7 @@ watch(projectId, () => {
             @click="goToNextMonth"
             class="p-1 hover:bg-surface-hover rounded text-content-secondary hover:text-content"
           >
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
+            <font-awesome-icon icon="chevron-right" class="w-5 h-5" />
           </button>
         </div>
       </div>

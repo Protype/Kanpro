@@ -226,9 +226,7 @@ const openTask = async () => {
                   class="text-content-tertiary hover:text-content-secondary"
                   title="編輯標題"
                 >
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                  </svg>
+                  <font-awesome-icon icon="pen-to-square" class="w-4 h-4" />
                 </button>
               </div>
               <div v-else class="flex items-center gap-2">
@@ -246,17 +244,13 @@ const openTask = async () => {
                   :disabled="isUpdating"
                   class="text-success hover:opacity-80"
                 >
-                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                  </svg>
+                  <font-awesome-icon icon="check" class="w-5 h-5" />
                 </button>
                 <button
                   @click="cancelEditTitle"
                   class="text-content-tertiary hover:text-content-secondary"
                 >
-                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <font-awesome-icon icon="xmark" class="w-5 h-5" />
                 </button>
               </div>
             </div>
@@ -268,9 +262,7 @@ const openTask = async () => {
               class="text-content-tertiary hover:text-content-secondary ml-4"
               :disabled="isUpdating"
             >
-              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <font-awesome-icon icon="xmark" class="w-6 h-6" />
             </button>
           </div>
 

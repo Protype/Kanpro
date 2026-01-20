@@ -190,10 +190,7 @@ const getColorValue = (colorId: string): string => {
 
       <!-- Loading -->
       <div v-if="isLoading" class="flex justify-center py-12">
-        <svg class="animate-spin h-8 w-8 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
+        <font-awesome-icon icon="spinner" class="animate-spin h-8 w-8 text-accent" />
       </div>
 
       <!-- Error -->
@@ -288,9 +285,7 @@ const getColorValue = (colorId: string): string => {
 
         <!-- Empty State -->
         <div v-if="sortedTasks.length === 0" class="p-12 text-center text-content-secondary">
-          <svg class="w-16 h-16 mx-auto mb-4 text-content-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+          <font-awesome-icon icon="circle-check" class="w-16 h-16 mx-auto mb-4 text-content-tertiary" />
           <p>沒有指派給你的任務</p>
           <p class="text-sm text-content-tertiary mt-1">太棒了！你已完成所有任務</p>
         </div>

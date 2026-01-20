@@ -120,15 +120,11 @@ onUnmounted(() => {
       <!-- Name (hidden on mobile) -->
       <span class="hidden sm:inline text-sm text-content">{{ displayName }}</span>
       <!-- Chevron -->
-      <svg
+      <font-awesome-icon
+        icon="chevron-down"
         class="w-4 h-4 text-content-tertiary transition-transform"
         :class="{ 'rotate-180': isOpen }"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-      </svg>
+      />
     </button>
 
     <!-- Dropdown Menu -->
@@ -175,9 +171,7 @@ onUnmounted(() => {
             @click="goToSettings"
             class="w-full px-4 py-2 text-left text-sm text-content hover:bg-surface-hover transition-colors flex items-center gap-3"
           >
-            <svg class="w-4 h-4 text-content-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
+            <font-awesome-icon icon="user" class="w-4 h-4 text-content-secondary" />
             個人設定
           </button>
 
@@ -187,19 +181,13 @@ onUnmounted(() => {
               @click.stop="toggleThemeMenu"
               class="w-full px-4 py-2 text-left text-sm text-content hover:bg-surface-hover transition-colors flex items-center gap-3"
             >
-              <svg class="w-4 h-4 text-content-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-              </svg>
+              <font-awesome-icon icon="palette" class="w-4 h-4 text-content-secondary" />
               <span class="flex-1">樣板風格</span>
-              <svg
+              <font-awesome-icon
+                icon="chevron-right"
                 class="w-4 h-4 text-content-tertiary transition-transform"
                 :class="{ 'rotate-90': showThemeMenu }"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
+              />
             </button>
 
             <!-- Theme Submenu -->
@@ -223,34 +211,22 @@ onUnmounted(() => {
                   :class="currentTheme === theme.id ? 'text-accent' : 'text-content'"
                 >
                   <!-- Theme icon -->
-                  <svg
+                  <font-awesome-icon
                     v-if="!theme.isDark"
+                    icon="sun"
                     class="w-4 h-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                  </svg>
-                  <svg
+                  />
+                  <font-awesome-icon
                     v-else
+                    icon="moon"
                     class="w-4 h-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                  </svg>
+                  />
                   <span class="flex-1">{{ theme.name }}</span>
-                  <svg
+                  <font-awesome-icon
                     v-if="currentTheme === theme.id"
+                    icon="check"
                     class="w-4 h-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                  </svg>
+                  />
                 </button>
               </div>
             </Transition>
@@ -263,9 +239,7 @@ onUnmounted(() => {
             @click="handleLogout"
             class="w-full px-4 py-2 text-left text-sm text-error hover:bg-surface-hover transition-colors flex items-center gap-3"
           >
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
+            <font-awesome-icon icon="right-from-bracket" class="w-4 h-4" />
             登出
           </button>
         </div>

@@ -140,10 +140,7 @@ const getEventIcon = (eventName: string): string => {
 
       <!-- Loading -->
       <div v-if="isLoading" class="flex justify-center py-12">
-        <svg class="animate-spin h-8 w-8 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
+        <font-awesome-icon icon="spinner" class="animate-spin h-8 w-8 text-accent" />
       </div>
 
       <!-- Error -->
@@ -164,41 +161,23 @@ const getEventIcon = (eventName: string): string => {
             <!-- Icon -->
             <div class="flex-shrink-0 w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent">
               <!-- Plus Icon -->
-              <svg v-if="getEventIcon(activity.event_name) === 'plus'" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-              </svg>
+              <font-awesome-icon v-if="getEventIcon(activity.event_name) === 'plus'" icon="plus" class="w-5 h-5" />
               <!-- Check Icon -->
-              <svg v-else-if="getEventIcon(activity.event_name) === 'check'" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
+              <font-awesome-icon v-else-if="getEventIcon(activity.event_name) === 'check'" icon="check" class="w-5 h-5" />
               <!-- Refresh Icon -->
-              <svg v-else-if="getEventIcon(activity.event_name) === 'refresh'" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
+              <font-awesome-icon v-else-if="getEventIcon(activity.event_name) === 'refresh'" icon="rotate" class="w-5 h-5" />
               <!-- Arrow Icon -->
-              <svg v-else-if="getEventIcon(activity.event_name) === 'arrow'" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
+              <font-awesome-icon v-else-if="getEventIcon(activity.event_name) === 'arrow'" icon="arrow-right" class="w-5 h-5" />
               <!-- Chat Icon -->
-              <svg v-else-if="getEventIcon(activity.event_name) === 'chat'" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-              </svg>
+              <font-awesome-icon v-else-if="getEventIcon(activity.event_name) === 'chat'" icon="comment" class="w-5 h-5" />
               <!-- List Icon -->
-              <svg v-else-if="getEventIcon(activity.event_name) === 'list'" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-              </svg>
+              <font-awesome-icon v-else-if="getEventIcon(activity.event_name) === 'list'" icon="clipboard-check" class="w-5 h-5" />
               <!-- Attachment Icon -->
-              <svg v-else-if="getEventIcon(activity.event_name) === 'attachment'" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-              </svg>
+              <font-awesome-icon v-else-if="getEventIcon(activity.event_name) === 'attachment'" icon="paperclip" class="w-5 h-5" />
               <!-- Link Icon -->
-              <svg v-else-if="getEventIcon(activity.event_name) === 'link'" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-              </svg>
+              <font-awesome-icon v-else-if="getEventIcon(activity.event_name) === 'link'" icon="link" class="w-5 h-5" />
               <!-- Default Activity Icon -->
-              <svg v-else class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
+              <font-awesome-icon v-else icon="bolt" class="w-5 h-5" />
             </div>
 
             <!-- Content -->
@@ -220,9 +199,7 @@ const getEventIcon = (eventName: string): string => {
 
         <!-- Empty State -->
         <div v-if="activities.length === 0" class="bg-surface rounded-lg border border-edge p-12 text-center">
-          <svg class="w-16 h-16 mx-auto mb-4 text-content-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
+          <font-awesome-icon icon="bolt" class="w-16 h-16 mx-auto mb-4 text-content-tertiary" />
           <p class="text-content-secondary">沒有近期活動</p>
         </div>
       </div>

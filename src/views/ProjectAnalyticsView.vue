@@ -131,18 +131,10 @@
                 class="w-8 h-8 rounded-full flex items-center justify-center text-white"
                 :class="getActivityColor(activity.event_name)"
               >
-                <svg v-if="activity.event_name.includes('create')" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                <svg v-else-if="activity.event_name.includes('move')" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                </svg>
-                <svg v-else-if="activity.event_name.includes('close')" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <font-awesome-icon v-if="activity.event_name.includes('create')" icon="plus" class="h-4 w-4" />
+                <font-awesome-icon v-else-if="activity.event_name.includes('move')" icon="arrows-left-right" class="h-4 w-4" />
+                <font-awesome-icon v-else-if="activity.event_name.includes('close')" icon="check" class="h-4 w-4" />
+                <font-awesome-icon v-else icon="circle-info" class="h-4 w-4" />
               </div>
               <div class="flex-1">
                 <p class="text-sm text-content">{{ formatEventName(activity.event_name) }}</p>
