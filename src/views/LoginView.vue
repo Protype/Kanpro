@@ -185,7 +185,21 @@ const handleLogin = async () => {
       <ThemeToggle />
     </div>
 
-    <div class="max-w-md w-full card p-8 mx-4">
+    <div class="max-w-md w-full card p-8 mx-4 relative">
+      <!-- 伺服器連結 icon（僅在 config 有設定時顯示） -->
+      <a
+        v-if="hasConfigFileUrl && !configLoading"
+        :href="displayApiUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="absolute top-4 right-4 p-2 text-content-tertiary hover:text-content-secondary transition-colors"
+        title="開啟 Kanboard 伺服器"
+      >
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+        </svg>
+      </a>
+
       <h2 class="text-2xl font-bold text-center text-content mb-8">Kanpro</h2>
 
       <!-- 錯誤訊息 -->
@@ -194,8 +208,8 @@ const handleLogin = async () => {
       </div>
 
       <form @submit.prevent="handleLogin" class="space-y-6">
-        <!-- 伺服器網址 -->
-        <div>
+        <!-- 伺服器網址（僅在 config 無設定時顯示） -->
+        <div v-if="!hasConfigFileUrl">
           <label for="apiUrl" class="block text-sm font-medium text-content-secondary mb-1">
             伺服器網址
           </label>
@@ -203,16 +217,6 @@ const handleLogin = async () => {
           <div v-if="configLoading" class="input bg-surface-tertiary animate-pulse">
             載入中...
           </div>
-          <!-- config.json 有值時：顯示虛線底連結（不可編輯） -->
-          <a
-            v-else-if="hasConfigFileUrl"
-            :href="displayApiUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 border-b border-dashed border-current truncate inline-block"
-          >
-            {{ displayApiUrl }}
-          </a>
           <!-- config.json 無值時：顯示輸入框 -->
           <input
             v-else
