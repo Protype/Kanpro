@@ -5,6 +5,7 @@ import type { ProjectMember, User } from '@/types'
 
 export const useMembersStore = defineStore('members', () => {
   const members = ref<ProjectMember[]>([])
+  const membersMap = ref<Record<string | number, string>>({})
   const allUsers = ref<User[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
@@ -25,14 +26,18 @@ export const useMembersStore = defineStore('members', () => {
 
     try {
       const client = authStore.getClient()
-      const result = await client.call<Record<string, ProjectMember>>('getProjectUsers', {
+      // getProjectUsers returns { userId: displayName } format
+      const result = await client.call<Record<string, string>>('getProjectUsers', {
         project_id: projectId
       })
-      // getProjectUsers returns an object with user IDs as keys
-      members.value = Object.values(result || {})
+      // Preserve the original ID->name mapping
+      membersMap.value = result || {}
+      // Convert to array of names for display
+      members.value = Object.values(result || {}) as unknown as ProjectMember[]
     } catch (err) {
       error.value = err instanceof Error ? err.message : '載入成員失敗'
       members.value = []
+      membersMap.value = {}
     } finally {
       isLoading.value = false
     }
@@ -96,11 +101,13 @@ export const useMembersStore = defineStore('members', () => {
 
   function clearMembers(): void {
     members.value = []
+    membersMap.value = {}
     error.value = null
   }
 
   return {
     members,
+    membersMap,
     allUsers,
     isLoading,
     error,

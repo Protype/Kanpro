@@ -23,6 +23,7 @@ const projectNavItems = computed(() => {
   const id = currentProjectId.value
   if (!id) return []
   return [
+    { name: 'project-overview', label: '總覽', icon: 'squares-four', route: `/projects/${id}/overview` },
     { name: 'project-list', label: '列表', icon: 'list', route: `/projects/${id}` },
     { name: 'project-board', label: '看板', icon: 'table-columns', route: `/projects/${id}/board` },
     { name: 'project-calendar', label: '行事曆', icon: 'calendar', route: `/projects/${id}/calendar` },
@@ -72,7 +73,7 @@ const toggleMobileSidebar = () => {
       <!-- Create Project Button -->
       <button
         @click="openCreateProject"
-        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors text-base"
+        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
         title="新增專案"
       >
         <ph-icon icon="folder-simple-plus" weight="fill" class="w-5 h-5" />
@@ -81,10 +82,10 @@ const toggleMobileSidebar = () => {
       <!-- Create Task Button -->
       <button
         @click="openCreateTask"
-        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors text-sm"
+        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
         title="新增任務"
       >
-        <ph-icon icon="plus-circle" weight="fill" class="w-[19px] h-[19px]" />
+        <ph-icon icon="plus-circle" weight="fill" class="w-5 h-5" />
       </button>
 
       <!-- Project Navigation Buttons (when in project context) -->

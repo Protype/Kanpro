@@ -85,6 +85,11 @@ const router = createRouter({
               component: () => import('@/views/ListView.vue')
             },
             {
+              path: 'overview',
+              name: 'project-overview',
+              component: () => import('@/views/ProjectOverviewView.vue')
+            },
+            {
               path: 'board',
               name: 'project-board',
               component: () => import('@/views/BoardView.vue')

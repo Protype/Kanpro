@@ -35,6 +35,7 @@ import {
   PhChartBar,
   PhFolder,
   PhFolderOpen,
+  PhSquaresFour,
 
   // 使用者相關
   PhUser,
@@ -149,6 +150,7 @@ export const iconComponents = {
   'chart-bar': PhChartBar,
   'folder': PhFolder,
   'folder-open': PhFolderOpen,
+  'squares-four': PhSquaresFour,
 
   // 使用者相關
   'user': PhUser,
