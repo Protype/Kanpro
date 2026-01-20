@@ -195,7 +195,7 @@ const handleLogin = async () => {
           :href="displayApiUrl"
           target="_blank"
           rel="noopener noreferrer"
-          class="absolute right-0 p-1 text-content-tertiary hover:text-content-secondary transition-colors"
+          class="absolute right-0 top-[5px] p-1 text-content-tertiary hover:text-content-secondary transition-colors"
           title="開啟 Kanboard 伺服器"
         >
           <font-awesome-icon icon="server" class="w-5 h-5" />
