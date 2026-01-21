@@ -104,7 +104,7 @@ async function handleFileSelect(event: Event): Promise<void> {
 
     showSuccess('頭像已更新')
   } catch (err) {
-    avatarError.value = err instanceof Error ? err.message : '上傳失敗'
+    avatarError.value = parseAvatarError(err)
   } finally {
     isUploadingAvatar.value = false
     // 清除 input 以便重複選擇同一檔案
@@ -123,10 +123,21 @@ async function handleRemoveAvatar(): Promise<void> {
     avatarData.value = null
     showSuccess('頭像已移除')
   } catch (err) {
-    avatarError.value = err instanceof Error ? err.message : '移除失敗'
+    avatarError.value = parseAvatarError(err)
   } finally {
     isUploadingAvatar.value = false
   }
+}
+
+function parseAvatarError(err: unknown): string {
+  if (err instanceof Error) {
+    // Method not found - KanproBridge User Avatar 功能未啟用
+    if (err.message.includes('-32601') || err.message.includes('Method not found')) {
+      return '頭像功能未啟用，請在 Kanboard 設定中啟用 KanproBridge User Avatar'
+    }
+    return err.message
+  }
+  return '操作失敗'
 }
 
 function fileToBase64(file: File): Promise<string> {
