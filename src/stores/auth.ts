@@ -397,6 +397,10 @@ export const useAuthStore = defineStore('auth', () => {
     email?: string
   }
 
+  interface AvatarResponse {
+    imageData: string | null
+  }
+
   /**
    * 更新當前使用者
    */
@@ -426,6 +430,90 @@ export const useAuthStore = defineStore('auth', () => {
       const updatedUser = await client.call<User>('getMe')
       user.value = updatedUser
     }
+
+    return result
+  }
+
+  /**
+   * 取得當前使用者頭像
+   */
+  async function getAvatar(): Promise<string | null> {
+    if (!user.value) {
+      throw new Error('Not authenticated')
+    }
+
+    const valid = await ensureValidToken()
+    if (!valid) {
+      const reauthed = await requireReauth()
+      if (!reauthed) {
+        throw new Error('Authentication required')
+      }
+    }
+
+    const client = getClient()
+
+    try {
+      const result = await client.call<AvatarResponse>('getUserAvatar', {
+        userId: user.value.id
+      })
+      return result?.imageData ?? null
+    } catch (error) {
+      // 如果頭像功能未啟用或沒有頭像，回傳 null
+      if (error instanceof Error && error.message.includes('-32601')) {
+        return null
+      }
+      throw error
+    }
+  }
+
+  /**
+   * 上傳當前使用者頭像
+   * @param imageData Base64 編碼的圖片資料（PNG/JPG/GIF）
+   */
+  async function uploadAvatar(imageData: string): Promise<boolean> {
+    if (!user.value) {
+      throw new Error('Not authenticated')
+    }
+
+    const valid = await ensureValidToken()
+    if (!valid) {
+      const reauthed = await requireReauth()
+      if (!reauthed) {
+        throw new Error('Authentication required')
+      }
+    }
+
+    const client = getClient()
+
+    const result = await client.call<boolean>('uploadUserAvatar', {
+      userId: user.value.id,
+      imageData
+    })
+
+    return result
+  }
+
+  /**
+   * 移除當前使用者頭像
+   */
+  async function removeAvatar(): Promise<boolean> {
+    if (!user.value) {
+      throw new Error('Not authenticated')
+    }
+
+    const valid = await ensureValidToken()
+    if (!valid) {
+      const reauthed = await requireReauth()
+      if (!reauthed) {
+        throw new Error('Authentication required')
+      }
+    }
+
+    const client = getClient()
+
+    const result = await client.call<boolean>('removeUserAvatar', {
+      userId: user.value.id
+    })
 
     return result
   }
@@ -474,6 +562,9 @@ export const useAuthStore = defineStore('auth', () => {
     abandonReauth,
     getClient,
     updateCurrentUser,
+    getAvatar,
+    uploadAvatar,
+    removeAvatar,
 
     // 測試用
     _setTestCredentials

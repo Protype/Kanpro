@@ -8,6 +8,8 @@ import {
   PhPencilSimple,
   PhTrash,
   PhDownloadSimple,
+  PhUploadSimple,
+  PhCamera,
 
   // 導航與選單
   PhList,
@@ -97,7 +99,9 @@ import {
   PhProhibit,
   PhLock,
   PhSmileyXEyes,
-  PhCircle
+  PhCircle,
+  PhShield,
+  PhShieldCheck
 } from '@phosphor-icons/vue'
 
 // 圖示名稱對應表（用於動態載入）
@@ -113,6 +117,9 @@ export const iconComponents = {
   'pen-to-square': PhPencilSimple,
   'trash': PhTrash,
   'download': PhDownloadSimple,
+  'upload-simple': PhUploadSimple,
+  'upload': PhUploadSimple,
+  'camera': PhCamera,
 
   // 導航與選單
   'list': PhList,
@@ -230,7 +237,9 @@ export const iconComponents = {
   'ban': PhProhibit,
   'lock': PhLock,
   'face-frown': PhSmileyXEyes,
-  'circle': PhCircle
+  'circle': PhCircle,
+  'shield': PhShield,
+  'shield-check': PhShieldCheck
 } as const
 
 export type IconName = keyof typeof iconComponents
