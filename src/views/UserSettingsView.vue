@@ -64,7 +64,7 @@ async function loadAvatar(): Promise<void> {
     await authStore.loadAvatar()
   } catch (err) {
     console.error('[Avatar] Load error:', err)
-    toast.error(parseAvatarError(err))
+    toast.error('載入失敗', parseAvatarError(err))
   }
 }
 
@@ -81,13 +81,13 @@ async function handleFileSelect(event: Event): Promise<void> {
   // 驗證檔案類型
   const validTypes = ['image/png', 'image/jpeg', 'image/gif']
   if (!validTypes.includes(file.type)) {
-    toast.error('只支援 PNG、JPG、GIF 格式')
+    toast.error('格式錯誤', '只支援 PNG、JPG、GIF 格式')
     return
   }
 
   // 驗證檔案大小 (最大 2MB)
   if (file.size > 2 * 1024 * 1024) {
-    toast.error('檔案大小不能超過 2MB')
+    toast.error('檔案過大', '檔案大小不能超過 2MB')
     return
   }
 
@@ -100,9 +100,9 @@ async function handleFileSelect(event: Event): Promise<void> {
     // 上傳（store 會自動更新 avatarData）
     await authStore.uploadAvatar(base64)
 
-    toast.success('頭像已更新')
+    toast.success('上傳成功', '頭像已更新')
   } catch (err) {
-    toast.error(parseAvatarError(err))
+    toast.error('上傳失敗', parseAvatarError(err))
   } finally {
     isUploadingAvatar.value = false
     // 清除 input 以便重複選擇同一檔案
@@ -118,9 +118,9 @@ async function handleRemoveAvatar(): Promise<void> {
   try {
     // 移除（store 會自動清除 avatarData）
     await authStore.removeAvatar()
-    toast.success('頭像已移除')
+    toast.success('移除成功', '頭像已移除')
   } catch (err) {
-    toast.error(parseAvatarError(err))
+    toast.error('移除失敗', parseAvatarError(err))
   } finally {
     isUploadingAvatar.value = false
   }
@@ -153,7 +153,7 @@ function fileToBase64(file: File): Promise<string> {
 
 async function handleSave(): Promise<void> {
   if (!userName.value.trim()) {
-    toast.error('名稱不能為空')
+    toast.error('驗證錯誤', '名稱不能為空')
     return
   }
 
@@ -164,9 +164,9 @@ async function handleSave(): Promise<void> {
       name: userName.value.trim(),
       email: userEmail.value.trim()
     })
-    toast.success('設定已儲存')
+    toast.success('儲存成功', '個人資訊已更新')
   } catch (err) {
-    toast.error(err instanceof Error ? err.message : '儲存失敗')
+    toast.error('儲存失敗', err instanceof Error ? err.message : '請稍後再試')
   } finally {
     isSaving.value = false
   }
@@ -175,19 +175,19 @@ async function handleSave(): Promise<void> {
 async function handleChangePassword(): Promise<void> {
   // 驗證
   if (!currentPassword.value) {
-    toast.error('請輸入目前密碼')
+    toast.error('驗證錯誤', '請輸入目前密碼')
     return
   }
   if (!newPassword.value) {
-    toast.error('請輸入新密碼')
+    toast.error('驗證錯誤', '請輸入新密碼')
     return
   }
   if (newPassword.value.length < 6) {
-    toast.error('新密碼至少需要 6 個字元')
+    toast.error('驗證錯誤', '新密碼至少需要 6 個字元')
     return
   }
   if (newPassword.value !== confirmPassword.value) {
-    toast.error('新密碼與確認密碼不一致')
+    toast.error('驗證錯誤', '新密碼與確認密碼不一致')
     return
   }
 
@@ -195,13 +195,13 @@ async function handleChangePassword(): Promise<void> {
 
   try {
     await authStore.changePassword(currentPassword.value, newPassword.value)
-    toast.success('密碼已變更')
+    toast.success('變更成功', '密碼已更新')
     // 清空表單
     currentPassword.value = ''
     newPassword.value = ''
     confirmPassword.value = ''
   } catch (err) {
-    toast.error(parsePasswordError(err))
+    toast.error('變更失敗', parsePasswordError(err))
   } finally {
     isChangingPassword.value = false
   }

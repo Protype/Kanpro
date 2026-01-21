@@ -6,7 +6,8 @@ export type ToastType = 'success' | 'error' | 'warning' | 'info'
 export interface Toast {
   id: string
   type: ToastType
-  message: string
+  title: string
+  message?: string
   duration: number
 }
 
@@ -19,9 +20,9 @@ export const useToastStore = defineStore('toast', () => {
     return `toast-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
   }
 
-  function add(type: ToastType, message: string, duration = DEFAULT_DURATION): string {
+  function add(type: ToastType, title: string, message?: string, duration = DEFAULT_DURATION): string {
     const id = generateId()
-    const toast: Toast = { id, type, message, duration }
+    const toast: Toast = { id, type, title, message, duration }
     toasts.value.push(toast)
 
     // 自動移除
@@ -41,20 +42,20 @@ export const useToastStore = defineStore('toast', () => {
     }
   }
 
-  function success(message: string, duration = DEFAULT_DURATION): string {
-    return add('success', message, duration)
+  function success(title: string, message?: string, duration = DEFAULT_DURATION): string {
+    return add('success', title, message, duration)
   }
 
-  function error(message: string, duration = DEFAULT_DURATION): string {
-    return add('error', message, duration)
+  function error(title: string, message?: string, duration = DEFAULT_DURATION): string {
+    return add('error', title, message, duration)
   }
 
-  function warning(message: string, duration = DEFAULT_DURATION): string {
-    return add('warning', message, duration)
+  function warning(title: string, message?: string, duration = DEFAULT_DURATION): string {
+    return add('warning', title, message, duration)
   }
 
-  function info(message: string, duration = DEFAULT_DURATION): string {
-    return add('info', message, duration)
+  function info(title: string, message?: string, duration = DEFAULT_DURATION): string {
+    return add('info', title, message, duration)
   }
 
   function clear(): void {

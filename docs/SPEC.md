@@ -927,23 +927,21 @@ import { useToast } from '@/stores/toast'
 
 const toast = useToast()
 
-// 成功訊息
-toast.success('設定已儲存')
+// 標題 + 內容
+toast.success('儲存成功', '個人資訊已更新')
+toast.error('上傳失敗', '檔案大小不能超過 2MB')
+toast.warning('注意', '此操作無法復原')
+toast.info('提示', '您可以使用快捷鍵操作')
 
-// 錯誤訊息
-toast.error('操作失敗，請稍後再試')
-
-// 警告訊息
-toast.warning('此操作無法復原')
-
-// 資訊訊息
-toast.info('提示：您可以使用快捷鍵操作')
+// 僅標題（無內容）
+toast.success('已完成')
+toast.error('操作失敗')
 
 // 自訂顯示時間（毫秒）
-toast.success('已完成', 6000)
+toast.success('儲存成功', '設定已更新', 6000)
 
 // 不自動消失（duration = 0）
-toast.error('嚴重錯誤', 0)
+toast.error('嚴重錯誤', '請聯繫管理員', 0)
 ```
 
 ### 檔案結構

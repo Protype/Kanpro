@@ -38,12 +38,16 @@ function getClasses(type: ToastType): string {
           v-for="toast in toastStore.toasts"
           :key="toast.id"
           :class="[
-            'pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg max-w-sm',
+            'pointer-events-auto flex gap-3 px-4 py-3 rounded-lg shadow-lg max-w-sm',
+            toast.message ? 'items-start' : 'items-center',
             getClasses(toast.type)
           ]"
         >
-          <ph-icon :icon="getIcon(toast.type)" class="w-5 h-5 flex-shrink-0" />
-          <span class="text-sm font-medium flex-1">{{ toast.message }}</span>
+          <ph-icon :icon="getIcon(toast.type)" class="w-5 h-5 flex-shrink-0 mt-0.5" />
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold">{{ toast.title }}</p>
+            <p v-if="toast.message" class="text-sm opacity-80 mt-0.5">{{ toast.message }}</p>
+          </div>
           <button
             @click="toastStore.remove(toast.id)"
             class="p-1 hover:bg-current/10 rounded transition-colors flex-shrink-0 opacity-60 hover:opacity-100"
