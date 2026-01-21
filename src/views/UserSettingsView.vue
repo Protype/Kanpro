@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useToast } from '@/stores/toast'
 import SearchModal from '@/components/SearchModal.vue'
 import type { Task } from '@/types'
 
@@ -15,27 +16,24 @@ const emit = defineEmits<{
 
 const router = useRouter()
 const authStore = useAuthStore()
+const toast = useToast()
 
 // Avatar state - 直接使用 store 的狀態
 const avatarData = computed(() => authStore.avatarData)
 const isLoadingAvatar = computed(() => authStore.avatarLoading)
 const isUploadingAvatar = ref(false)
-const avatarError = ref<string | null>(null)
 const fileInputRef = ref<HTMLInputElement | null>(null)
 
 // Form state
 const userName = ref('')
 const userEmail = ref('')
 const isSaving = ref(false)
-const error = ref<string | null>(null)
-const successMessage = ref<string | null>(null)
 
 // Password change state
 const currentPassword = ref('')
 const newPassword = ref('')
 const confirmPassword = ref('')
 const isChangingPassword = ref(false)
-const passwordError = ref<string | null>(null)
 const showCurrentPassword = ref(false)
 const showNewPassword = ref(false)
 const showConfirmPassword = ref(false)
@@ -62,12 +60,11 @@ const roleBadgeClass = computed(() => {
 
 // Methods
 async function loadAvatar(): Promise<void> {
-  avatarError.value = null
   try {
     await authStore.loadAvatar()
   } catch (err) {
     console.error('[Avatar] Load error:', err)
-    avatarError.value = parseAvatarError(err)
+    toast.error(parseAvatarError(err))
   }
 }
 
@@ -84,18 +81,17 @@ async function handleFileSelect(event: Event): Promise<void> {
   // 驗證檔案類型
   const validTypes = ['image/png', 'image/jpeg', 'image/gif']
   if (!validTypes.includes(file.type)) {
-    avatarError.value = '只支援 PNG、JPG、GIF 格式'
+    toast.error('只支援 PNG、JPG、GIF 格式')
     return
   }
 
   // 驗證檔案大小 (最大 2MB)
   if (file.size > 2 * 1024 * 1024) {
-    avatarError.value = '檔案大小不能超過 2MB'
+    toast.error('檔案大小不能超過 2MB')
     return
   }
 
   isUploadingAvatar.value = true
-  avatarError.value = null
 
   try {
     // 轉換為 Base64
@@ -104,9 +100,9 @@ async function handleFileSelect(event: Event): Promise<void> {
     // 上傳（store 會自動更新 avatarData）
     await authStore.uploadAvatar(base64)
 
-    showSuccess('頭像已更新')
+    toast.success('頭像已更新')
   } catch (err) {
-    avatarError.value = parseAvatarError(err)
+    toast.error(parseAvatarError(err))
   } finally {
     isUploadingAvatar.value = false
     // 清除 input 以便重複選擇同一檔案
@@ -118,14 +114,13 @@ async function handleRemoveAvatar(): Promise<void> {
   if (!confirm('確定要移除頭像嗎？')) return
 
   isUploadingAvatar.value = true
-  avatarError.value = null
 
   try {
     // 移除（store 會自動清除 avatarData）
     await authStore.removeAvatar()
-    showSuccess('頭像已移除')
+    toast.success('頭像已移除')
   } catch (err) {
-    avatarError.value = parseAvatarError(err)
+    toast.error(parseAvatarError(err))
   } finally {
     isUploadingAvatar.value = false
   }
@@ -156,54 +151,43 @@ function fileToBase64(file: File): Promise<string> {
   })
 }
 
-function showSuccess(message: string): void {
-  successMessage.value = message
-  setTimeout(() => {
-    successMessage.value = null
-  }, 3000)
-}
-
 async function handleSave(): Promise<void> {
   if (!userName.value.trim()) {
-    error.value = '名稱不能為空'
+    toast.error('名稱不能為空')
     return
   }
 
   isSaving.value = true
-  error.value = null
-  successMessage.value = null
 
   try {
     await authStore.updateCurrentUser({
       name: userName.value.trim(),
       email: userEmail.value.trim()
     })
-    showSuccess('設定已儲存')
+    toast.success('設定已儲存')
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '儲存失敗'
+    toast.error(err instanceof Error ? err.message : '儲存失敗')
   } finally {
     isSaving.value = false
   }
 }
 
 async function handleChangePassword(): Promise<void> {
-  passwordError.value = null
-
   // 驗證
   if (!currentPassword.value) {
-    passwordError.value = '請輸入目前密碼'
+    toast.error('請輸入目前密碼')
     return
   }
   if (!newPassword.value) {
-    passwordError.value = '請輸入新密碼'
+    toast.error('請輸入新密碼')
     return
   }
   if (newPassword.value.length < 6) {
-    passwordError.value = '新密碼至少需要 6 個字元'
+    toast.error('新密碼至少需要 6 個字元')
     return
   }
   if (newPassword.value !== confirmPassword.value) {
-    passwordError.value = '新密碼與確認密碼不一致'
+    toast.error('新密碼與確認密碼不一致')
     return
   }
 
@@ -211,13 +195,13 @@ async function handleChangePassword(): Promise<void> {
 
   try {
     await authStore.changePassword(currentPassword.value, newPassword.value)
-    showSuccess('密碼已變更')
+    toast.success('密碼已變更')
     // 清空表單
     currentPassword.value = ''
     newPassword.value = ''
     confirmPassword.value = ''
   } catch (err) {
-    passwordError.value = parsePasswordError(err)
+    toast.error(parsePasswordError(err))
   } finally {
     isChangingPassword.value = false
   }
@@ -262,21 +246,6 @@ onMounted(() => {
       <div class="mb-8">
         <h1 class="text-2xl font-bold text-content">使用者設定</h1>
         <p class="text-content-secondary mt-1">管理您的個人資訊與帳號設定</p>
-      </div>
-
-      <!-- Alerts -->
-      <div v-if="error" class="alert-error mb-6">
-        <div class="flex items-center gap-2">
-          <ph-icon icon="warning" class="w-5 h-5" />
-          <span>{{ error }}</span>
-        </div>
-      </div>
-
-      <div v-if="successMessage" class="alert-success mb-6">
-        <div class="flex items-center gap-2">
-          <ph-icon icon="check-circle" class="w-5 h-5" />
-          <span>{{ successMessage }}</span>
-        </div>
       </div>
 
       <!-- Main Content: Two Column Layout -->
@@ -352,11 +321,6 @@ onMounted(() => {
                   移除
                 </button>
               </div>
-
-              <!-- Avatar Error -->
-              <p v-if="avatarError" class="mt-2 text-sm text-error text-center">
-                {{ avatarError }}
-              </p>
 
               <!-- Avatar Hint -->
               <p class="mt-3 text-xs text-content-tertiary text-center">
@@ -516,14 +480,6 @@ onMounted(() => {
               <!-- Password Change Form -->
               <div>
                 <h3 class="text-sm font-medium text-content mb-4">變更密碼</h3>
-
-                <!-- Password Error Alert -->
-                <div v-if="passwordError" class="alert-error mb-4">
-                  <div class="flex items-center gap-2">
-                    <ph-icon icon="warning" class="w-5 h-5 flex-shrink-0" />
-                    <span>{{ passwordError }}</span>
-                  </div>
-                </div>
 
                 <div class="space-y-4">
                   <!-- Current Password -->

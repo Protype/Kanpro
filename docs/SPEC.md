@@ -900,6 +900,68 @@ Phosphor Icons 支援多種 weight（粗細）變體：
 
 ---
 
+## 附錄：Toast 通知規範
+
+Kanpro 統一使用 Toast 通知系統顯示操作結果訊息，取代傳統的行內警告區塊。
+
+### 設計原則
+
+- Toast 從畫面右下角往上堆疊顯示
+- 自動在 4 秒後消失（可自訂）
+- 支援手動關閉
+- 使用動畫平滑顯示/消失
+
+### Toast 類型
+
+| 類型 | 用途 | 顏色 |
+|------|------|------|
+| `success` | 操作成功 | 綠色 (bg-success) |
+| `error` | 操作失敗、驗證錯誤 | 紅色 (bg-error) |
+| `warning` | 警告訊息 | 黃色 (bg-warning) |
+| `info` | 一般資訊 | 藍色 (bg-info) |
+
+### 使用方式
+
+```typescript
+import { useToast } from '@/stores/toast'
+
+const toast = useToast()
+
+// 成功訊息
+toast.success('設定已儲存')
+
+// 錯誤訊息
+toast.error('操作失敗，請稍後再試')
+
+// 警告訊息
+toast.warning('此操作無法復原')
+
+// 資訊訊息
+toast.info('提示：您可以使用快捷鍵操作')
+
+// 自訂顯示時間（毫秒）
+toast.success('已完成', 6000)
+
+// 不自動消失（duration = 0）
+toast.error('嚴重錯誤', 0)
+```
+
+### 檔案結構
+
+| 檔案 | 說明 |
+|------|------|
+| `src/stores/toast.ts` | Toast Store 與 useToast composable |
+| `src/components/ToastContainer.vue` | Toast 容器元件，放置於 App.vue |
+
+### 注意事項
+
+- **禁止使用行內警告區塊**：所有操作結果訊息一律使用 Toast
+- **保持訊息簡短**：Toast 訊息應簡潔明瞭，避免長篇大論
+- **適時使用**：僅在有明確操作結果時顯示，避免過度打擾使用者
+- **元件外使用**：可在任何地方使用 `useToast()`，包括非元件的 TypeScript 檔案
+
+---
+
 ## 附錄：優先級規劃
 
 | 階段 | 功能範圍 |

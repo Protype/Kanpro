@@ -4,6 +4,7 @@ import { RouterView, useRouter } from 'vue-router'
 import { useKeyboardShortcuts } from '@/composables/useKeyboardShortcuts'
 import { useTheme } from '@/composables/useTheme'
 import KeyboardShortcutsModal from '@/components/KeyboardShortcutsModal.vue'
+import ToastContainer from '@/components/ToastContainer.vue'
 
 const router = useRouter()
 const shortcuts = useKeyboardShortcuts()
@@ -48,4 +49,7 @@ onUnmounted(() => {
     :is-open="showShortcutsModal"
     @close="showShortcutsModal = false"
   />
+
+  <!-- 全域 Toast 通知 -->
+  <ToastContainer />
 </template>
