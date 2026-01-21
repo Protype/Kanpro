@@ -26,31 +26,13 @@ function getAvatarColor(name: string): string {
 
 const avatarBgColor = computed(() => getAvatarColor(displayName.value))
 
-// 使用 KanproBridge API 載入頭像（base64 格式）
-const avatarImageData = ref<string | null>(null)
-const avatarLoading = ref(false)
+// 直接使用 store 的頭像資料（與其他元件同步）
+const avatarImageData = computed(() => authStore.avatarData)
 
-async function loadAvatar(): Promise<void> {
-  if (!authStore.user?.id) return
-
-  avatarLoading.value = true
-  try {
-    const imageData = await authStore.getAvatar()
-    avatarImageData.value = imageData
-  } catch {
-    // 頭像功能未啟用或載入失敗，使用預設頭像
-    avatarImageData.value = null
-  } finally {
-    avatarLoading.value = false
-  }
-}
-
-// 當使用者變更時重新載入頭像
+// 當使用者變更時載入頭像
 watch(() => authStore.user?.id, (newId) => {
-  if (newId) {
-    loadAvatar()
-  } else {
-    avatarImageData.value = null
+  if (newId && !authStore.avatarData && !authStore.avatarLoading) {
+    authStore.loadAvatar()
   }
 }, { immediate: true })
 

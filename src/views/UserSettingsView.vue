@@ -16,9 +16,9 @@ const emit = defineEmits<{
 const router = useRouter()
 const authStore = useAuthStore()
 
-// Avatar state
-const avatarData = ref<string | null>(null)
-const isLoadingAvatar = ref(false)
+// Avatar state - 直接使用 store 的狀態
+const avatarData = computed(() => authStore.avatarData)
+const isLoadingAvatar = computed(() => authStore.avatarLoading)
 const isUploadingAvatar = ref(false)
 const avatarError = ref<string | null>(null)
 const fileInputRef = ref<HTMLInputElement | null>(null)
@@ -52,19 +52,12 @@ const roleBadgeClass = computed(() => {
 
 // Methods
 async function loadAvatar(): Promise<void> {
-  isLoadingAvatar.value = true
   avatarError.value = null
-
   try {
-    const data = await authStore.getAvatar()
-    avatarData.value = data
+    await authStore.loadAvatar()
   } catch (err) {
-    // 顯示錯誤訊息，幫助診斷問題
     console.error('[Avatar] Load error:', err)
     avatarError.value = parseAvatarError(err)
-    avatarData.value = null
-  } finally {
-    isLoadingAvatar.value = false
   }
 }
 
@@ -98,11 +91,8 @@ async function handleFileSelect(event: Event): Promise<void> {
     // 轉換為 Base64
     const base64 = await fileToBase64(file)
 
-    // 上傳
+    // 上傳（store 會自動更新 avatarData）
     await authStore.uploadAvatar(base64)
-
-    // 重新載入頭像
-    await loadAvatar()
 
     showSuccess('頭像已更新')
   } catch (err) {
@@ -121,8 +111,8 @@ async function handleRemoveAvatar(): Promise<void> {
   avatarError.value = null
 
   try {
+    // 移除（store 會自動清除 avatarData）
     await authStore.removeAvatar()
-    avatarData.value = null
     showSuccess('頭像已移除')
   } catch (err) {
     avatarError.value = parseAvatarError(err)
@@ -196,7 +186,10 @@ onMounted(() => {
     userName.value = authStore.user.name || ''
     userEmail.value = authStore.user.email || ''
   }
-  loadAvatar()
+  // 如果尚未載入頭像，載入之
+  if (!authStore.avatarData && !authStore.avatarLoading) {
+    loadAvatar()
+  }
 })
 </script>
 

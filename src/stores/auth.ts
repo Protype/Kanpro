@@ -39,6 +39,10 @@ export const useAuthStore = defineStore('auth', () => {
   const tokenExpiresAt = ref(0)
   const autoRefresh = ref(true)  // 是否自動刷新 token
 
+  // === 頭像狀態 ===
+  const avatarData = ref<string | null>(null)
+  const avatarLoading = ref(false)
+
   // === 重新認證狀態 ===
   const isSessionLocked = ref(false)
   const pendingReauthResolvers = ref<Array<{
@@ -85,6 +89,8 @@ export const useAuthStore = defineStore('auth', () => {
     tokenExpiresAt.value = 0
     autoRefresh.value = true
     isSessionLocked.value = false
+    avatarData.value = null
+    avatarLoading.value = false
   }
 
   /**
@@ -431,37 +437,44 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   /**
-   * 取得當前使用者頭像
-   * API 直接回傳 base64 字串或 null
+   * 載入當前使用者頭像到 store
+   * 會更新 avatarData 狀態，讓所有元件同步
    */
-  async function getAvatar(): Promise<string | null> {
-    if (!user.value) {
-      throw new Error('Not authenticated')
-    }
+  async function loadAvatar(): Promise<void> {
+    if (!user.value) return
 
-    const valid = await ensureValidToken()
-    if (!valid) {
-      const reauthed = await requireReauth()
-      if (!reauthed) {
-        throw new Error('Authentication required')
-      }
-    }
-
-    const client = getClient()
-
+    avatarLoading.value = true
     try {
+      const valid = await ensureValidToken()
+      if (!valid) {
+        avatarData.value = null
+        return
+      }
+
+      const client = getClient()
       // API 直接回傳 base64 字串或 null
       const result = await client.call<string | null>('getUserAvatar', {
         userId: user.value.id
       })
-      return result
+      avatarData.value = result
     } catch (error) {
-      // 如果頭像功能未啟用或沒有頭像，回傳 null
-      if (error instanceof Error && error.message.includes('-32601')) {
-        return null
-      }
-      throw error
+      // 如果頭像功能未啟用或沒有頭像，設為 null
+      avatarData.value = null
+    } finally {
+      avatarLoading.value = false
     }
+  }
+
+  /**
+   * 取得當前使用者頭像（舊版相容，直接回傳 store 的 avatarData）
+   * @deprecated 建議使用 avatarData computed 或呼叫 loadAvatar()
+   */
+  async function getAvatar(): Promise<string | null> {
+    // 如果尚未載入，先載入
+    if (avatarData.value === null && !avatarLoading.value) {
+      await loadAvatar()
+    }
+    return avatarData.value
   }
 
   /**
@@ -488,6 +501,11 @@ export const useAuthStore = defineStore('auth', () => {
       imageData
     })
 
+    if (result) {
+      // 上傳成功後，直接更新 store 的頭像資料
+      avatarData.value = imageData
+    }
+
     return result
   }
 
@@ -512,6 +530,11 @@ export const useAuthStore = defineStore('auth', () => {
     const result = await client.call<boolean>('removeUserAvatar', {
       userId: user.value.id
     })
+
+    if (result) {
+      // 移除成功後，清除 store 的頭像資料
+      avatarData.value = null
+    }
 
     return result
   }
@@ -545,6 +568,8 @@ export const useAuthStore = defineStore('auth', () => {
     tokenExpiresAt,
     autoRefresh,
     isSessionLocked,
+    avatarData,
+    avatarLoading,
 
     // 計算屬性
     isAuthenticated,
@@ -560,6 +585,7 @@ export const useAuthStore = defineStore('auth', () => {
     abandonReauth,
     getClient,
     updateCurrentUser,
+    loadAvatar,
     getAvatar,
     uploadAvatar,
     removeAvatar,
