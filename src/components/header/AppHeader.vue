@@ -146,8 +146,6 @@ const toggleMobileSidebar = () => {
           <ph-icon icon="plus-circle" weight="fill" class="w-5 h-5" />
         </button>
 
-        <div class="w-px h-5 bg-edge mx-1" />
-
         <!-- Search Button (Right side when IN project) -->
         <button
           @click="openSearch"
