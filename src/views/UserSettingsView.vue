@@ -30,6 +30,16 @@ const isSaving = ref(false)
 const error = ref<string | null>(null)
 const successMessage = ref<string | null>(null)
 
+// Password change state
+const currentPassword = ref('')
+const newPassword = ref('')
+const confirmPassword = ref('')
+const isChangingPassword = ref(false)
+const passwordError = ref<string | null>(null)
+const showCurrentPassword = ref(false)
+const showNewPassword = ref(false)
+const showConfirmPassword = ref(false)
+
 // Computed
 const userInitial = computed(() => {
   const name = authStore.user?.name || authStore.user?.username || ''
@@ -174,6 +184,58 @@ async function handleSave(): Promise<void> {
   } finally {
     isSaving.value = false
   }
+}
+
+async function handleChangePassword(): Promise<void> {
+  passwordError.value = null
+
+  // 驗證
+  if (!currentPassword.value) {
+    passwordError.value = '請輸入目前密碼'
+    return
+  }
+  if (!newPassword.value) {
+    passwordError.value = '請輸入新密碼'
+    return
+  }
+  if (newPassword.value.length < 6) {
+    passwordError.value = '新密碼至少需要 6 個字元'
+    return
+  }
+  if (newPassword.value !== confirmPassword.value) {
+    passwordError.value = '新密碼與確認密碼不一致'
+    return
+  }
+
+  isChangingPassword.value = true
+
+  try {
+    await authStore.changePassword(currentPassword.value, newPassword.value)
+    showSuccess('密碼已變更')
+    // 清空表單
+    currentPassword.value = ''
+    newPassword.value = ''
+    confirmPassword.value = ''
+  } catch (err) {
+    passwordError.value = parsePasswordError(err)
+  } finally {
+    isChangingPassword.value = false
+  }
+}
+
+function parsePasswordError(err: unknown): string {
+  if (err instanceof Error) {
+    // Method not found - KanproBridge User Password 功能未啟用
+    if (err.message.includes('-32601') || err.message.includes('Method not found')) {
+      return '密碼變更功能未啟用，請在 Kanboard 設定中啟用 KanproBridge User Password'
+    }
+    // 密碼錯誤
+    if (err.message.includes('Invalid') || err.message.includes('incorrect')) {
+      return '目前密碼不正確'
+    }
+    return err.message
+  }
+  return '密碼變更失敗'
 }
 
 function handleSearchSelect(task: Task): void {
@@ -443,7 +505,7 @@ onMounted(() => {
             </div>
           </div>
 
-          <!-- Security Section (placeholder for future) -->
+          <!-- Security Section -->
           <div class="card">
             <div class="p-6 border-b border-edge">
               <h2 class="text-lg font-semibold text-content">安全性設定</h2>
@@ -451,19 +513,107 @@ onMounted(() => {
             </div>
 
             <div class="p-6">
-              <div class="flex items-center justify-between">
-                <div>
-                  <h3 class="text-sm font-medium text-content">密碼</h3>
-                  <p class="text-sm text-content-tertiary mt-1">請透過 Kanboard 後台變更密碼</p>
+              <!-- Password Change Form -->
+              <div>
+                <h3 class="text-sm font-medium text-content mb-4">變更密碼</h3>
+
+                <!-- Password Error Alert -->
+                <div v-if="passwordError" class="alert-error mb-4">
+                  <div class="flex items-center gap-2">
+                    <ph-icon icon="warning" class="w-5 h-5 flex-shrink-0" />
+                    <span>{{ passwordError }}</span>
+                  </div>
                 </div>
-                <a
-                  :href="`${authStore.apiUrl?.replace('/jsonrpc.php', '')}/user/${authStore.user?.id}/password`"
-                  target="_blank"
-                  class="btn-secondary text-sm"
-                >
-                  <ph-icon icon="arrow-square-out" class="w-4 h-4 mr-1" />
-                  前往變更
-                </a>
+
+                <div class="space-y-4">
+                  <!-- Current Password -->
+                  <div>
+                    <label for="currentPassword" class="block text-sm font-medium text-content-secondary mb-2">
+                      目前密碼
+                    </label>
+                    <div class="relative">
+                      <input
+                        id="currentPassword"
+                        v-model="currentPassword"
+                        :type="showCurrentPassword ? 'text' : 'password'"
+                        class="input pr-10"
+                        placeholder="輸入目前密碼"
+                        :disabled="isChangingPassword"
+                        autocomplete="current-password"
+                      />
+                      <button
+                        type="button"
+                        @click="showCurrentPassword = !showCurrentPassword"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-content-tertiary hover:text-content-secondary"
+                      >
+                        <ph-icon :icon="showCurrentPassword ? 'eye-slash' : 'eye'" class="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- New Password -->
+                  <div>
+                    <label for="newPassword" class="block text-sm font-medium text-content-secondary mb-2">
+                      新密碼
+                    </label>
+                    <div class="relative">
+                      <input
+                        id="newPassword"
+                        v-model="newPassword"
+                        :type="showNewPassword ? 'text' : 'password'"
+                        class="input pr-10"
+                        placeholder="輸入新密碼（至少 6 個字元）"
+                        :disabled="isChangingPassword"
+                        autocomplete="new-password"
+                      />
+                      <button
+                        type="button"
+                        @click="showNewPassword = !showNewPassword"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-content-tertiary hover:text-content-secondary"
+                      >
+                        <ph-icon :icon="showNewPassword ? 'eye-slash' : 'eye'" class="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Confirm Password -->
+                  <div>
+                    <label for="confirmPassword" class="block text-sm font-medium text-content-secondary mb-2">
+                      確認新密碼
+                    </label>
+                    <div class="relative">
+                      <input
+                        id="confirmPassword"
+                        v-model="confirmPassword"
+                        :type="showConfirmPassword ? 'text' : 'password'"
+                        class="input pr-10"
+                        placeholder="再次輸入新密碼"
+                        :disabled="isChangingPassword"
+                        autocomplete="new-password"
+                      />
+                      <button
+                        type="button"
+                        @click="showConfirmPassword = !showConfirmPassword"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-content-tertiary hover:text-content-secondary"
+                      >
+                        <ph-icon :icon="showConfirmPassword ? 'eye-slash' : 'eye'" class="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Change Password Button -->
+                  <div class="pt-2">
+                    <button
+                      @click="handleChangePassword"
+                      :disabled="isChangingPassword"
+                      class="btn-primary"
+                    >
+                      <ph-icon v-if="isChangingPassword" icon="spinner" class="w-4 h-4 mr-2 animate-spin" />
+                      <ph-icon v-else icon="lock" class="w-4 h-4 mr-2" />
+                      <span>{{ isChangingPassword ? '變更中...' : '變更密碼' }}</span>
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <!-- 2FA Status -->

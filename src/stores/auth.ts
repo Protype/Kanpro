@@ -540,6 +540,35 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   /**
+   * 變更當前使用者密碼
+   * 需要提供目前密碼進行驗證
+   * @param currentPassword 目前密碼
+   * @param newPassword 新密碼
+   */
+  async function changePassword(currentPassword: string, newPassword: string): Promise<boolean> {
+    if (!user.value) {
+      throw new Error('Not authenticated')
+    }
+
+    const valid = await ensureValidToken()
+    if (!valid) {
+      const reauthed = await requireReauth()
+      if (!reauthed) {
+        throw new Error('Authentication required')
+      }
+    }
+
+    const client = getClient()
+
+    const result = await client.call<boolean>('changeUserPassword', {
+      currentPassword,
+      newPassword
+    })
+
+    return result
+  }
+
+  /**
    * 設置測試用認證狀態
    * 僅供測試使用
    */
@@ -589,6 +618,7 @@ export const useAuthStore = defineStore('auth', () => {
     getAvatar,
     uploadAvatar,
     removeAvatar,
+    changePassword,
 
     // 測試用
     _setTestCredentials
