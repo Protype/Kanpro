@@ -173,6 +173,16 @@ export const useProjectsStore = defineStore('projects', () => {
     }
   }
 
+  /**
+   * 重置 store 狀態（登出時呼叫）
+   */
+  function $reset(): void {
+    projects.value = []
+    isLoading.value = false
+    error.value = null
+    searchQuery.value = ''
+  }
+
   return {
     projects,
     isLoading,
@@ -186,6 +196,7 @@ export const useProjectsStore = defineStore('projects', () => {
     removeProject,
     createProject,
     disableProjectPublicAccess,
-    enableProjectPublicAccess
+    enableProjectPublicAccess,
+    $reset
   }
 })

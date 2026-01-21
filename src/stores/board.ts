@@ -84,6 +84,14 @@ export const useBoardStore = defineStore('board', () => {
     error.value = null
   }
 
+  /**
+   * 重置 store 狀態（登出時呼叫）
+   */
+  function $reset(): void {
+    clearBoard()
+    isLoading.value = false
+  }
+
   return {
     project,
     swimlanes,
@@ -92,6 +100,7 @@ export const useBoardStore = defineStore('board', () => {
     columns,
     fetchBoard,
     getTaskById,
-    clearBoard
+    clearBoard,
+    $reset
   }
 })

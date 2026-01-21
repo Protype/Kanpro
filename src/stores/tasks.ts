@@ -122,6 +122,16 @@ export const useTasksStore = defineStore('tasks', () => {
     error.value = null
   }
 
+  /**
+   * 重置 store 狀態（登出時呼叫）
+   */
+  function $reset(): void {
+    currentTask.value = null
+    allTasks.value = []
+    isLoading.value = false
+    error.value = null
+  }
+
   async function searchTasks(query: string, projectId?: number): Promise<Task[]> {
     const authStore = useAuthStore()
     const client = authStore.getClient()
@@ -148,6 +158,7 @@ export const useTasksStore = defineStore('tasks', () => {
     openTask,
     clearCurrentTask,
     clearAllTasks,
-    searchTasks
+    searchTasks,
+    $reset
   }
 })

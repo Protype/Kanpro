@@ -105,6 +105,19 @@ export const useSidebarStore = defineStore('sidebar', () => {
     }
   }
 
+  /**
+   * 重置 store 狀態（登出時呼叫）
+   * 保留 isExpanded 設定，但清除與專案相關的狀態
+   */
+  const $reset = () => {
+    isMobileOpen.value = false
+    mode.value = 'global'
+    currentProjectId.value = null
+    expandedProjects.value = new Set()
+    // 更新 localStorage
+    persistState()
+  }
+
   // Initialize state from localStorage
   loadState()
 
@@ -131,6 +144,7 @@ export const useSidebarStore = defineStore('sidebar', () => {
     isProjectExpanded,
     expandProject,
     collapseProject,
-    loadState
+    loadState,
+    $reset
   }
 })

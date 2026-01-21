@@ -152,22 +152,35 @@ const handleLogin = async () => {
     router.push('/')
   } catch (error) {
     if (error instanceof Error) {
-      if (error.message.includes('401') || error.message.includes('Unauthorized')) {
-        // 使用者登入問題
+      const msg = error.message
+
+      // 認證失敗：帳號或密碼錯誤
+      if (msg.includes('認證失敗')) {
         errorMessage.value = '登入失敗，帳號或密碼錯誤'
-      } else if (error.message.includes('Unexpected token') || error.message.includes('not valid JSON')) {
-        // 主機連線問題：API 路徑錯誤
+      }
+      // 認證格式錯誤（通常是程式問題）
+      else if (msg.includes('認證格式錯誤')) {
+        errorMessage.value = '登入失敗，認證格式錯誤（請聯絡系統管理員）'
+      }
+      // 外掛未安裝或 JWT 未啟用
+      else if (msg.includes('KanproBridge') || msg.includes('外掛未安裝') || msg.includes('JWT')) {
+        errorMessage.value = '登入失敗，KanproBridge 外掛未安裝或 JWT 功能未啟用'
+      }
+      // API 路徑錯誤（返回非 JSON）
+      else if (msg.includes('Unexpected token') || msg.includes('not valid JSON')) {
         errorMessage.value = '伺服器連線錯誤，API 端點返回非 JSON 格式（請確認網址是否正確）'
-      } else if (error.message.includes('Network') || error.message.includes('fetch') || error.message.includes('Failed')) {
-        // 主機連線問題：網路錯誤
+      }
+      // 網路連線問題
+      else if (msg.includes('Network') || msg.includes('fetch') || msg.includes('Failed')) {
         if (wasCrossOrigin && !import.meta.env.DEV) {
           errorMessage.value = '伺服器連線錯誤，可能是 CORS 未設定（請確認伺服器已啟用跨域存取）'
         } else {
           errorMessage.value = '伺服器連線錯誤，無法連線到伺服器'
         }
-      } else {
-        // 其他登入問題
-        errorMessage.value = '登入失敗，' + (error.message || '請稍後再試')
+      }
+      // 其他錯誤
+      else {
+        errorMessage.value = '登入失敗，' + (msg || '請稍後再試')
       }
     } else {
       errorMessage.value = '登入失敗，請稍後再試'

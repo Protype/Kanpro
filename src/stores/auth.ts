@@ -118,8 +118,9 @@ export const useAuthStore = defineStore('auth', () => {
 
     if (!pluginInfo) {
       throw new Error(
-        'JWT 認證外掛未安裝。請先在 Kanboard 伺服器上安裝 JWTAuth 外掛：\n' +
-        'https://github.com/Protype/Kanboard-Plugin-JWTAuth'
+        'KanproBridge 外掛未安裝或 JWT 功能未啟用。\n' +
+        '請在 Kanboard 伺服器上安裝 KanproBridge 外掛並啟用 JWT Authentication：\n' +
+        'https://github.com/Protype/Kanboard-Plugin-KanproBridge'
       )
     }
 
@@ -180,6 +181,17 @@ export const useAuthStore = defineStore('auth', () => {
         // 撤銷失敗不影響登出
       }
     }
+
+    // 重置所有相關 store（延遲導入避免循環依賴）
+    const { useProjectsStore } = await import('./projects')
+    const { useSidebarStore } = await import('./sidebar')
+    const { useBoardStore } = await import('./board')
+    const { useTasksStore } = await import('./tasks')
+
+    useProjectsStore().$reset()
+    useSidebarStore().$reset()
+    useBoardStore().$reset()
+    useTasksStore().$reset()
 
     // 清除狀態
     clearState()

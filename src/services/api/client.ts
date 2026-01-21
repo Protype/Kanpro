@@ -22,7 +22,7 @@ export class KanboardError extends Error {
 
 /**
  * 從配置取得認證密鑰
- * 注意：Kanboard 的 JWT 認證使用 Basic Auth 格式（username:access_token）
+ * 注意：Kanboard 的 JWT 認證使用 X-API-Auth 格式（username:access_token）
  */
 function getAuthSecret(config: KanboardClientConfig): string {
   if ('authMode' in config) {
@@ -39,12 +39,13 @@ function getAuthSecret(config: KanboardClientConfig): string {
 }
 
 /**
- * 取得認證標頭
+ * 取得認證標頭值
+ * 使用 X-API-Auth header 格式：base64(username:password)
+ * 避免 401 回應觸發瀏覽器原生認證對話框
  */
-function getAuthHeader(config: KanboardClientConfig): string {
+function getAuthHeaderValue(config: KanboardClientConfig): string {
   const secret = getAuthSecret(config)
-  const credentials = btoa(`${config.username}:${secret}`)
-  return `Basic ${credentials}`
+  return btoa(`${config.username}:${secret}`)
 }
 
 /**
@@ -69,13 +70,13 @@ export function createKanboardClient(config: KanboardClientConfig): KanboardClie
       request.params = params
     }
 
-    const authHeader = getAuthHeader(config)
+    const authHeaderValue = getAuthHeaderValue(config)
 
     const response = await fetch(config.apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': authHeader
+        'X-API-Auth': authHeaderValue
       },
       body: JSON.stringify(request)
     })

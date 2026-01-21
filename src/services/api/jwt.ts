@@ -67,10 +67,11 @@ export interface JWTAuthService {
 
 /**
  * 認證方式類型
- * 注意：Kanboard JWTAuth 外掛僅支援 Basic Auth 格式
+ * 使用 X-API-Auth header 避免瀏覽器彈出原生認證對話框
+ * 格式：base64(username:password)
  */
 type AuthHeader =
-  | { type: 'basic'; username: string; password: string }
+  | { type: 'x-api-auth'; username: string; password: string }
 
 /**
  * 建立 JWT 認證服務
@@ -82,6 +83,7 @@ export function createJWTAuthService(): JWTAuthService {
 
   /**
    * 發送 JSON-RPC 請求（通用方法）
+   * 使用 X-API-Auth header 進行認證，避免 401 回應觸發瀏覽器原生對話框
    */
   async function call<T>(
     apiUrl: string,
@@ -99,9 +101,10 @@ export function createJWTAuthService(): JWTAuthService {
       request.params = params
     }
 
+    // 使用 X-API-Auth header，格式為 base64(username:password)
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'Authorization': `Basic ${btoa(`${auth.username}:${auth.password}`)}`
+      'X-API-Auth': btoa(`${auth.username}:${auth.password}`)
     }
 
     const response = await fetch(apiUrl, {
@@ -117,7 +120,10 @@ export function createJWTAuthService(): JWTAuthService {
     const json = await response.json()
 
     if ('error' in json) {
-      throw new Error(json.error.message)
+      // 將 error code 附加到錯誤訊息中，便於上層判斷
+      const errorCode = json.error.code
+      const errorMessage = json.error.message
+      throw new Error(`[${errorCode}] ${errorMessage}`)
     }
 
     return json.result as T
@@ -128,11 +134,26 @@ export function createJWTAuthService(): JWTAuthService {
       try {
         return await call<JWTPluginInfo>(
           apiUrl,
-          'getJWTPlugin',
-          { type: 'basic', username, password }
+          'getKanproBridgePlugin',
+          { type: 'x-api-auth', username, password }
         )
-      } catch {
-        return null
+      } catch (error) {
+        if (error instanceof Error) {
+          // HTTP 401 或 JSON-RPC error code 401：認證失敗
+          if (error.message.includes('[401]') || error.message.includes('HTTP 401')) {
+            throw new Error('認證失敗：帳號或密碼錯誤')
+          }
+          // JSON-RPC error code -32600：無效請求格式（header 格式錯誤）
+          if (error.message.includes('[-32600]')) {
+            throw new Error('認證格式錯誤：' + error.message.replace(/\[-?\d+\]\s*/, ''))
+          }
+          // JSON-RPC error code -32601：方法不存在（外掛未安裝或 JWT 未啟用）
+          if (error.message.includes('[-32601]')) {
+            return null
+          }
+        }
+        // 其他錯誤（網路問題等）直接拋出
+        throw error
       }
     },
 
@@ -144,7 +165,7 @@ export function createJWTAuthService(): JWTAuthService {
       return await call<JWTTokenResponse>(
         apiUrl,
         'getJWTToken',
-        { type: 'basic', username, password }
+        { type: 'x-api-auth', username, password }
       )
     },
 
@@ -152,7 +173,7 @@ export function createJWTAuthService(): JWTAuthService {
       return await call<JWTTokenResponse>(
         apiUrl,
         'refreshJWTToken',
-        { type: 'basic', username, password: accessToken },
+        { type: 'x-api-auth', username, password: accessToken },
         { refresh_token: refreshToken }
       )
     },
@@ -167,7 +188,7 @@ export function createJWTAuthService(): JWTAuthService {
         await call(
           apiUrl,
           'revokeJWTToken',
-          { type: 'basic', username, password: accessToken },
+          { type: 'x-api-auth', username, password: accessToken },
           { token: tokenToRevoke }
         )
         return true

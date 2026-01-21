@@ -719,9 +719,7 @@ assignee:me due:today status:open
 
 ### 認證方式
 
-使用 HTTP Basic Authentication：
-- 使用者名稱：`jsonrpc` 或使用者帳號
-- 密碼：API Token 或使用者密碼
+Kanpro 使用自定義的 `X-API-Auth` header 進行認證，避免瀏覽器原生認證對話框。
 
 ### API 端點
 
@@ -729,19 +727,52 @@ assignee:me due:today status:open
 POST {kanboard_url}/jsonrpc.php
 ```
 
+### 伺服器端設定
+
+在 Kanboard 的 `config.php` 中需要設定：
+
+```php
+define('API_AUTHENTICATION_HEADER', 'X-API-Auth');
+```
+
+### X-API-Auth 認證格式
+
+使用 `X-API-Auth` header，值為 Base64 編碼的 `username:password`：
+
+```
+X-API-Auth: base64(username:password)
+```
+
+**範例**：
+```bash
+# admin:admin 的 Base64 編碼為 YWRtaW46YWRtaW4=
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -H "X-API-Auth: YWRtaW46YWRtaW4=" \
+  -d '{"jsonrpc":"2.0","method":"getMe","id":1}' \
+  http://localhost/kanboard/jsonrpc.php
+```
+
 ### JWTAuth 外掛認證規格
 
-Kanpro 使用 JWTAuth 外掛進行認證，所有 API 呼叫必須使用 **HTTP Basic Auth** 格式：
+Kanpro 使用 JWTAuth 外掛進行認證，所有 API 呼叫使用 `X-API-Auth` header：
 
-| 方法 | 認證格式 | 說明 |
+| 方法 | 認證內容 | 說明 |
 |------|----------|------|
-| `getJWTToken` | `username:password` | 登入取得 token |
-| `getJWTPlugin` | `username:password` | 檢查外掛狀態 |
-| `refreshJWTToken` | `username:access_token` | 刷新 token |
-| `revokeJWTToken` | `username:access_token` | 撤銷 token |
-| 其他 API | `username:access_token` | 一般 API 呼叫 |
+| `getJWTToken` | `base64(username:password)` | 登入取得 token |
+| `getJWTPlugin` | `base64(username:password)` | 檢查外掛狀態 |
+| `refreshJWTToken` | `base64(username:access_token)` | 刷新 token |
+| `revokeJWTToken` | `base64(username:access_token)` | 撤銷 token |
+| 其他 API | `base64(username:access_token)` | 一般 API 呼叫 |
 
-**重要**：不可使用 Bearer token 或無認證方式，否則伺服器回傳 401 + `WWW-Authenticate: Basic` 會觸發瀏覽器原生認證對話框。
+### 為什麼使用 X-API-Auth 而非 Authorization
+
+當使用標準 `Authorization: Basic` header 且認證失敗時，伺服器回傳 `401 Unauthorized` 搭配 `WWW-Authenticate: Basic` header，會觸發瀏覽器的原生認證對話框。
+
+使用自定義的 `X-API-Auth` header 可以避免此問題：
+- JWTAuth 外掛會移除回應中的 `WWW-Authenticate` header
+- 瀏覽器不會彈出原生認證對話框
+- 應用程式可以正常處理 401 錯誤並顯示適當的錯誤訊息
 
 ---
 
