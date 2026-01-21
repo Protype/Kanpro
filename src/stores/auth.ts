@@ -397,10 +397,6 @@ export const useAuthStore = defineStore('auth', () => {
     email?: string
   }
 
-  interface AvatarResponse {
-    imageData: string | null
-  }
-
   /**
    * 更新當前使用者
    */
@@ -436,6 +432,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   /**
    * 取得當前使用者頭像
+   * API 直接回傳 base64 字串或 null
    */
   async function getAvatar(): Promise<string | null> {
     if (!user.value) {
@@ -453,10 +450,11 @@ export const useAuthStore = defineStore('auth', () => {
     const client = getClient()
 
     try {
-      const result = await client.call<AvatarResponse>('getUserAvatar', {
+      // API 直接回傳 base64 字串或 null
+      const result = await client.call<string | null>('getUserAvatar', {
         userId: user.value.id
       })
-      return result?.imageData ?? null
+      return result
     } catch (error) {
       // 如果頭像功能未啟用或沒有頭像，回傳 null
       if (error instanceof Error && error.message.includes('-32601')) {

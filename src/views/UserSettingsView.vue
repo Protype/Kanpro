@@ -59,7 +59,9 @@ async function loadAvatar(): Promise<void> {
     const data = await authStore.getAvatar()
     avatarData.value = data
   } catch (err) {
-    // 靜默失敗，使用預設頭像
+    // 顯示錯誤訊息，幫助診斷問題
+    console.error('[Avatar] Load error:', err)
+    avatarError.value = parseAvatarError(err)
     avatarData.value = null
   } finally {
     isLoadingAvatar.value = false
