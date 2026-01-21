@@ -134,7 +134,12 @@ const handleCreateTask = async (data: {
 
     <!-- Board -->
     <main v-else class="flex-1 overflow-x-auto p-4">
-      <div class="flex gap-4 h-full min-w-max">
+      <!-- Project Name -->
+      <div class="mb-3 flex items-center gap-2">
+        <h1 class="text-lg font-semibold text-content">{{ boardStore.project?.name || '看板' }}</h1>
+        <span class="text-sm text-content-tertiary">· {{ boardStore.columns.length }} 欄位</span>
+      </div>
+      <div class="flex gap-4 h-[calc(100%-2rem)] min-w-max">
         <!-- Columns -->
         <div
           v-for="column in boardStore.columns"

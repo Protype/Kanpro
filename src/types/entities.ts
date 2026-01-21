@@ -32,9 +32,9 @@ export interface Project {
   id: number
   name: string
   description?: string | null
-  is_active: boolean
-  is_public: boolean
-  is_private: boolean
+  is_active: boolean | number | string  // API 可能回傳不同類型
+  is_public: boolean | number | string
+  is_private: boolean | number | string
   owner_id: number
   token?: string | null
   start_date?: string | null
@@ -209,6 +209,14 @@ export interface Activity {
   project_id: number
   task_id?: number
   data?: Record<string, unknown>
+  // API 回傳的額外欄位
+  author_username?: string
+  author_name?: string
+  task?: {
+    id: number
+    title: string
+    [key: string]: unknown
+  }
 }
 
 /**
