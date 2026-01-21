@@ -45,6 +45,18 @@ function navigateTo(path: string): void {
 function toggleMobileSidebar(): void {
   sidebarStore.toggleMobileOpen()
 }
+
+function openSearch(): void {
+  emit('open-search')
+}
+
+function openCreateProject(): void {
+  emit('open-create-project')
+}
+
+function openCreateTask(): void {
+  emit('open-create-task')
+}
 </script>
 
 <template>
