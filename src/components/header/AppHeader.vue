@@ -97,7 +97,7 @@ const toggleMobileSidebar = () => {
         >
           <ph-icon icon="magnifying-glass" weight="bold" class="w-4 h-4" />
           <span>搜尋</span>
-          <kbd class="px-1.5 py-0.5 text-xs bg-surface-tertiary rounded">⌘K</kbd>
+          <kbd class="px-1.5 py-0.5 text-xs bg-surface-tertiary rounded">⌘KK</kbd>
         </button>
       </template>
 
@@ -153,7 +153,7 @@ const toggleMobileSidebar = () => {
         >
           <ph-icon icon="magnifying-glass" weight="bold" class="w-4 h-4" />
           <span>搜尋</span>
-          <kbd class="px-1.5 py-0.5 text-xs bg-surface-tertiary rounded">⌘K</kbd>
+          <kbd class="px-1.5 py-0.5 text-xs bg-surface-tertiary rounded">⌘KK</kbd>
         </button>
       </template>
     </div>
