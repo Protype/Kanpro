@@ -68,29 +68,41 @@ const toggleMobileSidebar = () => {
       <ph-icon icon="list" class="w-5 h-5" />
     </button>
 
-    <!-- Quick Actions (Left side) -->
+    <!-- Left side content -->
     <div class="hidden lg:flex items-center gap-1">
-      <!-- Create Project Button -->
-      <button
-        @click="openCreateProject"
-        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
-        title="新增專案"
-      >
-        <ph-icon icon="folder-simple-plus" weight="fill" class="w-5 h-5" />
-      </button>
+      <!-- Quick Actions (Left side - only when NOT in project context) -->
+      <template v-if="!currentProjectId">
+        <!-- Create Project Button -->
+        <button
+          @click="openCreateProject"
+          class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
+          title="新增專案"
+        >
+          <ph-icon icon="folder-simple-plus" weight="fill" class="w-5 h-5" />
+        </button>
 
-      <!-- Create Task Button -->
-      <button
-        @click="openCreateTask"
-        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
-        title="新增任務"
-      >
-        <ph-icon icon="plus-circle" weight="fill" class="w-5 h-5" />
-      </button>
+        <!-- Create Task Button -->
+        <button
+          @click="openCreateTask"
+          class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
+          title="新增任務"
+        >
+          <ph-icon icon="plus-circle" weight="fill" class="w-5 h-5" />
+        </button>
+
+        <!-- Search Button (Left side when NOT in project) -->
+        <button
+          @click="openSearch"
+          class="flex items-center gap-2 px-3 py-1.5 text-sm text-content-tertiary bg-surface-secondary hover:bg-surface-hover rounded-md transition-colors"
+        >
+          <ph-icon icon="magnifying-glass" weight="bold" class="w-4 h-4" />
+          <span>搜尋</span>
+          <kbd class="px-1.5 py-0.5 text-xs bg-surface-tertiary rounded">⌘K</kbd>
+        </button>
+      </template>
 
       <!-- Project Navigation Buttons (when in project context) -->
       <template v-if="currentProjectId">
-        <div class="w-px h-5 bg-edge mx-2" />
         <button
           v-for="item in projectNavItems"
           :key="item.name"
@@ -112,15 +124,41 @@ const toggleMobileSidebar = () => {
     <!-- Spacer -->
     <div class="flex-1" />
 
-    <!-- Search Button (Right side) -->
-    <button
-      @click="openSearch"
-      class="hidden lg:flex items-center gap-2 px-3 py-1.5 text-sm text-content-tertiary bg-surface-secondary hover:bg-surface-hover rounded-md transition-colors"
-    >
-      <ph-icon icon="magnifying-glass" weight="bold" class="w-4 h-4" />
-      <span>搜尋</span>
-      <kbd class="px-1.5 py-0.5 text-xs bg-surface-tertiary rounded">⌘K</kbd>
-    </button>
+    <!-- Right side content -->
+    <div class="hidden lg:flex items-center gap-1">
+      <!-- Quick Actions (Right side - only when IN project context) -->
+      <template v-if="currentProjectId">
+        <!-- Create Project Button -->
+        <button
+          @click="openCreateProject"
+          class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
+          title="新增專案"
+        >
+          <ph-icon icon="folder-simple-plus" weight="fill" class="w-5 h-5" />
+        </button>
+
+        <!-- Create Task Button -->
+        <button
+          @click="openCreateTask"
+          class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
+          title="新增任務"
+        >
+          <ph-icon icon="plus-circle" weight="fill" class="w-5 h-5" />
+        </button>
+
+        <div class="w-px h-5 bg-edge mx-1" />
+
+        <!-- Search Button (Right side when IN project) -->
+        <button
+          @click="openSearch"
+          class="flex items-center gap-2 px-3 py-1.5 text-sm text-content-tertiary bg-surface-secondary hover:bg-surface-hover rounded-md transition-colors"
+        >
+          <ph-icon icon="magnifying-glass" weight="bold" class="w-4 h-4" />
+          <span>搜尋</span>
+          <kbd class="px-1.5 py-0.5 text-xs bg-surface-tertiary rounded">⌘K</kbd>
+        </button>
+      </template>
+    </div>
 
     <!-- Notifications -->
     <NotificationsDropdown />
