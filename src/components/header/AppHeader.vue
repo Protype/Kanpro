@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSidebarStore } from '@/stores/sidebar'
+import { useBoardStore } from '@/stores/board'
 import NotificationsDropdown from '@/components/NotificationsDropdown.vue'
 import UserDropdown from '@/components/header/UserDropdown.vue'
 
@@ -14,11 +15,13 @@ const emit = defineEmits<{
 const route = useRoute()
 const router = useRouter()
 const sidebarStore = useSidebarStore()
+const boardStore = useBoardStore()
 
 // Check if we're in project context
 const currentProjectId = computed(() => sidebarStore.currentProjectId)
+const currentProjectName = computed(() => boardStore.project?.name || '')
 
-// Project navigation items
+// Project navigation items - full version
 const projectNavItems = computed(() => {
   const id = currentProjectId.value
   if (!id) return []
@@ -27,11 +30,12 @@ const projectNavItems = computed(() => {
     { name: 'project-list', label: '列表', icon: 'list', route: `/projects/${id}` },
     { name: 'project-board', label: '看板', icon: 'table-columns', route: `/projects/${id}/board` },
     { name: 'project-calendar', label: '行事曆', icon: 'calendar', route: `/projects/${id}/calendar` },
-    { name: 'project-activity', label: '動態', icon: 'bolt', route: `/projects/${id}/activity` },
+    { name: 'project-activity', label: '動態', icon: 'lightning', route: `/projects/${id}/activity` },
     { name: 'project-analytics', label: '分析', icon: 'chart-bar', route: `/projects/${id}/analytics` },
     { name: 'project-settings', label: '設定', icon: 'gear', route: `/projects/${id}/settings` }
   ]
 })
+
 
 const isActiveRoute = (routeName: string) => {
   return route.name === routeName
@@ -101,23 +105,57 @@ const toggleMobileSidebar = () => {
         </button>
       </template>
 
-      <!-- Project Navigation Buttons (when in project context) -->
+      <!-- Project Navigation (when in project context) - Style B -->
       <template v-if="currentProjectId">
-        <button
-          v-for="item in projectNavItems"
-          :key="item.name"
-          @click="navigateTo(item.route)"
-          :class="[
-            'flex items-center gap-1.5 px-2.5 py-1.5 text-sm rounded-md transition-colors',
-            isActiveRoute(item.name)
-              ? 'bg-accent text-content-inverse'
-              : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-hover'
-          ]"
-          :title="item.label"
-        >
-          <ph-icon :icon="item.icon" class="w-4 h-4" />
-          <span>{{ item.label }}</span>
-        </button>
+        <!-- Project Name with Icon Box -->
+        <div class="flex items-center gap-2 min-w-0">
+          <div class="w-7 h-7 bg-accent/10 rounded-md flex items-center justify-center flex-shrink-0">
+            <ph-icon icon="folder" class="w-4 h-4 text-accent" />
+          </div>
+          <span class="text-base font-semibold text-content truncate max-w-[200px] 2xl:max-w-[300px]">
+            {{ currentProjectName }}
+          </span>
+        </div>
+
+        <!-- Chevron Separator -->
+        <ph-icon icon="caret-right" class="w-4 h-4 text-content-tertiary ml-1 flex-shrink-0" />
+
+        <!-- Full Navigation (xl and above) -->
+        <div class="hidden xl:flex items-center gap-1">
+          <button
+            v-for="item in projectNavItems"
+            :key="item.name"
+            @click="navigateTo(item.route)"
+            :class="[
+              'flex items-center gap-1.5 px-2.5 py-1.5 text-sm rounded-md transition-colors',
+              isActiveRoute(item.name)
+                ? 'bg-accent text-content-inverse'
+                : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-hover'
+            ]"
+            :title="item.label"
+          >
+            <ph-icon :icon="item.icon" class="w-4 h-4" />
+            <span>{{ item.label }}</span>
+          </button>
+        </div>
+
+        <!-- Compact Navigation (lg to xl) - icons only with tooltips -->
+        <div class="hidden lg:flex xl:hidden items-center gap-1">
+          <button
+            v-for="item in projectNavItems"
+            :key="item.name"
+            @click="navigateTo(item.route)"
+            :class="[
+              'p-2 rounded-md transition-colors',
+              isActiveRoute(item.name)
+                ? 'bg-accent text-content-inverse'
+                : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-hover'
+            ]"
+            :title="item.label"
+          >
+            <ph-icon :icon="item.icon" class="w-4 h-4" />
+          </button>
+        </div>
       </template>
     </div>
 
