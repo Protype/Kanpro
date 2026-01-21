@@ -185,10 +185,12 @@ const handleSearchSelect = (task: Task) => {
     <main v-else class="flex-1 p-4 overflow-auto">
       <!-- Toolbar -->
       <div class="card mb-4 p-4 flex items-center gap-4">
+        <h1 class="text-lg font-semibold text-content whitespace-nowrap">{{ boardStore.project?.name || '任務列表' }}</h1>
+        <span class="text-content-tertiary">|</span>
         <input
           v-model="filterQuery"
           type="text"
-          placeholder="搜尋任務..."
+          :placeholder="`搜尋任務...`"
           class="input flex-1 max-w-md"
         />
         <label class="flex items-center gap-2 text-sm text-content-secondary">

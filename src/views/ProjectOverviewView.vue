@@ -15,8 +15,12 @@
 
       <!-- Content -->
       <div v-else class="max-w-6xl mx-auto px-6 py-6 animate-fadeIn">
-      <!-- Progress Section -->
+      <!-- Project Title & Progress Section -->
       <section class="mb-6">
+        <div class="mb-4">
+          <h1 class="text-2xl font-bold text-content">{{ project?.name || '專案總覽' }}</h1>
+          <p class="text-sm text-content-tertiary mt-1">專案總覽與進度追蹤</p>
+        </div>
         <div class="flex items-center justify-between mb-3">
           <h2 class="text-xs font-semibold text-content-tertiary uppercase tracking-wider">任務進度</h2>
           <span class="text-sm text-content-secondary">共 {{ totalTasks }} 項任務</span>
@@ -258,10 +262,11 @@ const totalTasks = computed(() => {
   return columns.value.reduce((sum, col) => sum + (col.nb_tasks || 0), 0)
 })
 
-// Check if project is active (handles both number and string values)
+// Check if project is active (handles both boolean and number/string values from API)
 const isProjectActive = computed(() => {
   const isActive = project.value?.is_active
-  return isActive === 1 || isActive === '1' || isActive === true
+  // API 可能回傳 boolean、number 或 string
+  return Boolean(isActive) && isActive !== 0 && isActive !== '0'
 })
 
 // Get project owner name
