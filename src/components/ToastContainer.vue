@@ -14,10 +14,10 @@ function getIcon(type: ToastType): string {
 
 function getClasses(type: ToastType): string {
   switch (type) {
-    case 'success': return 'bg-success text-white'
-    case 'error': return 'bg-error text-white'
-    case 'warning': return 'bg-warning text-white'
-    case 'info': return 'bg-info text-white'
+    case 'success': return 'bg-emerald-100 dark:bg-emerald-900/50 border border-emerald-500 text-emerald-700 dark:text-emerald-300'
+    case 'error': return 'bg-red-100 dark:bg-red-900/50 border border-red-500 text-red-700 dark:text-red-300'
+    case 'warning': return 'bg-amber-100 dark:bg-amber-900/50 border border-amber-500 text-amber-700 dark:text-amber-300'
+    case 'info': return 'bg-blue-100 dark:bg-blue-900/50 border border-blue-500 text-blue-700 dark:text-blue-300'
   }
 }
 </script>
@@ -46,7 +46,7 @@ function getClasses(type: ToastType): string {
           <span class="text-sm font-medium flex-1">{{ toast.message }}</span>
           <button
             @click="toastStore.remove(toast.id)"
-            class="p-1 hover:bg-white/20 rounded transition-colors flex-shrink-0"
+            class="p-1 hover:bg-current/10 rounded transition-colors flex-shrink-0 opacity-60 hover:opacity-100"
           >
             <ph-icon icon="x" class="w-4 h-4" />
           </button>
