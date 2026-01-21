@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useTheme, type ThemeName, THEMES } from '@/composables/useTheme'
@@ -15,7 +15,7 @@ const displayName = computed(() => authStore.user?.name || authStore.user?.usern
 const avatarInitial = computed(() => displayName.value.charAt(0).toUpperCase())
 
 // 根據使用者名稱產生一致的背景色（與 Kanboard 相似的演算法）
-const getAvatarColor = (name: string): string => {
+function getAvatarColor(name: string): string {
   let hash = 0
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash)
@@ -26,26 +26,33 @@ const getAvatarColor = (name: string): string => {
 
 const avatarBgColor = computed(() => getAvatarColor(displayName.value))
 
-// Kanboard avatar URLs
-// apiUrl 可能包含 /jsonrpc.php，需要移除
-const baseUrl = computed(() => {
-  if (!authStore.apiUrl) return null
-  return authStore.apiUrl.replace(/\/?jsonrpc\.php$/, '')
-})
+// 使用 KanproBridge API 載入頭像（base64 格式）
+const avatarImageData = ref<string | null>(null)
+const avatarLoading = ref(false)
 
-const avatarUrl = computed(() => {
-  if (!authStore.user?.id || !baseUrl.value) return null
-  return `${baseUrl.value}/?controller=AvatarFileController&action=image&user_id=${authStore.user.id}&size=32`
-})
+async function loadAvatar(): Promise<void> {
+  if (!authStore.user?.id) return
 
-const avatarUrlLarge = computed(() => {
-  if (!authStore.user?.id || !baseUrl.value) return null
-  return `${baseUrl.value}/?controller=AvatarFileController&action=image&user_id=${authStore.user.id}&size=48`
-})
+  avatarLoading.value = true
+  try {
+    const imageData = await authStore.getAvatar()
+    avatarImageData.value = imageData
+  } catch {
+    // 頭像功能未啟用或載入失敗，使用預設頭像
+    avatarImageData.value = null
+  } finally {
+    avatarLoading.value = false
+  }
+}
 
-// Track avatar load errors
-const avatarError = ref(false)
-const avatarLargeError = ref(false)
+// 當使用者變更時重新載入頭像
+watch(() => authStore.user?.id, (newId) => {
+  if (newId) {
+    loadAvatar()
+  } else {
+    avatarImageData.value = null
+  }
+}, { immediate: true })
 
 const toggleDropdown = () => {
   isOpen.value = !isOpen.value
@@ -104,11 +111,10 @@ onUnmounted(() => {
     >
       <!-- Avatar -->
       <img
-        v-if="avatarUrl && !avatarError"
-        :src="avatarUrl"
+        v-if="avatarImageData"
+        :src="`data:image/png;base64,${avatarImageData}`"
         :alt="displayName"
         class="w-8 h-8 rounded-full object-cover"
-        @error="avatarError = true"
       />
       <div
         v-else
@@ -144,11 +150,10 @@ onUnmounted(() => {
         <div class="px-4 py-3 border-b border-edge bg-surface-secondary">
           <div class="flex items-center gap-3">
             <img
-              v-if="avatarUrlLarge && !avatarLargeError"
-              :src="avatarUrlLarge"
+              v-if="avatarImageData"
+              :src="`data:image/png;base64,${avatarImageData}`"
               :alt="displayName"
               class="w-10 h-10 rounded-full object-cover"
-              @error="avatarLargeError = true"
             />
             <div
               v-else
