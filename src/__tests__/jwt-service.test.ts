@@ -63,15 +63,15 @@ describe('JWTAuthService', () => {
       const [url, options] = vi.mocked(fetch).mock.calls[0]
       expect(url).toBe(mockApiUrl)
       expect(options?.method).toBe('POST')
-      // 現在使用 Basic Auth
+      // 使用 X-API-Auth header 避免瀏覽器原生認證對話框
       const expectedAuth = btoa('testuser:testpass')
       expect(options?.headers).toEqual({
         'Content-Type': 'application/json',
-        'Authorization': `Basic ${expectedAuth}`
+        'X-API-Auth': expectedAuth
       })
       const body = JSON.parse(options?.body as string)
       expect(body.jsonrpc).toBe('2.0')
-      expect(body.method).toBe('getJWTPlugin')
+      expect(body.method).toBe('getKanproBridgePlugin')
       expect(typeof body.id).toBe('number')
     })
 
@@ -86,24 +86,24 @@ describe('JWTAuthService', () => {
       expect(result).toBeNull()
     })
 
-    it('should return null on HTTP error', async () => {
+    it('should throw on HTTP error', async () => {
       vi.mocked(fetch).mockResolvedValue(
         mockHttpError(500, 'Internal Server Error') as Response
       )
 
       const service = createJWTAuthService()
-      const result = await service.checkPlugin(mockApiUrl, 'testuser', 'testpass')
 
-      expect(result).toBeNull()
+      await expect(service.checkPlugin(mockApiUrl, 'testuser', 'testpass'))
+        .rejects.toThrow('HTTP 500: Internal Server Error')
     })
 
-    it('should return null on network error', async () => {
+    it('should throw on network error', async () => {
       vi.mocked(fetch).mockRejectedValue(new Error('Network error'))
 
       const service = createJWTAuthService()
-      const result = await service.checkPlugin(mockApiUrl, 'testuser', 'testpass')
 
-      expect(result).toBeNull()
+      await expect(service.checkPlugin(mockApiUrl, 'testuser', 'testpass'))
+        .rejects.toThrow('Network error')
     })
   })
 
@@ -121,7 +121,7 @@ describe('JWTAuthService', () => {
 
       expect(result).toEqual(tokenResponse)
 
-      // 驗證使用 Basic Auth
+      // 驗證使用 X-API-Auth header
       const expectedAuth = btoa('testuser:testpass')
       expect(fetch).toHaveBeenCalledTimes(1)
       const [url, options] = vi.mocked(fetch).mock.calls[0]
@@ -129,7 +129,7 @@ describe('JWTAuthService', () => {
       expect(options?.method).toBe('POST')
       expect(options?.headers).toEqual({
         'Content-Type': 'application/json',
-        'Authorization': `Basic ${expectedAuth}`
+        'X-API-Auth': expectedAuth
       })
       const body = JSON.parse(options?.body as string)
       expect(body.jsonrpc).toBe('2.0')
@@ -177,7 +177,7 @@ describe('JWTAuthService', () => {
         refresh_token: newRefreshToken
       })
 
-      // 驗證使用 Basic Auth（username:access_token）
+      // 驗證使用 X-API-Auth header（username:access_token）
       const expectedAuth = btoa('testuser:current_access_token')
       expect(fetch).toHaveBeenCalledTimes(1)
       const [url, options] = vi.mocked(fetch).mock.calls[0]
@@ -185,7 +185,7 @@ describe('JWTAuthService', () => {
       expect(options?.method).toBe('POST')
       expect(options?.headers).toEqual({
         'Content-Type': 'application/json',
-        'Authorization': `Basic ${expectedAuth}`
+        'X-API-Auth': expectedAuth
       })
       const body = JSON.parse(options?.body as string)
       expect(body.jsonrpc).toBe('2.0')
@@ -231,7 +231,7 @@ describe('JWTAuthService', () => {
 
       expect(result).toBe(true)
 
-      // 驗證使用 Basic Auth（username:access_token）
+      // 驗證使用 X-API-Auth header（username:access_token）
       const expectedAuth = btoa('testuser:access_token_here')
       expect(fetch).toHaveBeenCalledTimes(1)
       const [url, options] = vi.mocked(fetch).mock.calls[0]
@@ -239,7 +239,7 @@ describe('JWTAuthService', () => {
       expect(options?.method).toBe('POST')
       expect(options?.headers).toEqual({
         'Content-Type': 'application/json',
-        'Authorization': `Basic ${expectedAuth}`
+        'X-API-Auth': expectedAuth
       })
       const body = JSON.parse(options?.body as string)
       expect(body.jsonrpc).toBe('2.0')

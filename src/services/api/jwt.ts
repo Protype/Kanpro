@@ -66,50 +66,39 @@ export interface JWTAuthService {
 }
 
 /**
- * 認證方式類型
- * 使用 X-API-Auth header 避免瀏覽器彈出原生認證對話框
- * 格式：base64(username:password)
- */
-type AuthHeader =
-  | { type: 'x-api-auth'; username: string; password: string }
-
-/**
  * 建立 JWT 認證服務
  */
 export function createJWTAuthService(): JWTAuthService {
   let requestId = 0
 
-  const getNextId = () => ++requestId
-
   /**
-   * 發送 JSON-RPC 請求（通用方法）
+   * 發送 JSON-RPC 請求
    * 使用 X-API-Auth header 進行認證，避免 401 回應觸發瀏覽器原生對話框
+   * 格式：base64(username:password)
    */
   async function call<T>(
     apiUrl: string,
     method: string,
-    auth: AuthHeader,
+    username: string,
+    password: string,
     params?: Record<string, unknown>
   ): Promise<T> {
     const request: Record<string, unknown> = {
       jsonrpc: '2.0',
       method,
-      id: getNextId()
+      id: ++requestId
     }
 
     if (params) {
       request.params = params
     }
 
-    // 使用 X-API-Auth header，格式為 base64(username:password)
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'X-API-Auth': btoa(`${auth.username}:${auth.password}`)
-    }
-
     const response = await fetch(apiUrl, {
       method: 'POST',
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Auth': btoa(`${username}:${password}`)
+      },
       body: JSON.stringify(request)
     })
 
@@ -120,10 +109,7 @@ export function createJWTAuthService(): JWTAuthService {
     const json = await response.json()
 
     if ('error' in json) {
-      // 將 error code 附加到錯誤訊息中，便於上層判斷
-      const errorCode = json.error.code
-      const errorMessage = json.error.message
-      throw new Error(`[${errorCode}] ${errorMessage}`)
+      throw new Error(`[${json.error.code}] ${json.error.message}`)
     }
 
     return json.result as T
@@ -132,11 +118,7 @@ export function createJWTAuthService(): JWTAuthService {
   return {
     async checkPlugin(apiUrl: string, username: string, password: string): Promise<JWTPluginInfo | null> {
       try {
-        return await call<JWTPluginInfo>(
-          apiUrl,
-          'getKanproBridgePlugin',
-          { type: 'x-api-auth', username, password }
-        )
+        return await call<JWTPluginInfo>(apiUrl, 'getKanproBridgePlugin', username, password)
       } catch (error) {
         if (error instanceof Error) {
           // HTTP 401 或 JSON-RPC error code 401：認證失敗
@@ -152,45 +134,27 @@ export function createJWTAuthService(): JWTAuthService {
             return null
           }
         }
-        // 其他錯誤（網路問題等）直接拋出
         throw error
       }
     },
 
-    async getToken(
-      apiUrl: string,
-      username: string,
-      password: string
-    ): Promise<JWTTokenResponse> {
-      return await call<JWTTokenResponse>(
-        apiUrl,
-        'getJWTToken',
-        { type: 'x-api-auth', username, password }
-      )
+    async getToken(apiUrl: string, username: string, password: string): Promise<JWTTokenResponse> {
+      return await call<JWTTokenResponse>(apiUrl, 'getJWTToken', username, password)
     },
 
     async refreshToken(apiUrl: string, username: string, accessToken: string, refreshToken: string): Promise<JWTTokenResponse> {
       return await call<JWTTokenResponse>(
         apiUrl,
         'refreshJWTToken',
-        { type: 'x-api-auth', username, password: accessToken },
+        username,
+        accessToken,
         { refresh_token: refreshToken }
       )
     },
 
-    async revokeToken(
-      apiUrl: string,
-      username: string,
-      accessToken: string,
-      tokenToRevoke: string
-    ): Promise<boolean> {
+    async revokeToken(apiUrl: string, username: string, accessToken: string, tokenToRevoke: string): Promise<boolean> {
       try {
-        await call(
-          apiUrl,
-          'revokeJWTToken',
-          { type: 'x-api-auth', username, password: accessToken },
-          { token: tokenToRevoke }
-        )
+        await call(apiUrl, 'revokeJWTToken', username, accessToken, { token: tokenToRevoke })
         return true
       } catch {
         return false

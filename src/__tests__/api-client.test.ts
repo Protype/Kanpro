@@ -106,12 +106,13 @@ describe('KanboardClient', () => {
 
       await client.call('getMe')
 
-      const expectedAuth = 'Basic ' + btoa('jsonrpc:my-api-token')
+      // 使用 X-API-Auth header 避免瀏覽器原生認證對話框
+      const expectedAuth = btoa('jsonrpc:my-api-token')
       expect(mockFetch).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
           headers: expect.objectContaining({
-            'Authorization': expectedAuth
+            'X-API-Auth': expectedAuth
           })
         })
       )
@@ -135,12 +136,13 @@ describe('KanboardClient', () => {
 
       await client.call('getMe')
 
-      const expectedAuth = 'Basic ' + btoa('admin:admin-password')
+      // 使用 X-API-Auth header 避免瀏覽器原生認證對話框
+      const expectedAuth = btoa('admin:admin-password')
       expect(mockFetch).toHaveBeenCalledWith(
         expect.any(String),
         expect.objectContaining({
           headers: expect.objectContaining({
-            'Authorization': expectedAuth
+            'X-API-Auth': expectedAuth
           })
         })
       )

@@ -183,7 +183,7 @@ describe('Auth Store', () => {
           username: 'admin',
           password: 'admin'
         })
-      ).rejects.toThrow('JWT 認證外掛未安裝')
+      ).rejects.toThrow('KanproBridge 外掛未安裝或 JWT 功能未啟用')
 
       expect(store.user).toBeNull()
       expect(store.isAuthenticated).toBe(false)

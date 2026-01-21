@@ -17,11 +17,9 @@ const router = useRouter()
 const sidebarStore = useSidebarStore()
 const boardStore = useBoardStore()
 
-// Check if we're in project context
 const currentProjectId = computed(() => sidebarStore.currentProjectId)
 const currentProjectName = computed(() => boardStore.project?.name || '')
 
-// Project navigation items - full version
 const projectNavItems = computed(() => {
   const id = currentProjectId.value
   if (!id) return []
@@ -36,28 +34,15 @@ const projectNavItems = computed(() => {
   ]
 })
 
-
-const isActiveRoute = (routeName: string) => {
+function isActiveRoute(routeName: string): boolean {
   return route.name === routeName
 }
 
-const navigateTo = (path: string) => {
+function navigateTo(path: string): void {
   router.push(path)
 }
 
-const openSearch = () => {
-  emit('open-search')
-}
-
-const openCreateProject = () => {
-  emit('open-create-project')
-}
-
-const openCreateTask = () => {
-  emit('open-create-task')
-}
-
-const toggleMobileSidebar = () => {
+function toggleMobileSidebar(): void {
   sidebarStore.toggleMobileOpen()
 }
 </script>
