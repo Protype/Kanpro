@@ -76,12 +76,29 @@
     @apply transition-colors duration-200;
   }
 
-  /* Hide scrollbar but allow scrolling */
-  .scrollbar-hide {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+  /* Custom scrollbar - subtle and light */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
   }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;  /* Chrome, Safari, Opera */
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-content-tertiary/20 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-content-tertiary/35;
+  }
+
+  /* Firefox */
+  @supports (scrollbar-width: thin) {
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(128, 128, 128, 0.2) transparent;
+    }
   }
 }
