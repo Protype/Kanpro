@@ -3,13 +3,27 @@ import { ref, computed } from 'vue'
 import { useAuthStore } from './auth'
 
 /**
- * KanproBridge 外掛狀態
+ * KanproBridge 功能模組狀態（API 回傳格式）
+ */
+export interface BridgeFeature {
+  enabled: boolean
+  methods: Array<{ name: string; description: string }>
+}
+
+/**
+ * KanproBridge 外掛狀態（API 回傳格式）
  */
 export interface KanproBridgeStatus {
   name: string
   version: string
   description?: string
-  methods: string[]
+  features: {
+    jwt_auth: BridgeFeature
+    user_metadata: BridgeFeature
+    user_avatar: BridgeFeature
+    user_password: BridgeFeature
+    user_profile: BridgeFeature
+  }
 }
 
 /**
@@ -19,7 +33,7 @@ export interface BridgeModule {
   id: string
   name: string
   description: string
-  methods: string[]  // 模組需要的 API 方法
+  featureKey: keyof KanproBridgeStatus['features']  // API features 對應的 key
 }
 
 /**
@@ -30,31 +44,31 @@ export const BRIDGE_MODULES: BridgeModule[] = [
     id: 'jwt',
     name: 'JWT 認證',
     description: '登入驗證、Token 管理',
-    methods: ['getJWTToken', 'refreshJWTToken', 'revokeJWTToken']
+    featureKey: 'jwt_auth'
   },
   {
     id: 'avatar',
     name: '使用者頭像',
     description: '頭像上傳與顯示',
-    methods: ['uploadUserAvatar', 'getUserAvatar', 'removeUserAvatar']
+    featureKey: 'user_avatar'
   },
   {
     id: 'metadata',
     name: '使用者元資料',
     description: '偏好設定儲存',
-    methods: ['getUserMetadata', 'getUserMetadataByName', 'saveUserMetadata', 'removeUserMetadata']
+    featureKey: 'user_metadata'
   },
   {
     id: 'password',
     name: '密碼管理',
     description: '密碼變更功能',
-    methods: ['changeUserPassword', 'resetUserPassword']
+    featureKey: 'user_password'
   },
   {
     id: 'profile',
     name: '使用者設定檔',
     description: '個人資料編輯',
-    methods: ['getUserProfile', 'updateUserProfile']
+    featureKey: 'user_profile'
   }
 ]
 
@@ -88,15 +102,14 @@ export const useSystemStore = defineStore('system', () => {
    */
   function isModuleEnabled(moduleId: string): boolean {
     if (!bridgeStatus.value) return false
-    if (!bridgeStatus.value.methods) return false
+    if (!bridgeStatus.value.features) return false
 
     const module = BRIDGE_MODULES.find(m => m.id === moduleId)
     if (!module) return false
 
-    // 檢查模組所需的所有方法是否都存在
-    return module.methods.every(method =>
-      bridgeStatus.value!.methods.includes(method)
-    )
+    // 從 features 中取得對應功能的啟用狀態
+    const feature = bridgeStatus.value.features[module.featureKey]
+    return feature?.enabled ?? false
   }
 
   /**
