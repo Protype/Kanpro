@@ -37,35 +37,35 @@ describe('System Store', () => {
       const jwtModule = BRIDGE_MODULES.find(m => m.id === 'jwt')
       expect(jwtModule).toBeDefined()
       expect(jwtModule?.name).toBe('JWT 認證')
-      expect(jwtModule?.methods).toContain('getJWTToken')
+      expect(jwtModule?.featureKey).toBe('jwt_auth')
     })
 
     it('should define avatar module', () => {
       const avatarModule = BRIDGE_MODULES.find(m => m.id === 'avatar')
       expect(avatarModule).toBeDefined()
       expect(avatarModule?.name).toBe('使用者頭像')
-      expect(avatarModule?.methods).toContain('uploadUserAvatar')
+      expect(avatarModule?.featureKey).toBe('user_avatar')
     })
 
     it('should define metadata module', () => {
       const metadataModule = BRIDGE_MODULES.find(m => m.id === 'metadata')
       expect(metadataModule).toBeDefined()
       expect(metadataModule?.name).toBe('使用者元資料')
-      expect(metadataModule?.methods).toContain('getUserMetadata')
+      expect(metadataModule?.featureKey).toBe('user_metadata')
     })
 
     it('should define password module', () => {
       const passwordModule = BRIDGE_MODULES.find(m => m.id === 'password')
       expect(passwordModule).toBeDefined()
       expect(passwordModule?.name).toBe('密碼管理')
-      expect(passwordModule?.methods).toContain('changeUserPassword')
+      expect(passwordModule?.featureKey).toBe('user_password')
     })
 
     it('should define profile module', () => {
       const profileModule = BRIDGE_MODULES.find(m => m.id === 'profile')
       expect(profileModule).toBeDefined()
       expect(profileModule?.name).toBe('使用者設定檔')
-      expect(profileModule?.methods).toContain('getUserProfile')
+      expect(profileModule?.featureKey).toBe('user_profile')
     })
   })
 
@@ -75,22 +75,34 @@ describe('System Store', () => {
       expect(store.isModuleEnabled('jwt')).toBe(false)
     })
 
-    it('should return true when all module methods are available', () => {
+    it('should return true when feature is enabled', () => {
       const store = useSystemStore()
       store.bridgeStatus = {
         name: 'KanproBridge',
         version: '1.0.0',
-        methods: ['getJWTToken', 'refreshJWTToken', 'revokeJWTToken']
+        features: {
+          jwt_auth: { enabled: true, methods: [] },
+          user_metadata: { enabled: false, methods: [] },
+          user_avatar: { enabled: false, methods: [] },
+          user_password: { enabled: false, methods: [] },
+          user_profile: { enabled: false, methods: [] }
+        }
       }
       expect(store.isModuleEnabled('jwt')).toBe(true)
     })
 
-    it('should return false when some module methods are missing', () => {
+    it('should return false when feature is disabled', () => {
       const store = useSystemStore()
       store.bridgeStatus = {
         name: 'KanproBridge',
         version: '1.0.0',
-        methods: ['getJWTToken'] // missing refreshJWTToken, revokeJWTToken
+        features: {
+          jwt_auth: { enabled: false, methods: [] },
+          user_metadata: { enabled: false, methods: [] },
+          user_avatar: { enabled: false, methods: [] },
+          user_password: { enabled: false, methods: [] },
+          user_profile: { enabled: false, methods: [] }
+        }
       }
       expect(store.isModuleEnabled('jwt')).toBe(false)
     })
@@ -100,7 +112,13 @@ describe('System Store', () => {
       store.bridgeStatus = {
         name: 'KanproBridge',
         version: '1.0.0',
-        methods: []
+        features: {
+          jwt_auth: { enabled: true, methods: [] },
+          user_metadata: { enabled: true, methods: [] },
+          user_avatar: { enabled: true, methods: [] },
+          user_password: { enabled: true, methods: [] },
+          user_profile: { enabled: true, methods: [] }
+        }
       }
       expect(store.isModuleEnabled('unknown')).toBe(false)
     })
@@ -112,10 +130,13 @@ describe('System Store', () => {
       store.bridgeStatus = {
         name: 'KanproBridge',
         version: '1.0.0',
-        methods: [
-          'getJWTToken', 'refreshJWTToken', 'revokeJWTToken',
-          'uploadUserAvatar', 'getUserAvatar', 'removeUserAvatar'
-        ]
+        features: {
+          jwt_auth: { enabled: true, methods: [] },
+          user_metadata: { enabled: false, methods: [] },
+          user_avatar: { enabled: true, methods: [] },
+          user_password: { enabled: true, methods: [] },
+          user_profile: { enabled: false, methods: [] }
+        }
       }
 
       const statuses = store.moduleStatuses
@@ -128,7 +149,7 @@ describe('System Store', () => {
       expect(avatarStatus?.enabled).toBe(true)
 
       const metadataStatus = statuses.find(s => s.id === 'metadata')
-      expect(metadataStatus?.enabled).toBe(false) // methods not available
+      expect(metadataStatus?.enabled).toBe(false)
     })
   })
 
@@ -205,7 +226,13 @@ describe('System Store', () => {
         name: 'KanproBridge',
         version: '1.0.0',
         description: 'Kanpro Bridge Plugin',
-        methods: ['getJWTToken', 'refreshJWTToken', 'revokeJWTToken']
+        features: {
+          jwt_auth: { enabled: true, methods: [] },
+          user_metadata: { enabled: true, methods: [] },
+          user_avatar: { enabled: true, methods: [] },
+          user_password: { enabled: true, methods: [] },
+          user_profile: { enabled: false, methods: [] }
+        }
       }
 
       mockFetch.mockResolvedValueOnce({
@@ -304,7 +331,17 @@ describe('System Store', () => {
       store.kanboardTimezone = 'Asia/Taipei'
       store.apiLatency = 50
       store.connectionStatus = 'connected'
-      store.bridgeStatus = { name: 'test', version: '1.0', methods: [] }
+      store.bridgeStatus = {
+        name: 'test',
+        version: '1.0',
+        features: {
+          jwt_auth: { enabled: true, methods: [] },
+          user_metadata: { enabled: true, methods: [] },
+          user_avatar: { enabled: true, methods: [] },
+          user_password: { enabled: true, methods: [] },
+          user_profile: { enabled: true, methods: [] }
+        }
+      }
       store.bridgeError = 'some error'
       store.isLoading = true
       store.error = 'another error'

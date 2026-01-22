@@ -159,7 +159,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAnalyticsStore } from '@/stores/analytics'
 import { useBoardStore } from '@/stores/board'
 import { useMembersStore } from '@/stores/members'
-import { useProjectsStore } from '@/stores/projects'
 import SearchModal from '@/components/SearchModal.vue'
 import type { Task } from '@/types'
 
@@ -176,7 +175,6 @@ const router = useRouter()
 const analyticsStore = useAnalyticsStore()
 const boardStore = useBoardStore()
 const membersStore = useMembersStore()
-const projectsStore = useProjectsStore()
 
 const projectId = computed(() => Number(route.params.id))
 const isLoading = ref(true)
