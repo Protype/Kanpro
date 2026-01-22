@@ -88,6 +88,7 @@ export const useSystemStore = defineStore('system', () => {
    */
   function isModuleEnabled(moduleId: string): boolean {
     if (!bridgeStatus.value) return false
+    if (!bridgeStatus.value.methods) return false
 
     const module = BRIDGE_MODULES.find(m => m.id === moduleId)
     if (!module) return false
