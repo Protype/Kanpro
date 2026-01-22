@@ -61,17 +61,33 @@ const router = createRouter({
           component: () => import('@/views/UserSettingsView.vue'),
           meta: { sidebarMode: 'global' }
         },
+
+        // Admin views
         {
-          path: 'admin/users',
-          name: 'admin-users',
-          component: () => import('@/views/UsersManagementView.vue'),
-          meta: { sidebarMode: 'global' }
-        },
-        {
-          path: 'admin/groups',
-          name: 'admin-groups',
-          component: () => import('@/views/GroupsManagementView.vue'),
-          meta: { sidebarMode: 'global' }
+          path: 'admin',
+          meta: { sidebarMode: 'admin', requiresAdmin: true },
+          children: [
+            {
+              path: '',
+              name: 'admin-status',
+              component: () => import('@/views/AdminStatusView.vue')
+            },
+            {
+              path: 'settings',
+              name: 'admin-settings',
+              component: () => import('@/views/AdminSettingsView.vue')
+            },
+            {
+              path: 'users',
+              name: 'admin-users',
+              component: () => import('@/views/UsersManagementView.vue')
+            },
+            {
+              path: 'groups',
+              name: 'admin-groups',
+              component: () => import('@/views/GroupsManagementView.vue')
+            }
+          ]
         },
 
         // Project views - List is default
@@ -136,6 +152,13 @@ router.beforeEach(async (to, _from, next) => {
   // 如果已登入但訪問 guest 頁面（如登入頁），導向首頁
   if (to.meta.guest && authStore.isAuthenticated) {
     return next({ name: 'all-tasks' })
+  }
+
+  // 如果需要 admin 權限但不是 admin，導向首頁
+  if (to.matched.some(record => record.meta.requiresAdmin)) {
+    if (authStore.user?.role !== 'app-admin') {
+      return next({ name: 'all-tasks' })
+    }
   }
 
   next()
