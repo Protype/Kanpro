@@ -80,12 +80,12 @@ const router = createRouter({
             {
               path: 'users',
               name: 'admin-users',
-              component: () => import('@/views/UsersManagementView.vue')
+              component: () => import('@/views/AdminUsersView.vue')
             },
             {
               path: 'groups',
               name: 'admin-groups',
-              component: () => import('@/views/GroupsManagementView.vue')
+              component: () => import('@/views/AdminGroupsView.vue')
             }
           ]
         },
