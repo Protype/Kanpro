@@ -774,6 +774,45 @@ Kanpro 使用 JWTAuth 外掛進行認證，所有 API 呼叫使用 `X-API-Auth` 
 - 瀏覽器不會彈出原生認證對話框
 - 應用程式可以正常處理 401 錯誤並顯示適當的錯誤訊息
 
+### API 權限說明
+
+Kanboard API 依使用者角色有不同的存取權限。Kanpro 前端需根據權限選用適當的 API。
+
+#### 需要 Admin 權限的 API
+
+以下 API 僅限 `app-admin` 角色使用，非 admin 用戶呼叫會得到 `403 Forbidden`：
+
+| API 方法 | 說明 | Kanpro 替代方案 |
+|----------|------|-----------------|
+| `getAllProjects` | 取得所有專案 | 改用 `getMyProjects` |
+| `getOverdueTasks` | 取得所有逾期任務 | 遍歷專案使用 `searchTasks` |
+| `getAllUsers` | 取得所有使用者 | 靜默失敗（管理功能） |
+| `getAllGroups` | 取得所有群組 | 靜默失敗（管理功能） |
+| `createUser` / `updateUser` / `removeUser` | 使用者管理 | 需 admin 權限 |
+| `createGroup` / `updateGroup` / `removeGroup` | 群組管理 | 需 admin 權限 |
+
+#### 所有角色可用的 API
+
+| API 方法 | 說明 |
+|----------|------|
+| `getMe` | 取得當前使用者資訊 |
+| `getMyProjects` | 取得使用者有權限的專案 |
+| `getMyActivityStream` | 取得個人活動流 |
+| `searchTasks` | 搜尋任務（需指定 project_id） |
+| `getProjectUsers` | 取得專案成員 |
+| `getAssignableUsers` | 取得專案可指派的使用者 |
+| `getBoard` / `getColumns` / `getSwimlanes` | 專案看板相關 |
+| `getTask` / `createTask` / `updateTask` | 任務操作 |
+| `getAllComments` / `createComment` | 評論操作 |
+| `getAllSubtasks` / `createSubtask` | 子任務操作 |
+| `getAllTaskFiles` / `createTaskFile` | 附件操作 |
+
+#### 錯誤處理原則
+
+1. **核心功能**：使用所有角色可用的 API，確保非 admin 用戶可正常使用
+2. **管理功能**：呼叫時靜默處理 403 錯誤，不影響其他功能
+3. **權限檢查**：可透過 `getMe` 取得的 `role` 欄位判斷使用者角色
+
 ---
 
 ## 附錄：圖示規範
