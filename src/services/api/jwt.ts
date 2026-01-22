@@ -118,7 +118,7 @@ export function createJWTAuthService(): JWTAuthService {
   return {
     async checkPlugin(apiUrl: string, username: string, password: string): Promise<JWTPluginInfo | null> {
       try {
-        return await call<JWTPluginInfo>(apiUrl, 'getKanproBridgePlugin', username, password)
+        return await call<JWTPluginInfo>(apiUrl, 'getKanproBridgeStatus', username, password)
       } catch (error) {
         if (error instanceof Error) {
           // HTTP 401 或 JSON-RPC error code 401：認證失敗

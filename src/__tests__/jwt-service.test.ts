@@ -71,7 +71,7 @@ describe('JWTAuthService', () => {
       })
       const body = JSON.parse(options?.body as string)
       expect(body.jsonrpc).toBe('2.0')
-      expect(body.method).toBe('getKanproBridgePlugin')
+      expect(body.method).toBe('getKanproBridgeStatus')
       expect(typeof body.id).toBe('number')
     })
 
