@@ -191,8 +191,6 @@ watch(projectId, () => {
     >
       <!-- Month/Year Navigation -->
       <div class="flex items-center gap-4">
-        <h1 class="text-lg font-semibold text-content">日曆</h1>
-        <span class="text-content-tertiary">|</span>
         <button
           data-testid="today-btn"
           @click="goToToday"
