@@ -251,7 +251,7 @@ const hasMultipleSwimlanes = computed(() => boardStore.swimlanes.length > 1)
           <!-- Columns (collapsible) -->
           <div
             v-show="!isSwimlaneCollapsed(swimlane.id)"
-            class="flex gap-4 overflow-x-auto pb-4"
+            class="flex gap-4 overflow-x-auto pb-2 scrollbar-hide"
           >
             <div
               v-for="column in swimlane.columns"
