@@ -34,10 +34,12 @@ import {
   PhCalendarBlank,
   PhCalendar,
   PhGear,
+  PhGearSix,
   PhChartBar,
   PhFolder,
   PhFolderOpen,
   PhSquaresFour,
+  PhPulse,
 
   // 使用者相關
   PhUser,
@@ -154,10 +156,12 @@ export const iconComponents = {
   'calendar-blank': PhCalendarBlank,
   'calendar': PhCalendar,
   'gear': PhGear,
+  'gear-six': PhGearSix,
   'chart-bar': PhChartBar,
   'folder': PhFolder,
   'folder-open': PhFolderOpen,
   'squares-four': PhSquaresFour,
+  'pulse': PhPulse,
 
   // 使用者相關
   'user': PhUser,
