@@ -168,18 +168,16 @@ function openCreateTask(): void {
 
       <!-- Admin Navigation (when in admin context) -->
       <template v-if="isAdminContext">
-        <!-- Admin Title with Icon Box -->
+        <!-- Admin Title -->
         <div class="flex items-center gap-2 min-w-0">
-          <div class="w-7 h-7 bg-error/10 rounded-md flex items-center justify-center flex-shrink-0">
-            <ph-icon icon="gear-six" class="w-4 h-4 text-error" />
-          </div>
+          <ph-icon icon="gear-six" class="w-5 h-5 text-content-secondary flex-shrink-0" />
           <span class="text-base font-semibold text-content">
             系統管理
           </span>
         </div>
 
-        <!-- Chevron Separator -->
-        <ph-icon icon="caret-right" class="w-4 h-4 text-content-tertiary ml-1 flex-shrink-0" />
+        <!-- Separator -->
+        <span class="text-content-tertiary mx-1">|</span>
 
         <!-- Full Navigation (xl and above) -->
         <div class="hidden xl:flex items-center gap-1">
