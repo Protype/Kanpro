@@ -9,7 +9,12 @@ function getIcon(type: ToastType): string {
     case 'error': return 'x-circle'
     case 'warning': return 'warning'
     case 'info': return 'info'
+    case 'loading': return 'spinner'
   }
+}
+
+function isLoading(type: ToastType): boolean {
+  return type === 'loading'
 }
 
 function getClasses(type: ToastType): string {
@@ -18,6 +23,7 @@ function getClasses(type: ToastType): string {
     case 'error': return 'bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200'
     case 'warning': return 'bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200'
     case 'info': return 'bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200'
+    case 'loading': return 'bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'
   }
 }
 </script>
@@ -43,7 +49,10 @@ function getClasses(type: ToastType): string {
             getClasses(toast.type)
           ]"
         >
-          <ph-icon :icon="getIcon(toast.type)" class="w-5 h-5 flex-shrink-0 mt-0.5" />
+          <ph-icon
+            :icon="getIcon(toast.type)"
+            :class="['w-5 h-5 flex-shrink-0 mt-0.5', isLoading(toast.type) && 'animate-spin']"
+          />
           <div class="flex-1 min-w-0">
             <p class="text-sm font-semibold">{{ toast.title }}</p>
             <p v-if="toast.message" class="text-sm opacity-80 mt-0.5">{{ toast.message }}</p>

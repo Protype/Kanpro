@@ -139,6 +139,9 @@ const handleDragEnd = async (evt: { item: HTMLElement; to: HTMLElement; newIndex
 
   if (!taskId || !columnId || !swimlaneId) return
 
+  // 顯示 loading 通知
+  const loadingId = toast.loading('正在更新...')
+
   try {
     await tasksStore.moveTaskPosition(
       projectId.value,
@@ -147,13 +150,18 @@ const handleDragEnd = async (evt: { item: HTMLElement; to: HTMLElement; newIndex
       position,
       swimlaneId
     )
-    // Refresh board to get updated positions
-    await boardStore.fetchBoard(projectId.value)
+    // 先顯示成功通知，再關閉 loading
+    toast.success('任務已移動')
+    toast.remove(loadingId)
+    // 靜默刷新以同步伺服器狀態（不顯示 loading）
+    await boardStore.fetchBoard(projectId.value, true)
   } catch (error) {
     console.error('Failed to move task:', error)
+    // 先顯示失敗通知，再關閉 loading
     toast.error('移動任務失敗')
-    // Refresh to revert UI state
-    await boardStore.fetchBoard(projectId.value)
+    toast.remove(loadingId)
+    // 靜默刷新以還原 UI 狀態
+    await boardStore.fetchBoard(projectId.value, true)
   }
 }
 

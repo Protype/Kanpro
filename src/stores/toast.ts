@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-export type ToastType = 'success' | 'error' | 'warning' | 'info'
+export type ToastType = 'success' | 'error' | 'warning' | 'info' | 'loading'
 
 export interface Toast {
   id: string
@@ -58,6 +58,11 @@ export const useToastStore = defineStore('toast', () => {
     return add('info', title, message, duration)
   }
 
+  function loading(title: string, message?: string): string {
+    // loading toast 不自動消失（duration = 0）
+    return add('loading', title, message, 0)
+  }
+
   function clear(): void {
     toasts.value = []
   }
@@ -70,6 +75,7 @@ export const useToastStore = defineStore('toast', () => {
     error,
     warning,
     info,
+    loading,
     clear
   }
 })
@@ -84,6 +90,7 @@ export function useToast() {
     error: store.error,
     warning: store.warning,
     info: store.info,
+    loading: store.loading,
     remove: store.remove,
     clear: store.clear
   }
