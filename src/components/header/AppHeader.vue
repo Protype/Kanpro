@@ -20,6 +20,9 @@ const boardStore = useBoardStore()
 const currentProjectId = computed(() => sidebarStore.currentProjectId)
 const currentProjectName = computed(() => boardStore.project?.name || '')
 
+// Check if we're in admin context
+const isAdminContext = computed(() => route.path.startsWith('/admin'))
+
 const projectNavItems = computed(() => {
   const id = currentProjectId.value
   if (!id) return []
@@ -33,6 +36,14 @@ const projectNavItems = computed(() => {
     { name: 'project-settings', label: '設定', icon: 'gear', route: `/projects/${id}/settings` }
   ]
 })
+
+// Admin navigation items
+const adminNavItems = [
+  { name: 'admin-status', label: '系統狀態', icon: 'pulse', route: '/admin' },
+  { name: 'admin-settings', label: '系統設定', icon: 'gear', route: '/admin/settings' },
+  { name: 'admin-users', label: '使用者管理', icon: 'users', route: '/admin/users' },
+  { name: 'admin-groups', label: '群組管理', icon: 'users-three', route: '/admin/groups' }
+]
 
 function isActiveRoute(routeName: string): boolean {
   return route.name === routeName
@@ -71,8 +82,8 @@ function openCreateTask(): void {
 
     <!-- Left side content -->
     <div class="hidden lg:flex items-center gap-1">
-      <!-- Quick Actions (Left side - only when NOT in project context) -->
-      <template v-if="!currentProjectId">
+      <!-- Quick Actions (Left side - only when NOT in project or admin context) -->
+      <template v-if="!currentProjectId && !isAdminContext">
         <!-- Create Project Button -->
         <button
           @click="openCreateProject"
@@ -103,7 +114,7 @@ function openCreateTask(): void {
       </template>
 
       <!-- Project Navigation (when in project context) - Style B -->
-      <template v-if="currentProjectId">
+      <template v-if="currentProjectId && !isAdminContext">
         <!-- Project Name with Icon Box -->
         <div class="flex items-center gap-2 min-w-0">
           <div class="w-7 h-7 bg-accent/10 rounded-md flex items-center justify-center flex-shrink-0">
@@ -140,6 +151,59 @@ function openCreateTask(): void {
         <div class="hidden lg:flex xl:hidden items-center gap-1">
           <button
             v-for="item in projectNavItems"
+            :key="item.name"
+            @click="navigateTo(item.route)"
+            :class="[
+              'p-2 rounded-md transition-colors',
+              isActiveRoute(item.name)
+                ? 'bg-accent text-content-inverse'
+                : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-hover'
+            ]"
+            :title="item.label"
+          >
+            <ph-icon :icon="item.icon" class="w-4 h-4" />
+          </button>
+        </div>
+      </template>
+
+      <!-- Admin Navigation (when in admin context) -->
+      <template v-if="isAdminContext">
+        <!-- Admin Title with Icon Box -->
+        <div class="flex items-center gap-2 min-w-0">
+          <div class="w-7 h-7 bg-error/10 rounded-md flex items-center justify-center flex-shrink-0">
+            <ph-icon icon="gear-six" class="w-4 h-4 text-error" />
+          </div>
+          <span class="text-base font-semibold text-content">
+            系統管理
+          </span>
+        </div>
+
+        <!-- Chevron Separator -->
+        <ph-icon icon="caret-right" class="w-4 h-4 text-content-tertiary ml-1 flex-shrink-0" />
+
+        <!-- Full Navigation (xl and above) -->
+        <div class="hidden xl:flex items-center gap-1">
+          <button
+            v-for="item in adminNavItems"
+            :key="item.name"
+            @click="navigateTo(item.route)"
+            :class="[
+              'flex items-center gap-1.5 px-2.5 py-1.5 text-sm rounded-md transition-colors',
+              isActiveRoute(item.name)
+                ? 'bg-accent text-content-inverse'
+                : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-hover'
+            ]"
+            :title="item.label"
+          >
+            <ph-icon :icon="item.icon" class="w-4 h-4" />
+            <span>{{ item.label }}</span>
+          </button>
+        </div>
+
+        <!-- Compact Navigation (lg to xl) - icons only with tooltips -->
+        <div class="hidden lg:flex xl:hidden items-center gap-1">
+          <button
+            v-for="item in adminNavItems"
             :key="item.name"
             @click="navigateTo(item.route)"
             :class="[
