@@ -58,6 +58,8 @@ const roleBadgeClass = computed(() => {
   return 'bg-info/10 text-info'
 })
 
+const isAdmin = computed(() => authStore.user?.role === 'app-admin')
+
 // Methods
 async function loadAvatar(): Promise<void> {
   try {
@@ -166,7 +168,12 @@ async function handleSave(): Promise<void> {
     })
     toast.success('儲存成功', '個人資訊已更新')
   } catch (err) {
-    toast.error('儲存失敗', err instanceof Error ? err.message : '請稍後再試')
+    // 檢查是否為權限錯誤
+    if (err instanceof Error && (err.message.includes('403') || err.message.includes('Forbidden'))) {
+      toast.error('權限不足', '修改個人資訊需要管理員權限，請聯繫系統管理員協助修改')
+    } else {
+      toast.error('儲存失敗', err instanceof Error ? err.message : '請稍後再試')
+    }
   } finally {
     isSaving.value = false
   }
@@ -375,6 +382,13 @@ onMounted(() => {
             <div class="p-6 border-b border-edge">
               <h2 class="text-lg font-semibold text-content">個人資訊</h2>
               <p class="text-sm text-content-secondary mt-1">更新您的顯示名稱與聯絡資訊</p>
+              <!-- 非管理員提示 -->
+              <div v-if="!isAdmin" class="mt-3 p-3 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-md">
+                <p class="text-sm text-amber-800 dark:text-amber-200 flex items-center gap-2">
+                  <ph-icon icon="info" class="w-4 h-4 flex-shrink-0" />
+                  <span>修改個人資訊需要管理員權限，如需修改請聯繫系統管理員</span>
+                </p>
+              </div>
             </div>
 
             <div class="p-6">
