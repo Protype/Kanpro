@@ -139,14 +139,6 @@ const getEventIcon = (eventName: string): string => {
 <template>
   <div class="p-6">
     <div class="max-w-4xl mx-auto">
-      <!-- Header -->
-      <div class="mb-6">
-        <h1 class="text-2xl font-bold text-content">專案動態</h1>
-        <p v-if="boardStore.project" class="text-content-secondary mt-1">
-          {{ boardStore.project.name }} 的最近活動
-        </p>
-      </div>
-
       <!-- Loading -->
       <div v-if="isLoading" class="flex justify-center py-12">
         <ph-icon icon="spinner" class="animate-spin h-8 w-8 text-accent" />

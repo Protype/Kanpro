@@ -2,11 +2,6 @@
   <div class="h-full overflow-auto bg-surface-secondary">
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- Page Title -->
-      <div class="mb-6">
-        <h1 class="text-2xl font-bold text-content">專案分析</h1>
-        <p class="text-content-secondary mt-1">{{ projectName }}</p>
-      </div>
       <!-- Loading State -->
       <div v-if="isLoading" class="flex justify-center py-12">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-accent"></div>
@@ -184,7 +179,6 @@ const membersStore = useMembersStore()
 const projectsStore = useProjectsStore()
 
 const projectId = computed(() => Number(route.params.id))
-const projectName = ref('')
 const isLoading = ref(true)
 const error = ref<string | null>(null)
 
@@ -279,12 +273,6 @@ async function loadAnalytics() {
   error.value = null
 
   try {
-    await projectsStore.fetchProjects()
-    const project = projectsStore.getProjectById(projectId.value)
-    if (project) {
-      projectName.value = project.name
-    }
-
     await Promise.all([
       analyticsStore.fetchProjectActivity(projectId.value),
       boardStore.fetchBoard(projectId.value),

@@ -189,9 +189,9 @@ watch(projectId, () => {
       data-testid="calendar-header"
       class="px-6 py-4 flex items-center justify-between bg-surface border-b border-edge"
     >
-      <!-- Project Name & Month/Year Navigation -->
+      <!-- Month/Year Navigation -->
       <div class="flex items-center gap-4">
-        <h1 class="text-lg font-semibold text-content">{{ boardStore.project?.name || '日曆' }}</h1>
+        <h1 class="text-lg font-semibold text-content">日曆</h1>
         <span class="text-content-tertiary">|</span>
         <button
           data-testid="today-btn"

@@ -185,7 +185,7 @@ const handleSearchSelect = (task: Task) => {
     <main v-else class="flex-1 p-4 overflow-auto">
       <!-- Toolbar -->
       <div class="card mb-4 p-4 flex items-center gap-4">
-        <h1 class="text-lg font-semibold text-content whitespace-nowrap">{{ boardStore.project?.name || '任務列表' }}</h1>
+        <h1 class="text-lg font-semibold text-content whitespace-nowrap">任務清單</h1>
         <span class="text-content-tertiary">|</span>
         <input
           v-model="filterQuery"

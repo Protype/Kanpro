@@ -15,12 +15,8 @@
 
       <!-- Content -->
       <div v-else class="max-w-6xl mx-auto px-6 py-6 animate-fadeIn">
-      <!-- Project Title & Progress Section -->
+      <!-- Progress Section -->
       <section class="mb-6">
-        <div class="mb-4">
-          <h1 class="text-2xl font-bold text-content">{{ project?.name || '專案總覽' }}</h1>
-          <p class="text-sm text-content-tertiary mt-1">專案總覽與進度追蹤</p>
-        </div>
         <div class="flex items-center justify-between mb-3">
           <h2 class="text-xs font-semibold text-content-tertiary uppercase tracking-wider">任務進度</h2>
           <span class="text-sm text-content-secondary">共 {{ totalTasks }} 項任務</span>

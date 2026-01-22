@@ -105,11 +105,6 @@ const handleSearchSelect = (task: Task) => {
 <template>
   <div class="h-full overflow-auto bg-surface-secondary">
     <main class="mx-auto max-w-2xl px-4 py-6">
-      <!-- Page Title -->
-      <div class="mb-6">
-        <h1 class="text-2xl font-bold text-content">專案設定</h1>
-        <p class="text-content-secondary mt-1">{{ currentProject?.name }}</p>
-      </div>
       <!-- Loading -->
       <div v-if="isLoading" class="flex items-center justify-center py-12">
         <ph-icon icon="spinner" class="animate-spin h-8 w-8 text-accent" />
