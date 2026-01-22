@@ -192,13 +192,11 @@ const handleRemoveUser = async (user: User) => {
     <!-- Content -->
     <main v-else class="flex-1 p-4 overflow-auto">
       <!-- Toolbar -->
-      <div class="card mb-4 p-4 flex items-center gap-4 flex-wrap">
-        <input
-          v-model="filterQuery"
-          type="text"
-          placeholder="搜尋使用者..."
-          class="input flex-1 min-w-[200px] max-w-md"
-        />
+      <div class="mb-4 flex items-center gap-4 flex-wrap">
+        <span class="text-sm text-content-tertiary whitespace-nowrap">
+          共 {{ filteredUsers.length }} 位使用者
+        </span>
+        <div class="flex-1" />
         <select v-model="filterRole" class="select w-40">
           <option value="">所有角色</option>
           <option v-for="role in roles" :key="role.value" :value="role.value">
@@ -210,10 +208,12 @@ const handleRemoveUser = async (user: User) => {
           <option value="active">啟用</option>
           <option value="inactive">停用</option>
         </select>
-        <span class="text-sm text-content-tertiary">
-          共 {{ filteredUsers.length }} 位使用者
-        </span>
-        <div class="flex-1" />
+        <input
+          v-model="filterQuery"
+          type="text"
+          placeholder="搜尋使用者..."
+          class="input w-64"
+        />
         <button
           v-if="!isAdding"
           @click="startAdding"

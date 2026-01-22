@@ -191,17 +191,17 @@ const handleRemoveMember = async (userId: number) => {
     <!-- Content -->
     <main v-else class="flex-1 p-4 overflow-auto">
       <!-- Toolbar -->
-      <div class="card mb-4 p-4 flex items-center gap-4 flex-wrap">
+      <div class="mb-4 flex items-center gap-4 flex-wrap">
+        <span class="text-sm text-content-tertiary whitespace-nowrap">
+          共 {{ filteredGroups.length }} 個群組
+        </span>
+        <div class="flex-1" />
         <input
           v-model="filterQuery"
           type="text"
           placeholder="搜尋群組..."
-          class="input flex-1 min-w-[200px] max-w-md"
+          class="input w-64"
         />
-        <span class="text-sm text-content-tertiary">
-          共 {{ filteredGroups.length }} 個群組
-        </span>
-        <div class="flex-1" />
         <button
           v-if="!isAdding"
           @click="startAdding"

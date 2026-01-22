@@ -184,15 +184,11 @@ const handleSearchSelect = (task: Task) => {
     <!-- Content -->
     <main v-else class="flex-1 p-4 overflow-auto">
       <!-- Toolbar -->
-      <div class="card mb-4 p-4 flex items-center gap-4">
-        <h1 class="text-lg font-semibold text-content whitespace-nowrap">任務清單</h1>
-        <span class="text-content-tertiary">|</span>
-        <input
-          v-model="filterQuery"
-          type="text"
-          :placeholder="`搜尋任務...`"
-          class="input flex-1 max-w-md"
-        />
+      <div class="mb-4 flex items-center gap-4">
+        <span class="text-sm text-content-tertiary whitespace-nowrap">
+          共 {{ filteredTasks.length }} 個任務
+        </span>
+        <div class="flex-1" />
         <label class="flex items-center gap-2 text-sm text-content-secondary">
           <input
             v-model="showClosedTasks"
@@ -201,9 +197,12 @@ const handleSearchSelect = (task: Task) => {
           />
           顯示已關閉任務
         </label>
-        <span class="text-sm text-content-tertiary">
-          共 {{ filteredTasks.length }} 個任務
-        </span>
+        <input
+          v-model="filterQuery"
+          type="text"
+          :placeholder="`搜尋任務...`"
+          class="input w-64"
+        />
       </div>
 
       <!-- Table -->
