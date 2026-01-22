@@ -145,6 +145,29 @@ export const useTasksStore = defineStore('tasks', () => {
     return tasks || []
   }
 
+  /**
+   * 移動任務位置（欄位/泳道/順序）
+   */
+  async function moveTaskPosition(
+    projectId: number,
+    taskId: number,
+    columnId: number,
+    position: number,
+    swimlaneId: number
+  ): Promise<boolean> {
+    const authStore = useAuthStore()
+    const client = authStore.getClient()
+
+    const result = await client.call<boolean>('moveTaskPosition', {
+      project_id: projectId,
+      task_id: taskId,
+      column_id: columnId,
+      position: position,
+      swimlane_id: swimlaneId
+    })
+    return result
+  }
+
   return {
     currentTask,
     allTasks,
@@ -159,6 +182,7 @@ export const useTasksStore = defineStore('tasks', () => {
     clearCurrentTask,
     clearAllTasks,
     searchTasks,
+    moveTaskPosition,
     $reset
   }
 })
