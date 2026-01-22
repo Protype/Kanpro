@@ -43,6 +43,10 @@ export const useMembersStore = defineStore('members', () => {
     }
   }
 
+  /**
+   * 獲取所有用戶（需要 admin 權限）
+   * 非 admin 用戶會靜默失敗，不影響其他功能
+   */
   async function fetchAllUsers(): Promise<void> {
     const authStore = useAuthStore()
 
@@ -50,8 +54,9 @@ export const useMembersStore = defineStore('members', () => {
       const client = authStore.getClient()
       const result = await client.call<User[]>('getAllUsers')
       allUsers.value = result || []
-    } catch (err) {
-      console.error('Failed to fetch users:', err)
+    } catch {
+      // getAllUsers 需要 admin 權限，非 admin 用戶會得到 403
+      // 靜默失敗，不影響其他功能
       allUsers.value = []
     }
   }

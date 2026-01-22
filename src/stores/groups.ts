@@ -11,6 +11,10 @@ export const useGroupsStore = defineStore('groups', () => {
   // Computed properties
   const groupsCount = computed(() => groups.value.length)
 
+  /**
+   * 獲取所有群組（需要 admin 權限）
+   * 非 admin 用戶會靜默失敗
+   */
   async function fetchAllGroups(): Promise<void> {
     const authStore = useAuthStore()
 
@@ -21,8 +25,8 @@ export const useGroupsStore = defineStore('groups', () => {
       const client = authStore.getClient()
       const result = await client.call<Group[]>('getAllGroups')
       groups.value = result || []
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : '載入群組失敗'
+    } catch {
+      // getAllGroups 需要 admin 權限，非 admin 用戶靜默失敗
       groups.value = []
     } finally {
       isLoading.value = false

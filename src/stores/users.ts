@@ -29,6 +29,10 @@ export const useUsersStore = defineStore('users', () => {
     return users.value.filter(u => u.is_active)
   })
 
+  /**
+   * 獲取所有使用者（需要 admin 權限）
+   * 非 admin 用戶會靜默失敗
+   */
   async function fetchAllUsers(): Promise<void> {
     const authStore = useAuthStore()
 
@@ -39,8 +43,8 @@ export const useUsersStore = defineStore('users', () => {
       const client = authStore.getClient()
       const result = await client.call<User[]>('getAllUsers')
       users.value = result || []
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : '載入使用者失敗'
+    } catch {
+      // getAllUsers 需要 admin 權限，非 admin 用戶靜默失敗
       users.value = []
     } finally {
       isLoading.value = false

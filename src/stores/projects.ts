@@ -59,7 +59,9 @@ export const useProjectsStore = defineStore('projects', () => {
 
     try {
       const client = authStore.getClient()
-      const result = await client.call<Project[]>('getAllProjects')
+      // 使用 getMyProjects 取代 getAllProjects
+      // getAllProjects 需要 admin 權限，非 admin 用戶會得到 403
+      const result = await client.call<Project[]>('getMyProjects')
       projects.value = result
     } catch (err) {
       error.value = err instanceof Error ? err.message : '載入專案失敗'

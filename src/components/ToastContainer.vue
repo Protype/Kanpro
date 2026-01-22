@@ -14,10 +14,10 @@ function getIcon(type: ToastType): string {
 
 function getClasses(type: ToastType): string {
   switch (type) {
-    case 'success': return 'bg-emerald-100 dark:bg-emerald-900/50 border border-emerald-300 dark:border-emerald-600 text-emerald-700 dark:text-emerald-300'
-    case 'error': return 'bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-600 text-red-700 dark:text-red-300'
-    case 'warning': return 'bg-amber-100 dark:bg-amber-900/50 border border-amber-300 dark:border-amber-600 text-amber-700 dark:text-amber-300'
-    case 'info': return 'bg-blue-100 dark:bg-blue-900/50 border border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300'
+    case 'success': return 'bg-success/10 border border-success/30 text-success'
+    case 'error': return 'bg-error/10 border border-error/30 text-error'
+    case 'warning': return 'bg-warning/10 border border-warning/30 text-warning'
+    case 'info': return 'bg-info/10 border border-info/30 text-info'
   }
 }
 </script>
