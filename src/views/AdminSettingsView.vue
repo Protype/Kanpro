@@ -129,76 +129,115 @@ onMounted(() => {
 <template>
   <div class="h-full flex flex-col bg-surface-secondary">
     <main class="flex-1 p-4 overflow-auto">
-      <!-- Toolbar -->
-      <div class="card mb-4 p-4">
-        <h1 class="text-lg font-semibold text-content">系統設定</h1>
-      </div>
+      <!-- Two Column Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- Left Column: Connection Settings -->
+        <div class="card overflow-hidden">
+          <div class="px-4 py-3 bg-surface-secondary border-b border-edge">
+            <h2 class="text-sm font-semibold text-content-secondary uppercase tracking-wide">
+              連線設定
+            </h2>
+          </div>
+          <div class="p-4 space-y-4">
+            <!-- API URL -->
+            <div>
+              <label class="block text-sm font-medium text-content-secondary mb-2">
+                API 位址
+              </label>
+              <div class="flex gap-2">
+                <input
+                  type="text"
+                  :value="getOriginalApiUrl()"
+                  readonly
+                  class="input flex-1 bg-surface-secondary cursor-not-allowed font-mono text-sm"
+                  title="API 位址由登入時設定"
+                />
+                <button
+                  @click="testConnection"
+                  :disabled="isTesting"
+                  class="btn-secondary whitespace-nowrap"
+                >
+                  <ph-icon
+                    :icon="isTesting ? 'spinner' : 'plugs-connected'"
+                    :class="['w-4 h-4 mr-1.5', isTesting && 'animate-spin']"
+                  />
+                  測試
+                </button>
+              </div>
+              <p class="mt-1.5 text-xs text-content-tertiary">
+                API 位址在登入時設定，如需變更請重新登入
+              </p>
+            </div>
 
-      <!-- Connection Settings -->
-      <div class="card overflow-hidden mb-4">
-        <div class="px-4 py-3 bg-surface-secondary border-b border-edge">
-          <h2 class="text-sm font-semibold text-content-secondary uppercase tracking-wide">
-            連線設定
-          </h2>
-        </div>
-        <div class="p-4 space-y-4">
-          <!-- API URL -->
-          <div>
-            <label class="block text-sm font-medium text-content-secondary mb-2">
-              API 位址
-            </label>
-            <div class="flex gap-2">
-              <input
-                type="text"
-                :value="getOriginalApiUrl()"
-                readonly
-                class="input flex-1 bg-surface-secondary cursor-not-allowed font-mono text-sm"
-                title="API 位址由登入時設定"
-              />
-              <button
-                @click="testConnection"
-                :disabled="isTesting"
-                class="btn-secondary whitespace-nowrap"
+            <!-- Connection Test Result -->
+            <div v-if="testResult">
+              <div
+                :class="[
+                  'p-3 rounded-md flex items-center gap-2',
+                  testResult.success
+                    ? 'bg-success/10 border border-success/20'
+                    : 'bg-error/10 border border-error/20'
+                ]"
               >
                 <ph-icon
-                  :icon="isTesting ? 'spinner' : 'plugs-connected'"
-                  :class="['w-4 h-4 mr-1.5', isTesting && 'animate-spin']"
+                  :icon="testResult.success ? 'check-circle' : 'x-circle'"
+                  :class="['w-5 h-5', testResult.success ? 'text-success' : 'text-error']"
                 />
-                測試連線
+                <span :class="['text-sm font-medium', testResult.success ? 'text-success' : 'text-error']">
+                  {{ testResult.success ? `連線成功 (${testResult.latency}ms)` : '連線失敗' }}
+                </span>
+                <span v-if="testResult.error" class="text-sm text-error ml-2">
+                  {{ testResult.error }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Desktop Notifications -->
+        <div class="card overflow-hidden">
+          <div class="px-4 py-3 bg-surface-secondary border-b border-edge">
+            <h2 class="text-sm font-semibold text-content-secondary uppercase tracking-wide">
+              桌面通知
+            </h2>
+          </div>
+          <div class="p-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="font-medium text-content">啟用桌面通知</p>
+                <p class="text-xs text-content-tertiary mt-0.5">
+                  接收任務指派、評論、到期提醒的桌面推播
+                </p>
+              </div>
+              <button
+                @click="enableDesktopNotifications = !enableDesktopNotifications; handleNotificationToggle()"
+                :class="[
+                  'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
+                  enableDesktopNotifications ? 'bg-accent' : 'bg-surface-tertiary'
+                ]"
+                role="switch"
+                :aria-checked="enableDesktopNotifications"
+              >
+                <span
+                  :class="[
+                    'inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm',
+                    enableDesktopNotifications ? 'translate-x-6' : 'translate-x-1'
+                  ]"
+                />
               </button>
             </div>
-            <p class="mt-1.5 text-xs text-content-tertiary">
-              API 位址在登入時設定，如需變更請重新登入
-            </p>
           </div>
-
-          <!-- Connection Test Result -->
-          <div v-if="testResult">
-            <div
-              :class="[
-                'p-3 rounded-md flex items-center gap-2',
-                testResult.success
-                  ? 'bg-success/10 border border-success/20'
-                  : 'bg-error/10 border border-error/20'
-              ]"
-            >
-              <ph-icon
-                :icon="testResult.success ? 'check-circle' : 'x-circle'"
-                :class="['w-5 h-5', testResult.success ? 'text-success' : 'text-error']"
-              />
-              <span :class="['text-sm font-medium', testResult.success ? 'text-success' : 'text-error']">
-                {{ testResult.success ? `連線成功 (${testResult.latency}ms)` : '連線失敗' }}
-              </span>
-              <span v-if="testResult.error" class="text-sm text-error ml-2">
-                {{ testResult.error }}
-              </span>
-            </div>
+          <div class="px-4 py-3 bg-surface-secondary border-t border-edge">
+            <p class="text-xs text-content-tertiary">
+              <ph-icon icon="info" class="w-3.5 h-3.5 inline mr-1" />
+              桌面通知需要瀏覽器權限，首次啟用時會要求授權
+            </p>
           </div>
         </div>
       </div>
 
-      <!-- Auto Refresh Settings -->
-      <div class="card overflow-hidden mb-4">
+      <!-- Auto Refresh Settings (Full Width) -->
+      <div class="card overflow-hidden mt-4">
         <div class="px-4 py-3 bg-surface-secondary border-b border-edge">
           <h2 class="text-sm font-semibold text-content-secondary uppercase tracking-wide">
             自動更新
@@ -262,47 +301,6 @@ onMounted(() => {
           <p class="text-xs text-content-tertiary">
             <ph-icon icon="info" class="w-3.5 h-3.5 inline mr-1" />
             自動更新僅在頁面可見時運作，切換到其他分頁時會暫停以節省資源
-          </p>
-        </div>
-      </div>
-
-      <!-- Desktop Notifications -->
-      <div class="card overflow-hidden">
-        <div class="px-4 py-3 bg-surface-secondary border-b border-edge">
-          <h2 class="text-sm font-semibold text-content-secondary uppercase tracking-wide">
-            桌面通知
-          </h2>
-        </div>
-        <div class="p-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="font-medium text-content">啟用桌面通知</p>
-              <p class="text-xs text-content-tertiary mt-0.5">
-                接收任務指派、評論、到期提醒的桌面推播
-              </p>
-            </div>
-            <button
-              @click="enableDesktopNotifications = !enableDesktopNotifications; handleNotificationToggle()"
-              :class="[
-                'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
-                enableDesktopNotifications ? 'bg-accent' : 'bg-surface-tertiary'
-              ]"
-              role="switch"
-              :aria-checked="enableDesktopNotifications"
-            >
-              <span
-                :class="[
-                  'inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm',
-                  enableDesktopNotifications ? 'translate-x-6' : 'translate-x-1'
-                ]"
-              />
-            </button>
-          </div>
-        </div>
-        <div class="px-4 py-3 bg-surface-secondary border-t border-edge">
-          <p class="text-xs text-content-tertiary">
-            <ph-icon icon="info" class="w-3.5 h-3.5 inline mr-1" />
-            桌面通知需要瀏覽器權限，首次啟用時會要求授權
           </p>
         </div>
       </div>

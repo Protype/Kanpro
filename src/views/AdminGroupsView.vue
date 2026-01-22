@@ -192,8 +192,6 @@ const handleRemoveMember = async (userId: number) => {
     <main v-else class="flex-1 p-4 overflow-auto">
       <!-- Toolbar -->
       <div class="card mb-4 p-4 flex items-center gap-4 flex-wrap">
-        <h1 class="text-lg font-semibold text-content whitespace-nowrap">群組管理</h1>
-        <span class="text-content-tertiary">|</span>
         <input
           v-model="filterQuery"
           type="text"
