@@ -10,6 +10,69 @@ const notificationsStore = useNotificationsStore()
 const isOpen = ref(false)
 let pollInterval: ReturnType<typeof setInterval> | null = null
 
+// Settings Storage Key (與 AdminSettingsView 相同)
+const SETTINGS_KEY = 'kanpro_settings'
+
+// 讀取通知檢查間隔設定
+function getNotificationCheckInterval(): number {
+  try {
+    const saved = localStorage.getItem(SETTINGS_KEY)
+    if (saved) {
+      const settings = JSON.parse(saved)
+      return settings.notificationCheckInterval ?? 300
+    }
+  } catch {
+    // 使用預設值
+  }
+  return 300 // 預設 5 分鐘
+}
+
+// 檢查桌面通知是否啟用
+function isDesktopNotificationsEnabled(): boolean {
+  try {
+    const saved = localStorage.getItem(SETTINGS_KEY)
+    if (saved) {
+      const settings = JSON.parse(saved)
+      return settings.enableDesktopNotifications ?? false
+    }
+  } catch {
+    // 使用預設值
+  }
+  return false
+}
+
+// 發送桌面通知
+function sendDesktopNotification(activity: Activity): void {
+  if (!('Notification' in window)) return
+  if (Notification.permission !== 'granted') return
+  if (!isDesktopNotificationsEnabled()) return
+
+  const title = getEventLabel(activity.event_name)
+  const taskTitle = getTaskTitle(activity)
+  const body = taskTitle ? `${taskTitle}` : '您有新的通知'
+
+  const notification = new Notification(title, {
+    body,
+    icon: '/favicon.ico',
+    tag: `kanpro-${activity.id}` // 避免重複通知
+  })
+
+  notification.onclick = () => {
+    window.focus()
+    if (activity.task_id && activity.project_id) {
+      router.push({
+        name: 'board',
+        params: { projectId: activity.project_id },
+        query: { task: activity.task_id.toString() }
+      })
+    }
+    notification.close()
+  }
+}
+
+// 追蹤已處理過的活動 ID（避免重複發送桌面通知）
+const processedActivityIds = new Set<number>()
+
 const eventLabels: Record<string, string> = {
   'task.create': '建立任務',
   'task.update': '更新任務',
@@ -82,16 +145,57 @@ const handleMarkAllAsRead = () => {
   notificationsStore.markAllAsRead()
 }
 
+// 檢查並發送新通知的桌面通知
+async function checkAndNotify(): Promise<void> {
+  const previousIds = new Set(notificationsStore.activities.map(a => a.id))
+  await notificationsStore.fetchActivities()
+
+  // 找出新的未讀活動並發送桌面通知
+  for (const activity of notificationsStore.activities) {
+    if (
+      !previousIds.has(activity.id) &&
+      !notificationsStore.isRead(activity.id) &&
+      !processedActivityIds.has(activity.id)
+    ) {
+      processedActivityIds.add(activity.id)
+      sendDesktopNotification(activity)
+    }
+  }
+
+  // 清理過舊的 processedActivityIds（保留最近 1000 筆）
+  if (processedActivityIds.size > 1000) {
+    const idsToKeep = notificationsStore.activities.map(a => a.id)
+    processedActivityIds.clear()
+    idsToKeep.forEach(id => processedActivityIds.add(id))
+  }
+}
+
 const startPolling = () => {
+  stopPolling() // 先停止現有輪詢
+
+  const intervalSeconds = getNotificationCheckInterval()
+  if (intervalSeconds === 0) return // 停用輪詢
+
+  const intervalMs = intervalSeconds * 1000
+
+  // 通知檢查在背景分頁也持續運作（不受 page visibility 影響）
   pollInterval = setInterval(() => {
-    notificationsStore.fetchActivities()
-  }, 60000) // 60 seconds
+    checkAndNotify()
+  }, intervalMs)
 }
 
 const stopPolling = () => {
   if (pollInterval) {
     clearInterval(pollInterval)
     pollInterval = null
+  }
+}
+
+// 監聽設定變更（透過 storage 事件）
+const handleStorageChange = (event: StorageEvent) => {
+  if (event.key === SETTINGS_KEY) {
+    // 設定變更時重新啟動輪詢
+    startPolling()
   }
 }
 
@@ -106,13 +210,19 @@ const handleClickOutside = (event: MouseEvent) => {
 onMounted(async () => {
   notificationsStore.loadReadIds()
   await notificationsStore.fetchActivities()
+
+  // 初始化已處理活動 ID（避免首次載入時發送舊通知）
+  notificationsStore.activities.forEach(a => processedActivityIds.add(a.id))
+
   startPolling()
   document.addEventListener('click', handleClickOutside)
+  window.addEventListener('storage', handleStorageChange)
 })
 
 onUnmounted(() => {
   stopPolling()
   document.removeEventListener('click', handleClickOutside)
+  window.removeEventListener('storage', handleStorageChange)
 })
 
 watch(() => isOpen.value, (open) => {

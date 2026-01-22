@@ -31,10 +31,12 @@ const boardRefreshOptions = [
 
 const notificationCheckOptions = [
   { value: 0, label: '停用' },
+  { value: 5, label: '5 秒' },
+  { value: 10, label: '10 秒' },
+  { value: 30, label: '30 秒' },
   { value: 60, label: '1 分鐘' },
   { value: 300, label: '5 分鐘' },
-  { value: 600, label: '10 分鐘' },
-  { value: 1800, label: '30 分鐘' }
+  { value: 600, label: '10 分鐘' }
 ]
 
 // 取得原始配置的 API URL
@@ -297,10 +299,14 @@ onMounted(() => {
             </tr>
           </tbody>
         </table>
-        <div class="px-4 py-3 bg-surface-secondary border-t border-edge">
+        <div class="px-4 py-3 bg-surface-secondary border-t border-edge space-y-1">
           <p class="text-xs text-content-tertiary">
             <ph-icon icon="info" class="w-3.5 h-3.5 inline mr-1" />
-            自動更新僅在頁面可見時運作，切換到其他分頁時會暫停以節省資源
+            看板更新僅在頁面可見時運作，切換分頁時會暫停以節省資源
+          </p>
+          <p class="text-xs text-content-tertiary">
+            <ph-icon icon="bell" class="w-3.5 h-3.5 inline mr-1" />
+            通知檢查即使在背景分頁也會持續運作，確保桌面通知正常發送
           </p>
         </div>
       </div>
