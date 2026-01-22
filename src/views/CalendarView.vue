@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useTasksStore } from '@/stores/tasks'
 import { useBoardStore } from '@/stores/board'
+import { getTaskColorBgClass } from '@/utils/task'
 import TaskDetailModal from '@/components/TaskDetailModal.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import type { Task } from '@/types'
@@ -124,28 +125,6 @@ const goToToday = () => {
   currentDate.value = new Date()
 }
 
-// Task color mapping
-const getTaskColor = (colorId: string): string => {
-  const colorMap: Record<string, string> = {
-    yellow: 'bg-yellow-400',
-    blue: 'bg-blue-400',
-    green: 'bg-green-400',
-    purple: 'bg-purple-400',
-    red: 'bg-red-400',
-    orange: 'bg-orange-400',
-    grey: 'bg-gray-400',
-    cyan: 'bg-cyan-400',
-    lime: 'bg-lime-400',
-    pink: 'bg-pink-400',
-    teal: 'bg-teal-400',
-    amber: 'bg-amber-400',
-    brown: 'bg-amber-700',
-    deep_orange: 'bg-orange-600',
-    dark_grey: 'bg-gray-600',
-    white: 'bg-gray-200'
-  }
-  return colorMap[colorId] || 'bg-gray-400'
-}
 
 // Open task modal
 const openTaskModal = (task: Task) => {
@@ -264,7 +243,7 @@ watch(projectId, () => {
                 @click="openTaskModal(task)"
                 :class="[
                   'calendar-task text-xs px-1 py-0.5 rounded truncate cursor-pointer hover:opacity-80',
-                  getTaskColor(task.color_id),
+                  getTaskColorBgClass(task.color_id),
                   task.color_id === 'white' ? 'text-content-secondary' : 'text-white'
                 ]"
                 :title="task.title"

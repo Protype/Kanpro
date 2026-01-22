@@ -99,50 +99,52 @@ const formatDate = (timestamp: number): string => {
   })
 }
 
-const getTaskTitle = (activity: Activity): string => {
+// Helper to safely extract nested data from activity
+function getActivityTaskData(activity: Activity): Record<string, unknown> | null {
   if (activity.data?.task && typeof activity.data.task === 'object') {
-    const task = activity.data.task as { title?: string }
-    if (task.title) return task.title
+    return activity.data.task as Record<string, unknown>
   }
+  return null
+}
+
+function getActivityCommentData(activity: Activity): Record<string, unknown> | null {
+  if (activity.data?.comment && typeof activity.data.comment === 'object') {
+    return activity.data.comment as Record<string, unknown>
+  }
+  return null
+}
+
+function getTaskTitle(activity: Activity): string {
+  const task = getActivityTaskData(activity)
+  if (task?.title && typeof task.title === 'string') return task.title
   return activity.task_id ? `#${activity.task_id}` : ''
 }
 
-const getAuthorName = (activity: Activity): string => {
+function getAuthorName(activity: Activity): string {
   return activity.author_name || activity.author_username || '未知使用者'
 }
 
-const getAuthorInitial = (activity: Activity): string => {
-  const name = getAuthorName(activity)
-  return name.charAt(0).toUpperCase()
+function getAuthorInitial(activity: Activity): string {
+  return getAuthorName(activity).charAt(0).toUpperCase()
 }
 
-const getAssigneeName = (activity: Activity): string | null => {
-  if (activity.data?.task && typeof activity.data.task === 'object') {
-    const task = activity.data.task as { assignee_name?: string; assignee_username?: string }
-    return task.assignee_name || task.assignee_username || null
-  }
-  return null
+function getAssigneeName(activity: Activity): string | null {
+  const task = getActivityTaskData(activity)
+  if (!task) return null
+  const name = task.assignee_name || task.assignee_username
+  return typeof name === 'string' ? name : null
 }
 
-const getColumnName = (activity: Activity): string | null => {
-  if (activity.data?.task && typeof activity.data.task === 'object') {
-    const task = activity.data.task as { column_title?: string }
-    return task.column_title || null
-  }
-  return null
+function getColumnName(activity: Activity): string | null {
+  const task = getActivityTaskData(activity)
+  return task?.column_title && typeof task.column_title === 'string' ? task.column_title : null
 }
 
-const getCommentContent = (activity: Activity): string | null => {
-  if (activity.data?.comment && typeof activity.data.comment === 'object') {
-    const comment = activity.data.comment as { comment?: string }
-    if (comment.comment) {
-      // Truncate to 100 chars
-      return comment.comment.length > 100
-        ? comment.comment.substring(0, 100) + '...'
-        : comment.comment
-    }
-  }
-  return null
+function getCommentContent(activity: Activity): string | null {
+  const comment = getActivityCommentData(activity)
+  if (!comment?.comment || typeof comment.comment !== 'string') return null
+  const content = comment.comment
+  return content.length > 100 ? content.substring(0, 100) + '...' : content
 }
 
 const handleActivityClick = (activity: Activity) => {
@@ -164,25 +166,38 @@ const handleSearchSelect = (task: Task) => {
   emit('close-search-modal')
 }
 
-const getEventIcon = (eventName: string): string => {
-  if (eventName.startsWith('task.create')) return 'plus-circle'
-  if (eventName.startsWith('task.close')) return 'check-circle'
-  if (eventName.startsWith('task.open')) return 'rotate'
-  if (eventName.startsWith('task.move')) return 'arrow-right'
-  if (eventName.startsWith('task.assignee')) return 'user'
-  if (eventName.startsWith('comment')) return 'chat'
-  if (eventName.startsWith('subtask')) return 'list-check'
-  if (eventName.startsWith('task_file')) return 'paperclip'
-  if (eventName.startsWith('task_internal_link')) return 'link'
-  if (eventName.startsWith('task.update')) return 'pencil'
+// Event icon and color mappings
+const eventIconMap: Record<string, string> = {
+  'task.create': 'plus-circle',
+  'task.close': 'check-circle',
+  'task.open': 'rotate',
+  'task.move': 'arrow-right',
+  'task.assignee': 'user',
+  'task.update': 'pencil',
+  'comment': 'chat',
+  'subtask': 'list-check',
+  'task_file': 'paperclip',
+  'task_internal_link': 'link'
+}
+
+const eventColorMap: Record<string, string> = {
+  'task.create': 'text-success bg-success/10',
+  'task.close': 'text-info bg-info/10',
+  'task.open': 'text-warning bg-warning/10',
+  'comment': 'text-accent bg-accent/10'
+}
+
+function getEventIcon(eventName: string): string {
+  for (const [prefix, icon] of Object.entries(eventIconMap)) {
+    if (eventName.startsWith(prefix)) return icon
+  }
   return 'bolt'
 }
 
-const getEventIconColor = (eventName: string): string => {
-  if (eventName.startsWith('task.create')) return 'text-success bg-success/10'
-  if (eventName.startsWith('task.close')) return 'text-info bg-info/10'
-  if (eventName.startsWith('task.open')) return 'text-warning bg-warning/10'
-  if (eventName.startsWith('comment')) return 'text-accent bg-accent/10'
+function getEventIconColor(eventName: string): string {
+  for (const [prefix, color] of Object.entries(eventColorMap)) {
+    if (eventName.startsWith(prefix)) return color
+  }
   return 'text-content-secondary bg-surface-tertiary'
 }
 

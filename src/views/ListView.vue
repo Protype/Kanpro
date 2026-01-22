@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useBoardStore } from '@/stores/board'
 import { useTasksStore } from '@/stores/tasks'
+import { isTaskOverdue, formatTaskDate, getTaskColorDotClass } from '@/utils/task'
 import TaskDetailModal from '@/components/TaskDetailModal.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import type { Task } from '@/types'
@@ -34,31 +35,6 @@ const showClosedTasks = ref(false)
 // Task detail modal
 const showTaskDetailModal = ref(false)
 const selectedTask = ref<Task | null>(null)
-
-const colorClasses: Record<string, string> = {
-  yellow: 'bg-yellow-500',
-  blue: 'bg-blue-500',
-  green: 'bg-green-500',
-  purple: 'bg-purple-500',
-  red: 'bg-red-500',
-  orange: 'bg-orange-500',
-  grey: 'bg-gray-500',
-  cyan: 'bg-cyan-500'
-}
-
-const getColorClass = (colorId: string) => {
-  return colorClasses[colorId] || 'bg-yellow-500'
-}
-
-const formatDate = (timestamp?: number) => {
-  if (!timestamp) return '-'
-  return new Date(timestamp * 1000).toLocaleDateString('zh-TW')
-}
-
-const isOverdue = (task: Task) => {
-  if (!task.date_due) return false
-  return task.date_due * 1000 < Date.now() && task.is_active
-}
 
 const getColumnName = (columnId: number) => {
   const column = boardStore.columns.find(c => c.id === columnId)
@@ -263,7 +239,7 @@ const handleSearchSelect = (task: Task) => {
               </td>
               <td class="table-cell">
                 <div class="flex items-center gap-2">
-                  <div :class="['w-3 h-3 rounded-full', getColorClass(task.color_id)]"></div>
+                  <div :class="['w-3 h-3 rounded-full', getTaskColorDotClass(task.color_id)]"></div>
                   <span class="font-medium text-content">{{ task.title }}</span>
                 </div>
               </td>
@@ -275,13 +251,13 @@ const handleSearchSelect = (task: Task) => {
               </td>
               <td class="table-cell">
                 <span
-                  :class="isOverdue(task) ? 'text-error font-medium' : 'text-content-secondary'"
+                  :class="isTaskOverdue(task.date_due, task.is_active) ? 'text-error font-medium' : 'text-content-secondary'"
                 >
-                  {{ formatDate(task.date_due) }}
+                  {{ formatTaskDate(task.date_due) }}
                 </span>
               </td>
               <td class="table-cell text-content-secondary">
-                {{ formatDate(task.date_creation) }}
+                {{ formatTaskDate(task.date_creation) }}
               </td>
               <td class="table-cell">
                 <span
