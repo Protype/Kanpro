@@ -42,6 +42,26 @@ export const useToastStore = defineStore('toast', () => {
     }
   }
 
+  /**
+   * 更新現有 toast 的類型和內容（用於 loading -> success/error 轉換）
+   */
+  function update(id: string, type: ToastType, title: string, message?: string, duration = DEFAULT_DURATION): void {
+    const toast = toasts.value.find(t => t.id === id)
+    if (toast) {
+      toast.type = type
+      toast.title = title
+      toast.message = message
+      toast.duration = duration
+
+      // 設定自動移除
+      if (duration > 0) {
+        setTimeout(() => {
+          remove(id)
+        }, duration)
+      }
+    }
+  }
+
   function success(title: string, message?: string, duration = DEFAULT_DURATION): string {
     return add('success', title, message, duration)
   }
@@ -71,6 +91,7 @@ export const useToastStore = defineStore('toast', () => {
     toasts,
     add,
     remove,
+    update,
     success,
     error,
     warning,
@@ -91,6 +112,7 @@ export function useToast() {
     warning: store.warning,
     info: store.info,
     loading: store.loading,
+    update: store.update,
     remove: store.remove,
     clear: store.clear
   }

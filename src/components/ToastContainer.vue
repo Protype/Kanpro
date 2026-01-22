@@ -13,18 +13,21 @@ function getIcon(type: ToastType): string {
   }
 }
 
-function isLoading(type: ToastType): boolean {
-  return type === 'loading'
-}
-
 function getClasses(type: ToastType): string {
   switch (type) {
     case 'success': return 'bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200'
     case 'error': return 'bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200'
     case 'warning': return 'bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200'
     case 'info': return 'bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200'
-    case 'loading': return 'bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'
+    case 'loading': return 'bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500'
   }
+}
+
+function getIconClasses(type: ToastType): string {
+  if (type === 'loading') {
+    return 'text-slate-600 dark:text-slate-300 animate-spin'
+  }
+  return ''
 }
 </script>
 
@@ -44,14 +47,14 @@ function getClasses(type: ToastType): string {
           v-for="toast in toastStore.toasts"
           :key="toast.id"
           :class="[
-            'pointer-events-auto flex gap-3 px-4 py-3 rounded-lg shadow-lg max-w-sm',
+            'pointer-events-auto flex gap-3 px-4 py-3 rounded-lg shadow-lg max-w-sm transition-colors duration-300',
             toast.message ? 'items-start' : 'items-center',
             getClasses(toast.type)
           ]"
         >
           <ph-icon
             :icon="getIcon(toast.type)"
-            :class="['w-5 h-5 flex-shrink-0 mt-0.5', isLoading(toast.type) && 'animate-spin']"
+            :class="['w-5 h-5 flex-shrink-0 mt-0.5 transition-colors duration-300', getIconClasses(toast.type)]"
           />
           <div class="flex-1 min-w-0">
             <p class="text-sm font-semibold">{{ toast.title }}</p>

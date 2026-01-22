@@ -150,16 +150,14 @@ const handleDragEnd = async (evt: { item: HTMLElement; to: HTMLElement; newIndex
       position,
       swimlaneId
     )
-    // 先顯示成功通知，再關閉 loading
-    toast.success('任務已移動')
-    toast.remove(loadingId)
+    // 將 loading 替換為成功通知（漸變動畫）
+    toast.update(loadingId, 'success', '任務已移動')
     // 靜默刷新以同步伺服器狀態（不顯示 loading）
     await boardStore.fetchBoard(projectId.value, true)
   } catch (error) {
     console.error('Failed to move task:', error)
-    // 先顯示失敗通知，再關閉 loading
-    toast.error('移動任務失敗')
-    toast.remove(loadingId)
+    // 將 loading 替換為失敗通知（漸變動畫）
+    toast.update(loadingId, 'error', '移動任務失敗')
     // 靜默刷新以還原 UI 狀態
     await boardStore.fetchBoard(projectId.value, true)
   }
