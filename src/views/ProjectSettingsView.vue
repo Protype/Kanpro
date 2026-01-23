@@ -3,7 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useProjectsStore } from '@/stores/projects'
 import { useBoardStore } from '@/stores/board'
-import { useUsersStore } from '@/stores/users'
+import { useMembersStore } from '@/stores/members'
 import { useToast } from '@/stores/toast'
 import MembersList from '@/components/MembersList.vue'
 import ColumnsList from '@/components/ColumnsList.vue'
@@ -11,7 +11,7 @@ import SwimlanesList from '@/components/SwimlanesList.vue'
 import CategoriesList from '@/components/CategoriesList.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
-import type { Task, Project, User } from '@/types'
+import type { Task, Project, ProjectMember } from '@/types'
 
 defineProps<{
   showSearchModal?: boolean
@@ -25,7 +25,7 @@ const route = useRoute()
 const router = useRouter()
 const projectsStore = useProjectsStore()
 const boardStore = useBoardStore()
-const usersStore = useUsersStore()
+const membersStore = useMembersStore()
 const toast = useToast()
 
 const projectId = computed(() => Number(route.params.id))
@@ -59,25 +59,25 @@ const currentProject = computed(() => projectsStore.getProjectById(projectId.val
 
 const filteredUsers = computed(() => {
   const query = ownerSearchQuery.value.toLowerCase()
-  if (!query) return usersStore.activeUsers
-  return usersStore.activeUsers.filter(u =>
-    u.username.toLowerCase().includes(query) ||
-    (u.name?.toLowerCase().includes(query) ?? false)
+  // 使用專案成員（包含頭像資料）而非全部使用者
+  const activeMembers = membersStore.members.filter(m => m.is_active)
+  if (!query) return activeMembers
+  return activeMembers.filter(m =>
+    m.username.toLowerCase().includes(query) ||
+    (m.name?.toLowerCase().includes(query) ?? false)
   )
 })
 
 const selectedOwner = computed(() => {
   if (!ownerId.value) return null
-  return usersStore.users.find(u => u.id === ownerId.value) || null
+  return membersStore.members.find(m => m.id === ownerId.value) || null
 })
 
 // === Load project data ===
 onMounted(async () => {
   await loadProjectData()
-  // 載入使用者列表用於擁有者選擇
-  if (usersStore.users.length === 0) {
-    usersStore.fetchAllUsers()
-  }
+  // 載入專案成員列表用於擁有者選擇（包含頭像資料）
+  await membersStore.fetchProjectMembers(projectId.value)
 })
 
 watch(projectId, async () => {
@@ -124,8 +124,8 @@ function populateForm(project: Project) {
 }
 
 // === Actions ===
-function selectOwner(user: User) {
-  ownerId.value = user.id
+function selectOwner(member: ProjectMember) {
+  ownerId.value = member.id
   ownerSearchQuery.value = ''
   showOwnerDropdown.value = false
 }
