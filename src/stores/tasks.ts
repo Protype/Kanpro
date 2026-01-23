@@ -13,9 +13,13 @@ export interface CreateTaskParams {
   owner_id?: number
   category_id?: number
   date_due?: string
+  date_started?: string
   priority?: number
   score?: number
   time_estimated?: number
+  time_spent?: number
+  reference?: string
+  tags?: string[]
 }
 
 export interface UpdateTaskParams {
@@ -27,9 +31,12 @@ export interface UpdateTaskParams {
   owner_id?: number
   category_id?: number
   date_due?: string
+  date_started?: string
   priority?: number
   score?: number
   time_estimated?: number
+  time_spent?: number
+  reference?: string
 }
 
 export const useTasksStore = defineStore('tasks', () => {
