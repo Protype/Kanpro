@@ -216,8 +216,9 @@ describe('Members Store', () => {
 
       const callBody = JSON.parse(mockFetch.mock.calls[0][1].body)
       // When project_user feature is enabled, same API returns extended format
+      // Kanpro Bridge uses camelCase parameter names
       expect(callBody.method).toBe('getProjectUsers')
-      expect(callBody.params).toEqual({ project_id: 5 })
+      expect(callBody.params).toEqual({ projectId: 5 })
     })
 
     it('should include avatar in member data when available', async () => {

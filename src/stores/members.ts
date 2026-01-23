@@ -190,8 +190,9 @@ export const useMembersStore = defineStore('members', () => {
       // 檢查是否啟用擴展模式
       if (isProjectUserExtendedEnabled()) {
         // Kanpro Bridge 已覆蓋 API - 回傳完整資料陣列
+        // 注意：Kanpro Bridge 使用 camelCase 參數名稱
         const result = await client.call<ExtendedProjectUser[]>('getProjectUsers', {
-          project_id: projectId
+          projectId: projectId
         })
 
         const extendedUsers = result || []
@@ -243,8 +244,9 @@ export const useMembersStore = defineStore('members', () => {
       // 檢查是否啟用擴展模式
       if (isProjectUserExtendedEnabled()) {
         // Kanpro Bridge 已覆蓋 API - 回傳完整資料陣列
+        // 注意：Kanpro Bridge 使用 camelCase 參數名稱
         const result = await client.call<ExtendedProjectUser[]>('getAssignableUsers', {
-          project_id: projectId
+          projectId: projectId
         })
 
         const extendedUsers = result || []

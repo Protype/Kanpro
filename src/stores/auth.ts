@@ -156,6 +156,12 @@ export const useAuthStore = defineStore('auth', () => {
 
     // 永遠保存 session
     saveCredentials()
+
+    // 載入 KanproBridge 狀態（用於功能偵測）
+    const { useSystemStore } = await import('./system')
+    const systemStore = useSystemStore()
+    // 不等待完成，背景載入即可
+    systemStore.fetchBridgeStatus()
   }
 
   /**
@@ -273,6 +279,12 @@ export const useAuthStore = defineStore('auth', () => {
       autoRefresh.value = credentials.autoRefresh ?? true
 
       saveCredentials()
+
+      // 載入 KanproBridge 狀態（用於功能偵測）
+      const { useSystemStore } = await import('./system')
+      const systemStore = useSystemStore()
+      // 不等待完成，背景載入即可
+      systemStore.fetchBridgeStatus()
 
       return true
     } catch {

@@ -542,12 +542,25 @@ describe('Auth Store', () => {
         password: 'admin'
       })
 
-      // Update user
+      // Mock getKanproBridgeStatus (called after login)
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({
           jsonrpc: '2.0',
           id: 4,
+          result: null
+        })
+      })
+
+      // Wait for bridge status to be fetched
+      await new Promise(resolve => setTimeout(resolve, 10))
+
+      // Update user
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 5,
           result: true
         })
       })
@@ -557,7 +570,7 @@ describe('Auth Store', () => {
         ok: true,
         json: () => Promise.resolve({
           jsonrpc: '2.0',
-          id: 5,
+          id: 6,
           result: mockUser
         })
       })
@@ -566,8 +579,8 @@ describe('Auth Store', () => {
         name: 'Updated Name'
       })
 
-      // Check the fourth call (update) - 1:checkPlugin, 2:getToken, 3:getMe, 4:updateUser
-      const updateCallBody = JSON.parse(mockFetch.mock.calls[3][1].body)
+      // Check the fifth call (update) - 1:checkPlugin, 2:getToken, 3:getMe, 4:getKanproBridgeStatus, 5:updateUser
+      const updateCallBody = JSON.parse(mockFetch.mock.calls[4][1].body)
       expect(updateCallBody.method).toBe('updateUser')
       expect(updateCallBody.params).toEqual({
         id: 1,
