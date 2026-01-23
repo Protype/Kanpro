@@ -180,7 +180,7 @@ const handleChangeRole = async (member: ProjectMember, newRole: 'project-manager
             <!-- Avatar -->
             <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
               <span class="text-gray-600 font-medium">
-                {{ (member.name || member.username).charAt(0).toUpperCase() }}
+                {{ (member.name || member.username || '?').charAt(0).toUpperCase() }}
               </span>
             </div>
 
