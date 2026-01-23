@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useTasksStore } from '@/stores/tasks'
+import { useMembersStore } from '@/stores/members'
+import { useCategoriesStore } from '@/stores/categories'
+import { useSwimlanesStore } from '@/stores/swimlanes'
 import SubtasksList from '@/components/SubtasksList.vue'
 import CommentsList from '@/components/CommentsList.vue'
 import TaskTags from '@/components/TaskTags.vue'
@@ -22,6 +25,9 @@ const emit = defineEmits<{
 }>()
 
 const tasksStore = useTasksStore()
+const membersStore = useMembersStore()
+const categoriesStore = useCategoriesStore()
+const swimlanesStore = useSwimlanesStore()
 
 // Edit states
 const isEditingTitle = ref(false)
@@ -71,14 +77,45 @@ const currentColumn = computed(() => {
   return props.columns.find(col => col.id === props.task?.column_id)
 })
 
-watch(() => props.isOpen, (open) => {
+// B 層欄位相關
+const members = computed(() => membersStore.members)
+const categories = computed(() => categoriesStore.categories)
+const swimlanes = computed(() => swimlanesStore.activeSwimlanes)
+
+const currentOwner = computed(() => {
+  if (!props.task?.owner_id) return null
+  return members.value.find(m => m.id === props.task?.owner_id)
+})
+
+const currentCategory = computed(() => {
+  if (!props.task?.category_id) return null
+  return categories.value.find(c => c.id === props.task?.category_id)
+})
+
+const currentSwimlane = computed(() => {
+  if (!props.task?.swimlane_id) return null
+  return swimlanes.value.find(s => s.id === props.task?.swimlane_id)
+})
+
+watch(() => props.isOpen, async (open) => {
   if (open && props.task) {
     editTitle.value = props.task.title
     editDescription.value = props.task.description || ''
     isEditingTitle.value = false
     isEditingDescription.value = false
+    // 載入 B 層欄位所需的資料
+    await loadProjectData()
   }
 })
+
+async function loadProjectData() {
+  if (!props.projectId) return
+  await Promise.all([
+    membersStore.fetchMembers(props.projectId),
+    categoriesStore.fetchCategories(props.projectId),
+    swimlanesStore.fetchSwimlanes(props.projectId)
+  ])
+}
 
 const handleClose = () => {
   if (!isUpdating.value) {
@@ -186,6 +223,59 @@ const openTask = async () => {
   } catch (error) {
     console.error('Failed to open task:', error)
     alert('重新開啟任務失敗')
+  } finally {
+    isUpdating.value = false
+  }
+}
+
+// B 層欄位更新方法
+const updateOwner = async (ownerId: number | null) => {
+  if (!props.task) return
+  isUpdating.value = true
+  try {
+    await tasksStore.updateTask(props.task.id, { owner_id: ownerId || 0 })
+    emit('updated')
+  } catch (error) {
+    console.error('Failed to update owner:', error)
+  } finally {
+    isUpdating.value = false
+  }
+}
+
+const updateColumn = async (columnId: number) => {
+  if (!props.task || props.task.column_id === columnId) return
+  isUpdating.value = true
+  try {
+    await tasksStore.updateTask(props.task.id, { column_id: columnId })
+    emit('updated')
+  } catch (error) {
+    console.error('Failed to update column:', error)
+  } finally {
+    isUpdating.value = false
+  }
+}
+
+const updateSwimlane = async (swimlaneId: number | null) => {
+  if (!props.task) return
+  isUpdating.value = true
+  try {
+    await tasksStore.updateTask(props.task.id, { swimlane_id: swimlaneId || 0 })
+    emit('updated')
+  } catch (error) {
+    console.error('Failed to update swimlane:', error)
+  } finally {
+    isUpdating.value = false
+  }
+}
+
+const updateCategory = async (categoryId: number | null) => {
+  if (!props.task) return
+  isUpdating.value = true
+  try {
+    await tasksStore.updateTask(props.task.id, { category_id: categoryId || 0 })
+    emit('updated')
+  } catch (error) {
+    console.error('Failed to update category:', error)
   } finally {
     isUpdating.value = false
   }
@@ -382,10 +472,83 @@ const openTask = async () => {
                   </div>
                 </div>
 
+                <!-- Assignee -->
+                <div>
+                  <h3 class="text-sm font-medium text-content-secondary mb-2">指派人</h3>
+                  <select
+                    :value="task.owner_id || ''"
+                    @change="updateOwner(($event.target as HTMLSelectElement).value ? Number(($event.target as HTMLSelectElement).value) : null)"
+                    :disabled="isUpdating"
+                    class="w-full text-sm px-2 py-1 border border-edge rounded bg-surface focus:outline-none focus:ring-1 focus:ring-accent"
+                  >
+                    <option value="">未指派</option>
+                    <option
+                      v-for="member in members"
+                      :key="member.id"
+                      :value="member.id"
+                    >
+                      {{ member.name || member.username }}
+                    </option>
+                  </select>
+                </div>
+
                 <!-- Column -->
                 <div>
                   <h3 class="text-sm font-medium text-content-secondary mb-2">欄位</h3>
-                  <span class="text-sm text-content-secondary">{{ currentColumn?.title || '-' }}</span>
+                  <select
+                    :value="task.column_id"
+                    @change="updateColumn(Number(($event.target as HTMLSelectElement).value))"
+                    :disabled="isUpdating"
+                    class="w-full text-sm px-2 py-1 border border-edge rounded bg-surface focus:outline-none focus:ring-1 focus:ring-accent"
+                  >
+                    <option
+                      v-for="column in columns"
+                      :key="column.id"
+                      :value="column.id"
+                    >
+                      {{ column.title }}
+                    </option>
+                  </select>
+                </div>
+
+                <!-- Swimlane -->
+                <div v-if="swimlanes.length > 0">
+                  <h3 class="text-sm font-medium text-content-secondary mb-2">泳道</h3>
+                  <select
+                    :value="task.swimlane_id || ''"
+                    @change="updateSwimlane(($event.target as HTMLSelectElement).value ? Number(($event.target as HTMLSelectElement).value) : null)"
+                    :disabled="isUpdating"
+                    class="w-full text-sm px-2 py-1 border border-edge rounded bg-surface focus:outline-none focus:ring-1 focus:ring-accent"
+                  >
+                    <option value="">預設泳道</option>
+                    <option
+                      v-for="swimlane in swimlanes"
+                      :key="swimlane.id"
+                      :value="swimlane.id"
+                    >
+                      {{ swimlane.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <!-- Category -->
+                <div v-if="categories.length > 0">
+                  <h3 class="text-sm font-medium text-content-secondary mb-2">類別</h3>
+                  <select
+                    :value="task.category_id || ''"
+                    @change="updateCategory(($event.target as HTMLSelectElement).value ? Number(($event.target as HTMLSelectElement).value) : null)"
+                    :disabled="isUpdating"
+                    class="w-full text-sm px-2 py-1 border border-edge rounded bg-surface focus:outline-none focus:ring-1 focus:ring-accent"
+                  >
+                    <option value="">無類別</option>
+                    <option
+                      v-for="category in categories"
+                      :key="category.id"
+                      :value="category.id"
+                    >
+                      {{ category.name }}
+                    </option>
+                  </select>
                 </div>
 
                 <!-- Color -->
@@ -423,10 +586,16 @@ const openTask = async () => {
                   <span class="text-sm text-content-secondary">{{ formattedDueDate }}</span>
                 </div>
 
-                <!-- Priority -->
-                <div v-if="task.priority">
-                  <h3 class="text-sm font-medium text-content-secondary mb-2">優先級</h3>
-                  <span class="text-sm text-content-secondary">{{ task.priority }}</span>
+                <!-- Priority & Score -->
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <h3 class="text-sm font-medium text-content-secondary mb-2">優先級</h3>
+                    <span class="text-sm text-content-secondary">{{ task.priority || '-' }}</span>
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-medium text-content-secondary mb-2">Story Points</h3>
+                    <span class="text-sm text-content-secondary">{{ task.score || '-' }}</span>
+                  </div>
                 </div>
 
                 <!-- Dates -->
