@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useGroupsStore } from '@/stores/groups'
 import { useUsersStore } from '@/stores/users'
+import { getAvatarColor, getAvatarInitial, getUserDisplayName } from '@/utils/avatar'
 import SearchModal from '@/components/SearchModal.vue'
 import type { Group, User, Task } from '@/types'
 
@@ -469,10 +470,11 @@ const handleSearchSelect = (task: Task) => {
                     class="flex items-center justify-between p-3 bg-surface-tertiary rounded-lg"
                   >
                     <div class="flex items-center gap-3">
-                      <div class="avatar-sm">
-                        <span>
-                          {{ (member.name || member.username).charAt(0).toUpperCase() }}
-                        </span>
+                      <div
+                        class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-medium"
+                        :style="{ backgroundColor: getAvatarColor(getUserDisplayName(member)) }"
+                      >
+                        {{ getAvatarInitial(getUserDisplayName(member)) }}
                       </div>
                       <div>
                         <div class="font-medium text-content text-sm">

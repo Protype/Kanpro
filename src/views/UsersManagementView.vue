@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useUsersStore } from '@/stores/users'
+import { getAvatarColor, getAvatarInitial, getUserDisplayName } from '@/utils/avatar'
 import SearchModal from '@/components/SearchModal.vue'
 import type { User, Task } from '@/types'
 
@@ -298,10 +299,11 @@ const handleSearchSelect = (task: Task) => {
               <div v-if="editingUserId !== user.id" class="flex items-center justify-between">
                 <div class="flex items-center gap-4">
                   <!-- Avatar -->
-                  <div class="avatar-md">
-                    <span>
-                      {{ (user.name || user.username).charAt(0).toUpperCase() }}
-                    </span>
+                  <div
+                    class="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-medium"
+                    :style="{ backgroundColor: getAvatarColor(getUserDisplayName(user)) }"
+                  >
+                    {{ getAvatarInitial(getUserDisplayName(user)) }}
                   </div>
 
                   <!-- User info -->

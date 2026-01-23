@@ -3,6 +3,7 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useBoardStore } from '@/stores/board'
 import { useNotificationsStore } from '@/stores/notifications'
+import { getAvatarColor, getAvatarInitial } from '@/utils/avatar'
 import SearchModal from '@/components/SearchModal.vue'
 import type { Activity, Task } from '@/types'
 
@@ -125,7 +126,7 @@ function getAuthorName(activity: Activity): string {
 }
 
 function getAuthorInitial(activity: Activity): string {
-  return getAuthorName(activity).charAt(0).toUpperCase()
+  return getAvatarInitial(getAuthorName(activity))
 }
 
 function getAssigneeName(activity: Activity): string | null {
@@ -318,7 +319,10 @@ const groupedActivities = computed(() => {
 
                   <!-- Author avatar -->
                   <div class="flex-shrink-0">
-                    <div class="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-accent text-sm font-medium">
+                    <div
+                      class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium"
+                      :style="{ backgroundColor: getAvatarColor(getAuthorName(activity)) }"
+                    >
                       {{ getAuthorInitial(activity) }}
                     </div>
                   </div>

@@ -3,6 +3,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useTheme, type ThemeName, THEMES } from '@/composables/useTheme'
+import { getAvatarColor, getAvatarInitial, getUserDisplayName } from '@/utils/avatar'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -11,19 +12,8 @@ const { currentTheme, setTheme } = useTheme()
 const isOpen = ref(false)
 const showThemeMenu = ref(false)
 
-const displayName = computed(() => authStore.user?.name || authStore.user?.username || '')
-const avatarInitial = computed(() => displayName.value.charAt(0).toUpperCase())
-
-// 根據使用者名稱產生一致的背景色（與 Kanboard 相似的演算法）
-function getAvatarColor(name: string): string {
-  let hash = 0
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash)
-  }
-  const hue = Math.abs(hash % 360)
-  return `hsl(${hue}, 65%, 45%)`
-}
-
+const displayName = computed(() => getUserDisplayName(authStore.user))
+const avatarInitial = computed(() => getAvatarInitial(displayName.value))
 const avatarBgColor = computed(() => getAvatarColor(displayName.value))
 
 // 直接使用 store 的頭像資料（與其他元件同步）

@@ -2,6 +2,7 @@
 import { ref, watch, onMounted, computed } from 'vue'
 import { useCommentsStore } from '@/stores/comments'
 import { useAuthStore } from '@/stores/auth'
+import UserAvatar from '@/components/UserAvatar.vue'
 import type { Comment } from '@/types'
 
 const props = defineProps<{
@@ -168,10 +169,8 @@ const canEditComment = (comment: Comment): boolean => {
         <!-- Comment header -->
         <div class="flex items-center justify-between mb-2">
           <div class="flex items-center gap-2">
-            <!-- Avatar placeholder -->
-            <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-white text-sm font-medium">
-              {{ (comment.name || comment.username || '?').charAt(0).toUpperCase() }}
-            </div>
+            <!-- Avatar -->
+            <UserAvatar :name="comment.name || comment.username" size="md" />
             <div>
               <span class="text-sm font-medium text-gray-900">
                 {{ comment.name || comment.username || '未知使用者' }}

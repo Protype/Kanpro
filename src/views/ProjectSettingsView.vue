@@ -10,6 +10,7 @@ import ColumnsList from '@/components/ColumnsList.vue'
 import SwimlanesList from '@/components/SwimlanesList.vue'
 import CategoriesList from '@/components/CategoriesList.vue'
 import SearchModal from '@/components/SearchModal.vue'
+import UserAvatar from '@/components/UserAvatar.vue'
 import type { Task, Project, User } from '@/types'
 
 defineProps<{
@@ -298,9 +299,7 @@ onMounted(() => {
                     :disabled="isSaving"
                   >
                     <template v-if="selectedOwner">
-                      <div class="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center text-xs text-accent font-medium">
-                        {{ selectedOwner.name?.[0] || selectedOwner.username?.[0] || '?' }}
-                      </div>
+                      <UserAvatar :user="selectedOwner" size="sm" />
                       <span class="flex-1 truncate text-sm text-content">
                         {{ selectedOwner.name || selectedOwner.username }}
                       </span>
@@ -343,9 +342,7 @@ onMounted(() => {
                           class="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-surface-hover transition-colors"
                           :class="{ 'bg-accent/10': ownerId === user.id }"
                         >
-                          <div class="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center text-xs text-accent font-medium">
-                            {{ user.name?.[0] || user.username[0] }}
-                          </div>
+                          <UserAvatar :user="user" size="sm" />
                           <div class="flex-1 min-w-0">
                             <div class="text-sm text-content truncate">{{ user.name || user.username }}</div>
                             <div class="text-xs text-content-tertiary truncate">@{{ user.username }}</div>

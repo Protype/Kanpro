@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useMembersStore } from '@/stores/members'
 import { useToast } from '@/stores/toast'
+import UserAvatar from '@/components/UserAvatar.vue'
 import type { ProjectMember, User } from '@/types'
 
 const props = defineProps<{
@@ -187,9 +188,7 @@ onMounted(() => {
                 class="w-full h-10 px-3 bg-surface border border-edge rounded-lg text-left flex items-center gap-2 hover:bg-surface-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <template v-if="selectedUser">
-                  <div class="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center text-xs text-accent font-medium flex-shrink-0">
-                    {{ selectedUser.name?.[0] || selectedUser.username?.[0] || '?' }}
-                  </div>
+                  <UserAvatar :user="selectedUser" size="sm" class="flex-shrink-0" />
                   <span class="flex-1 truncate text-sm text-content">
                     {{ selectedUser.name || selectedUser.username }}
                   </span>
@@ -233,9 +232,7 @@ onMounted(() => {
                       class="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-surface-hover transition-colors"
                       :class="{ 'bg-accent/10': selectedUserId === user.id }"
                     >
-                      <div class="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center text-xs text-accent font-medium">
-                        {{ user.name?.[0] || user.username[0] }}
-                      </div>
+                      <UserAvatar :user="user" size="sm" />
                       <div class="flex-1 min-w-0">
                         <div class="text-sm text-content truncate">{{ user.name || user.username }}</div>
                         <div class="text-xs text-content-tertiary truncate">@{{ user.username }}</div>
@@ -291,11 +288,7 @@ onMounted(() => {
         >
           <div class="flex items-center gap-3">
             <!-- Avatar -->
-            <div class="w-9 h-9 bg-accent/10 rounded-full flex items-center justify-center">
-              <span class="text-accent text-sm font-medium">
-                {{ (member.name || member.username || '?').charAt(0).toUpperCase() }}
-              </span>
-            </div>
+            <UserAvatar :user="member" size="md" />
 
             <!-- User info -->
             <div class="min-w-0">

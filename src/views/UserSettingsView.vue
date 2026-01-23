@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from '@/stores/toast'
+import { getAvatarColor, getAvatarInitial, getUserDisplayName } from '@/utils/avatar'
 import SearchModal from '@/components/SearchModal.vue'
 import type { Task } from '@/types'
 
@@ -39,10 +40,9 @@ const showNewPassword = ref(false)
 const showConfirmPassword = ref(false)
 
 // Computed
-const userInitial = computed(() => {
-  const name = authStore.user?.name || authStore.user?.username || ''
-  return name.charAt(0).toUpperCase()
-})
+const displayName = computed(() => getUserDisplayName(authStore.user))
+const userInitial = computed(() => getAvatarInitial(displayName.value))
+const avatarBgColor = computed(() => getAvatarColor(displayName.value))
 
 const roleLabel = computed(() => {
   const role = authStore.user?.role
@@ -268,7 +268,8 @@ onMounted(() => {
               <div class="relative group">
                 <!-- Avatar Image or Placeholder -->
                 <div
-                  class="w-32 h-32 rounded-full overflow-hidden bg-surface-tertiary flex items-center justify-center ring-4 ring-surface-secondary"
+                  class="w-32 h-32 rounded-full overflow-hidden flex items-center justify-center ring-4 ring-surface-secondary"
+                  :style="{ backgroundColor: avatarData ? 'transparent' : avatarBgColor }"
                 >
                   <img
                     v-if="avatarData"
@@ -276,7 +277,7 @@ onMounted(() => {
                     alt="頭像"
                     class="w-full h-full object-cover"
                   />
-                  <span v-else class="text-4xl font-semibold text-content-tertiary">
+                  <span v-else class="text-4xl font-semibold text-white">
                     {{ userInitial }}
                   </span>
 

@@ -3,6 +3,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useProjectsStore, type CreateProjectOptions } from '@/stores/projects'
 import { useUsersStore } from '@/stores/users'
 import { useAuthStore } from '@/stores/auth'
+import UserAvatar from '@/components/UserAvatar.vue'
 import type { User } from '@/types'
 
 const props = defineProps<{
@@ -291,9 +292,7 @@ onMounted(() => {
                             class="w-full px-3 py-2 bg-surface border border-edge rounded-md text-left flex items-center gap-2 hover:bg-surface-hover transition-colors"
                             :disabled="isSubmitting"
                           >
-                            <div class="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center text-xs text-accent font-medium">
-                              {{ selectedOwner?.name?.[0] || selectedOwner?.username?.[0] || '?' }}
-                            </div>
+                            <UserAvatar :user="selectedOwner" size="sm" />
                             <span class="flex-1 truncate text-sm text-content">
                               {{ selectedOwner?.name || selectedOwner?.username || '選擇擁有者' }}
                             </span>
@@ -325,9 +324,7 @@ onMounted(() => {
                                   class="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-surface-hover transition-colors"
                                   :class="{ 'bg-accent/10': ownerId === user.id }"
                                 >
-                                  <div class="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center text-xs text-accent font-medium">
-                                    {{ user.name?.[0] || user.username[0] }}
-                                  </div>
+                                  <UserAvatar :user="user" size="sm" />
                                   <div class="flex-1 min-w-0">
                                     <div class="text-sm text-content truncate">{{ user.name || user.username }}</div>
                                     <div class="text-xs text-content-tertiary truncate">@{{ user.username }}</div>

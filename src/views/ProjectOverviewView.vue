@@ -224,6 +224,7 @@ import { useBoardStore } from '@/stores/board'
 import { useMembersStore } from '@/stores/members'
 import { useProjectsStore } from '@/stores/projects'
 import { useAnalyticsStore } from '@/stores/analytics'
+import { getAvatarColor, getAvatarInitial } from '@/utils/avatar'
 
 const route = useRoute()
 const boardStore = useBoardStore()
@@ -305,23 +306,7 @@ function getColumnPercentage(count: number | undefined): number {
 }
 
 function getInitial(name: string | undefined): string {
-  if (!name) return '?'
-  return name.charAt(0).toUpperCase()
-}
-
-function getAvatarColor(username: string | undefined): string {
-  if (!username) return '#9ca3af'
-  const colors = [
-    '#6366f1', '#8b5cf6', '#a855f7', '#d946ef',
-    '#ec4899', '#f43f5e', '#ef4444', '#f97316',
-    '#f59e0b', '#84cc16', '#22c55e', '#10b981',
-    '#14b8a6', '#06b6d4', '#0ea5e9', '#3b82f6'
-  ]
-  let hash = 0
-  for (let i = 0; i < username.length; i++) {
-    hash = username.charCodeAt(i) + ((hash << 5) - hash)
-  }
-  return colors[Math.abs(hash) % colors.length]
+  return getAvatarInitial(name)
 }
 
 function formatEventName(eventName: string): string {

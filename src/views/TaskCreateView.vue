@@ -8,6 +8,7 @@ import { useCategoriesStore } from '@/stores/categories'
 import { useSwimlanesStore } from '@/stores/swimlanes'
 import { useTagsStore } from '@/stores/tags'
 import { useToast } from '@/stores/toast'
+import UserAvatar from '@/components/UserAvatar.vue'
 import type { ProjectMember } from '@/types'
 
 const route = useRoute()
@@ -386,9 +387,7 @@ function handleCancel() {
                     :disabled="isSubmitting"
                   >
                     <template v-if="selectedOwner">
-                      <div class="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center text-xs text-accent font-medium">
-                        {{ selectedOwner.name?.[0] || selectedOwner.username[0] }}
-                      </div>
+                      <UserAvatar :user="selectedOwner" size="sm" />
                       <span class="flex-1 truncate text-sm text-content">
                         {{ selectedOwner.name || selectedOwner.username }}
                       </span>
@@ -431,9 +430,7 @@ function handleCancel() {
                           class="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-surface-hover transition-colors"
                           :class="{ 'bg-accent/10': ownerId === member.id }"
                         >
-                          <div class="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center text-xs text-accent font-medium">
-                            {{ member.name?.[0] || member.username[0] }}
-                          </div>
+                          <UserAvatar :user="member" size="sm" />
                           <div class="flex-1 min-w-0">
                             <div class="text-sm text-content truncate">{{ member.name || member.username }}</div>
                             <div class="text-xs text-content-tertiary truncate">@{{ member.username }}</div>
