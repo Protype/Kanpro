@@ -23,6 +23,7 @@ export interface User {
   language?: string | null
   twofactor_activated?: boolean
   avatar_path?: string | null
+  avatar?: string | null  // Kanpro Bridge: base64 encoded avatar image
 }
 
 /**
