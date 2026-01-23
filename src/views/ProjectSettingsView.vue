@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useProjectsStore } from '@/stores/projects'
+import { useUsersStore } from '@/stores/users'
+import { useToast } from '@/stores/toast'
 import MembersList from '@/components/MembersList.vue'
 import ColumnsList from '@/components/ColumnsList.vue'
 import SwimlanesList from '@/components/SwimlanesList.vue'
 import CategoriesList from '@/components/CategoriesList.vue'
 import SearchModal from '@/components/SearchModal.vue'
-import type { Task } from '@/types'
+import type { Task, Project, User } from '@/types'
 
 defineProps<{
   showSearchModal?: boolean
@@ -20,28 +22,76 @@ const emit = defineEmits<{
 const route = useRoute()
 const router = useRouter()
 const projectsStore = useProjectsStore()
+const usersStore = useUsersStore()
+const toast = useToast()
 
 const projectId = computed(() => Number(route.params.id))
 
-// Form state
+// === 基本資訊欄位 (A+B) ===
 const projectName = ref('')
 const projectDescription = ref('')
+const projectIdentifier = ref('')
+const ownerId = ref<number | null>(null)
+const startDate = ref('')
+const endDate = ref('')
+const isPublicAccessEnabled = ref(false)
+
+// === 進階設定欄位 (C) ===
+const priorityDefault = ref<number | undefined>(undefined)
+const priorityStart = ref<number | undefined>(undefined)
+const priorityEnd = ref<number | undefined>(undefined)
+const projectEmail = ref('')
+
+// === UI 狀態 ===
 const isLoading = ref(false)
 const isSaving = ref(false)
 const showDeleteConfirm = ref(false)
 const isDeleting = ref(false)
 const error = ref<string | null>(null)
-const successMessage = ref<string | null>(null)
+const ownerSearchQuery = ref('')
+const showOwnerDropdown = ref(false)
 
-// Load project data
+// === Computed ===
+const currentProject = computed(() => projectsStore.getProjectById(projectId.value))
+
+const filteredUsers = computed(() => {
+  const query = ownerSearchQuery.value.toLowerCase()
+  if (!query) return usersStore.activeUsers
+  return usersStore.activeUsers.filter(u =>
+    u.username.toLowerCase().includes(query) ||
+    (u.name?.toLowerCase().includes(query) ?? false)
+  )
+})
+
+const selectedOwner = computed(() => {
+  if (!ownerId.value) return null
+  return usersStore.users.find(u => u.id === ownerId.value) || null
+})
+
+// === Load project data ===
 onMounted(async () => {
+  await loadProjectData()
+  // 載入使用者列表用於擁有者選擇
+  if (usersStore.users.length === 0) {
+    usersStore.fetchAllUsers()
+  }
+})
+
+watch(projectId, async () => {
+  await loadProjectData()
+})
+
+async function loadProjectData() {
   isLoading.value = true
+  error.value = null
+
   try {
-    await projectsStore.fetchProjects()
-    const project = projectsStore.getProjectById(projectId.value)
+    // 設定頁面需要完整欄位，永遠從 API 取得
+    // getMyProjects 不包含 priority_*, email 等進階欄位
+    const project = await projectsStore.fetchProjectById(projectId.value)
+
     if (project) {
-      projectName.value = project.name
-      projectDescription.value = project.description || ''
+      populateForm(project)
     } else {
       error.value = '找不到專案'
     }
@@ -50,11 +100,35 @@ onMounted(async () => {
   } finally {
     isLoading.value = false
   }
-})
+}
 
-const currentProject = computed(() => projectsStore.getProjectById(projectId.value))
+function populateForm(project: Project) {
+  projectName.value = project.name || ''
+  projectDescription.value = project.description || ''
+  projectIdentifier.value = project.identifier || ''
+  ownerId.value = project.owner_id || null
+  startDate.value = project.start_date || ''
+  endDate.value = project.end_date || ''
+  isPublicAccessEnabled.value = project.is_public || false
+  priorityDefault.value = project.priority_default
+  priorityStart.value = project.priority_start
+  priorityEnd.value = project.priority_end
+  projectEmail.value = project.email || ''
+}
 
-const handleSave = async () => {
+// === Actions ===
+function selectOwner(user: User) {
+  ownerId.value = user.id
+  ownerSearchQuery.value = ''
+  showOwnerDropdown.value = false
+}
+
+function clearOwner() {
+  ownerId.value = null
+  showOwnerDropdown.value = false
+}
+
+async function handleSave() {
   if (!projectName.value.trim()) {
     error.value = '專案名稱不能為空'
     return
@@ -62,55 +136,98 @@ const handleSave = async () => {
 
   isSaving.value = true
   error.value = null
-  successMessage.value = null
 
   try {
     await projectsStore.updateProject(projectId.value, {
       name: projectName.value.trim(),
-      description: projectDescription.value.trim()
+      description: projectDescription.value.trim() || undefined,
+      identifier: projectIdentifier.value.trim() || undefined,
+      owner_id: ownerId.value || undefined,
+      start_date: startDate.value || undefined,
+      end_date: endDate.value || undefined,
+      priority_default: priorityDefault.value,
+      priority_start: priorityStart.value,
+      priority_end: priorityEnd.value,
+      email: projectEmail.value.trim() || undefined
     })
-    successMessage.value = '專案設定已儲存'
+
+    // 處理公開存取設定
+    const currentProject = projectsStore.getProjectById(projectId.value)
+    if (currentProject) {
+      if (isPublicAccessEnabled.value && !currentProject.is_public) {
+        await projectsStore.enableProjectPublicAccess(projectId.value)
+      } else if (!isPublicAccessEnabled.value && currentProject.is_public) {
+        await projectsStore.disableProjectPublicAccess(projectId.value)
+      }
+    }
+
+    toast.success('儲存成功', '專案設定已更新')
     await projectsStore.fetchProjects()
-    setTimeout(() => {
-      successMessage.value = null
-    }, 3000)
   } catch (err) {
     error.value = err instanceof Error ? err.message : '儲存失敗'
+    toast.error('儲存失敗', error.value)
   } finally {
     isSaving.value = false
   }
 }
 
-const handleDelete = async () => {
+async function handleDelete() {
   isDeleting.value = true
   error.value = null
 
   try {
     await projectsStore.removeProject(projectId.value)
+    toast.success('刪除成功', '專案已刪除')
     router.push('/')
   } catch (err) {
     error.value = err instanceof Error ? err.message : '刪除失敗'
+    toast.error('刪除失敗', error.value)
     showDeleteConfirm.value = false
   } finally {
     isDeleting.value = false
   }
 }
 
-const handleSearchSelect = (task: Task) => {
+function handleSearchSelect(task: Task) {
   router.push(`/projects/${task.project_id}?task=${task.id}`)
   emit('close-search-modal')
 }
+
+// 點擊外部關閉擁有者下拉選單
+function handleClickOutside(event: MouseEvent) {
+  const target = event.target as HTMLElement
+  if (!target.closest('.owner-dropdown-container')) {
+    showOwnerDropdown.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
 </script>
 
 <template>
   <div class="h-full overflow-auto bg-surface-secondary">
-    <main class="mx-auto max-w-2xl px-4 py-6">
+    <main class="mx-auto max-w-5xl px-4 py-6">
       <!-- Loading -->
       <div v-if="isLoading" class="flex items-center justify-center py-12">
         <ph-icon icon="spinner" class="animate-spin h-8 w-8 text-accent" />
       </div>
 
       <template v-else>
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6">
+          <h1 class="text-2xl font-bold text-content">專案設定</h1>
+          <button
+            @click="handleSave"
+            :disabled="isSaving"
+            class="btn-primary"
+          >
+            <ph-icon v-if="isSaving" icon="spinner" class="animate-spin -ml-1 mr-2 h-4 w-4" />
+            {{ isSaving ? '儲存中...' : '儲存變更' }}
+          </button>
+        </div>
+
         <!-- Error Alert -->
         <div v-if="error" class="alert-error mb-6">
           <div class="flex items-center gap-2">
@@ -119,86 +236,291 @@ const handleSearchSelect = (task: Task) => {
           </div>
         </div>
 
-        <!-- Success Alert -->
-        <div v-if="successMessage" class="alert-success mb-6">
-          <div class="flex items-center gap-2">
-            <ph-icon icon="check" class="w-5 h-5" />
-            <span>{{ successMessage }}</span>
+        <!-- 基本設定 - 雙欄佈局 -->
+        <div class="card mb-6">
+          <div class="p-6">
+            <h2 class="text-lg font-semibold text-content mb-4">基本設定</h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <!-- 左欄 - A+B 基本/常用 -->
+              <div class="space-y-4">
+                <!-- 專案名稱 -->
+                <div>
+                  <label for="projectName" class="block text-sm font-medium text-content-secondary mb-1">
+                    專案名稱 <span class="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="projectName"
+                    v-model="projectName"
+                    type="text"
+                    class="input"
+                    placeholder="輸入專案名稱"
+                    :disabled="isSaving"
+                  />
+                </div>
+
+                <!-- 專案描述 -->
+                <div>
+                  <label for="projectDescription" class="block text-sm font-medium text-content-secondary mb-1">
+                    描述
+                  </label>
+                  <textarea
+                    id="projectDescription"
+                    v-model="projectDescription"
+                    rows="3"
+                    class="input"
+                    placeholder="輸入專案描述（選填）"
+                    :disabled="isSaving"
+                  ></textarea>
+                </div>
+
+                <!-- 專案識別碼 -->
+                <div>
+                  <label for="projectIdentifier" class="block text-sm font-medium text-content-secondary mb-1">
+                    專案識別碼
+                  </label>
+                  <input
+                    id="projectIdentifier"
+                    v-model="projectIdentifier"
+                    type="text"
+                    class="input"
+                    placeholder="例如：PROJ"
+                    :disabled="isSaving"
+                  />
+                  <p class="mt-1 text-xs text-content-tertiary">
+                    用於任務編號前綴，如：PROJ-123
+                  </p>
+                </div>
+
+                <!-- 擁有者 -->
+                <div class="owner-dropdown-container">
+                  <label class="block text-sm font-medium text-content-secondary mb-1">
+                    擁有者
+                  </label>
+                  <div class="relative">
+                    <button
+                      type="button"
+                      @click="showOwnerDropdown = !showOwnerDropdown"
+                      class="w-full px-3 py-2 bg-surface border border-edge rounded-md text-left flex items-center gap-2 hover:bg-surface-hover transition-colors"
+                      :disabled="isSaving"
+                    >
+                      <template v-if="selectedOwner">
+                        <div class="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center text-xs text-accent font-medium">
+                          {{ selectedOwner.name?.[0] || selectedOwner.username?.[0] || '?' }}
+                        </div>
+                        <span class="flex-1 truncate text-sm text-content">
+                          {{ selectedOwner.name || selectedOwner.username }}
+                        </span>
+                        <button
+                          type="button"
+                          @click.stop="clearOwner"
+                          class="text-content-tertiary hover:text-content-secondary"
+                        >
+                          <ph-icon icon="xmark" class="w-4 h-4" />
+                        </button>
+                      </template>
+                      <template v-else>
+                        <span class="flex-1 text-sm text-content-tertiary">選擇擁有者</span>
+                      </template>
+                      <ph-icon icon="chevron-down" class="w-4 h-4 text-content-tertiary" />
+                    </button>
+
+                    <!-- Owner Dropdown -->
+                    <Transition name="dropdown">
+                      <div
+                        v-if="showOwnerDropdown"
+                        class="absolute z-10 w-full mt-1 bg-surface border border-edge rounded-md shadow-lg max-h-48 overflow-y-auto"
+                      >
+                        <!-- Search -->
+                        <div class="p-2 border-b border-edge">
+                          <input
+                            v-model="ownerSearchQuery"
+                            type="text"
+                            placeholder="搜尋使用者..."
+                            class="w-full px-2 py-1 text-sm bg-surface-secondary border border-edge rounded text-content placeholder:text-content-tertiary focus:outline-none focus:ring-1 focus:ring-accent"
+                          />
+                        </div>
+                        <!-- User List -->
+                        <div class="py-1">
+                          <button
+                            v-for="user in filteredUsers"
+                            :key="user.id"
+                            type="button"
+                            @click="selectOwner(user)"
+                            class="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-surface-hover transition-colors"
+                            :class="{ 'bg-accent/10': ownerId === user.id }"
+                          >
+                            <div class="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center text-xs text-accent font-medium">
+                              {{ user.name?.[0] || user.username[0] }}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                              <div class="text-sm text-content truncate">{{ user.name || user.username }}</div>
+                              <div class="text-xs text-content-tertiary truncate">@{{ user.username }}</div>
+                            </div>
+                          </button>
+                          <div v-if="filteredUsers.length === 0" class="px-3 py-2 text-sm text-content-tertiary">
+                            找不到使用者
+                          </div>
+                        </div>
+                      </div>
+                    </Transition>
+                  </div>
+                </div>
+
+                <!-- 日期範圍 -->
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label for="startDate" class="block text-sm font-medium text-content-secondary mb-1">
+                      開始日期
+                    </label>
+                    <input
+                      id="startDate"
+                      v-model="startDate"
+                      type="date"
+                      class="input"
+                      :disabled="isSaving"
+                    />
+                  </div>
+                  <div>
+                    <label for="endDate" class="block text-sm font-medium text-content-secondary mb-1">
+                      結束日期
+                    </label>
+                    <input
+                      id="endDate"
+                      v-model="endDate"
+                      type="date"
+                      class="input"
+                      :min="startDate"
+                      :disabled="isSaving"
+                    />
+                  </div>
+                </div>
+
+                <!-- 公開存取 -->
+                <div class="flex items-start gap-3 pt-2">
+                  <input
+                    id="publicAccess"
+                    v-model="isPublicAccessEnabled"
+                    type="checkbox"
+                    :disabled="isSaving"
+                    class="mt-0.5 w-4 h-4 rounded border-edge text-accent focus:ring-accent focus:ring-offset-0"
+                  />
+                  <div>
+                    <label for="publicAccess" class="text-sm text-content font-medium cursor-pointer">
+                      啟用公開存取
+                    </label>
+                    <p class="text-xs text-content-tertiary mt-0.5">
+                      允許未登入的使用者檢視此專案
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 右欄 - C 少用進階 -->
+              <div class="space-y-4 lg:border-l lg:border-edge lg:pl-6">
+                <h3 class="text-sm font-medium text-content-tertiary uppercase tracking-wider">進階設定</h3>
+
+                <!-- 預設優先級 -->
+                <div>
+                  <label for="priorityDefault" class="block text-sm font-medium text-content-secondary mb-1">
+                    預設優先級
+                  </label>
+                  <input
+                    id="priorityDefault"
+                    v-model.number="priorityDefault"
+                    type="number"
+                    min="0"
+                    class="input"
+                    placeholder="0"
+                    :disabled="isSaving"
+                  />
+                  <p class="mt-1 text-xs text-content-tertiary">
+                    新任務的預設優先級
+                  </p>
+                </div>
+
+                <!-- 優先級範圍 -->
+                <div>
+                  <label class="block text-sm font-medium text-content-secondary mb-1">
+                    優先級範圍
+                  </label>
+                  <div class="flex items-center gap-2">
+                    <input
+                      v-model.number="priorityStart"
+                      type="number"
+                      min="0"
+                      class="input flex-1"
+                      placeholder="0"
+                      :disabled="isSaving"
+                    />
+                    <span class="text-content-tertiary">~</span>
+                    <input
+                      v-model.number="priorityEnd"
+                      type="number"
+                      min="0"
+                      class="input flex-1"
+                      placeholder="3"
+                      :disabled="isSaving"
+                    />
+                  </div>
+                  <p class="mt-1 text-xs text-content-tertiary">
+                    專案允許的優先級範圍
+                  </p>
+                </div>
+
+                <!-- 專案 Email -->
+                <div>
+                  <label for="projectEmail" class="block text-sm font-medium text-content-secondary mb-1">
+                    專案通知 Email
+                  </label>
+                  <input
+                    id="projectEmail"
+                    v-model="projectEmail"
+                    type="email"
+                    class="input"
+                    placeholder="project@example.com"
+                    :disabled="isSaving"
+                  />
+                  <p class="mt-1 text-xs text-content-tertiary">
+                    接收專案通知的 Email 地址
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Settings Form -->
+        <!-- 管理設定 - 雙欄佈局 -->
+        <div class="card mb-6">
+          <div class="p-6">
+            <h2 class="text-lg font-semibold text-content mb-4">管理設定</h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <!-- 上排左: 成員管理 -->
+              <div class="border border-edge rounded-lg p-4">
+                <MembersList :project-id="projectId" />
+              </div>
+
+              <!-- 上排右: 類別管理 -->
+              <div class="border border-edge rounded-lg p-4">
+                <CategoriesList :project-id="projectId" />
+              </div>
+
+              <!-- 下排左: 泳道管理 -->
+              <div class="border border-edge rounded-lg p-4">
+                <SwimlanesList :project-id="projectId" />
+              </div>
+
+              <!-- 下排右: 欄位管理 -->
+              <div class="border border-edge rounded-lg p-4">
+                <ColumnsList :project-id="projectId" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 危險區域 -->
         <div class="card">
-          <!-- Basic Info Section -->
-          <div class="p-6 border-b border-edge">
-            <h2 class="text-lg font-semibold text-content mb-4">基本資訊</h2>
-
-            <div class="space-y-4">
-              <!-- Project Name -->
-              <div>
-                <label for="projectName" class="block text-sm font-medium text-content-secondary mb-1">
-                  專案名稱 <span class="text-red-500">*</span>
-                </label>
-                <input
-                  id="projectName"
-                  v-model="projectName"
-                  type="text"
-                  class="input"
-                  placeholder="輸入專案名稱"
-                  :disabled="isSaving"
-                />
-              </div>
-
-              <!-- Project Description -->
-              <div>
-                <label for="projectDescription" class="block text-sm font-medium text-content-secondary mb-1">
-                  專案描述
-                </label>
-                <textarea
-                  id="projectDescription"
-                  v-model="projectDescription"
-                  rows="4"
-                  class="input"
-                  placeholder="輸入專案描述（選填）"
-                  :disabled="isSaving"
-                ></textarea>
-              </div>
-            </div>
-
-            <!-- Save Button -->
-            <div class="mt-6">
-              <button
-                @click="handleSave"
-                :disabled="isSaving"
-                class="btn-primary"
-              >
-                <span v-if="isSaving">儲存中...</span>
-                <span v-else>儲存變更</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Members Section -->
-          <div class="p-6 border-b border-edge">
-            <MembersList :project-id="projectId" />
-          </div>
-
-          <!-- Columns Section -->
-          <div class="p-6 border-b border-edge">
-            <ColumnsList :project-id="projectId" />
-          </div>
-
-          <!-- Swimlanes Section -->
-          <div class="p-6 border-b border-edge">
-            <SwimlanesList :project-id="projectId" />
-          </div>
-
-          <!-- Categories Section -->
-          <div class="p-6 border-b border-edge">
-            <CategoriesList :project-id="projectId" />
-          </div>
-
-          <!-- Danger Zone -->
           <div class="p-6">
             <h2 class="text-lg font-semibold text-error mb-4">危險區域</h2>
 
@@ -213,7 +535,7 @@ const handleSearchSelect = (task: Task) => {
                 <button
                   @click="showDeleteConfirm = true"
                   :disabled="isDeleting"
-                  class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+                  class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 shrink-0"
                 >
                   刪除專案
                 </button>
@@ -272,3 +594,20 @@ const handleSearchSelect = (task: Task) => {
     />
   </div>
 </template>
+
+<style scoped>
+/* Dropdown Transition */
+.dropdown-enter-active {
+  transition: all 0.15s ease-out;
+}
+
+.dropdown-leave-active {
+  transition: all 0.1s ease-in;
+}
+
+.dropdown-enter-from,
+.dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-0.25rem);
+}
+</style>
