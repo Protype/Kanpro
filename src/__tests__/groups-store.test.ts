@@ -88,14 +88,16 @@ describe('Groups Store', () => {
       expect(store.isLoading).toBe(false)
     })
 
-    it('should handle fetch error', async () => {
+    it('should handle fetch error silently (admin API)', async () => {
+      // getAllGroups 需要 admin 權限，非 admin 用戶會靜默失敗
       mockFetch.mockRejectedValueOnce(new Error('Network error'))
 
       const store = useGroupsStore()
       await store.fetchAllGroups()
 
+      // 靜默失敗：groups 清空，不設定 error
       expect(store.groups).toEqual([])
-      expect(store.error).toBe('Network error')
+      expect(store.error).toBeNull()
     })
 
     it('should call API with correct method', async () => {

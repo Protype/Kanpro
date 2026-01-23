@@ -37,10 +37,12 @@ export const useBoardStore = defineStore('board', () => {
     return swimlanes.value[0].columns
   })
 
-  async function fetchBoard(projectId: number): Promise<void> {
+  async function fetchBoard(projectId: number, silent = false): Promise<void> {
     const authStore = useAuthStore()
 
-    isLoading.value = true
+    if (!silent) {
+      isLoading.value = true
+    }
     error.value = null
 
     try {
@@ -62,7 +64,9 @@ export const useBoardStore = defineStore('board', () => {
       project.value = null
       swimlanes.value = []
     } finally {
-      isLoading.value = false
+      if (!silent) {
+        isLoading.value = false
+      }
     }
   }
 

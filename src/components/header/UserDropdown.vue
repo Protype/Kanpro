@@ -29,6 +29,9 @@ const avatarBgColor = computed(() => getAvatarColor(displayName.value))
 // 直接使用 store 的頭像資料（與其他元件同步）
 const avatarImageData = computed(() => authStore.avatarData)
 
+// 檢查是否為管理員
+const isAdmin = computed(() => authStore.user?.role === 'app-admin')
+
 // 當使用者變更時載入頭像
 watch(() => authStore.user?.id, (newId) => {
   if (newId && !authStore.avatarData && !authStore.avatarLoading) {
@@ -57,6 +60,11 @@ const handleLogout = async () => {
 const goToSettings = () => {
   closeDropdown()
   router.push('/settings')
+}
+
+const goToAdmin = () => {
+  closeDropdown()
+  router.push('/admin')
 }
 
 const toggleThemeMenu = () => {
@@ -160,6 +168,16 @@ onUnmounted(() => {
           >
             <ph-icon icon="user" class="w-4 h-4 text-content-secondary" />
             個人設定
+          </button>
+
+          <!-- System Management (Admin Only) -->
+          <button
+            v-if="isAdmin"
+            @click="goToAdmin"
+            class="w-full px-4 py-2 text-left text-sm text-content hover:bg-surface-hover transition-colors flex items-center gap-3"
+          >
+            <ph-icon icon="gear-six" class="w-4 h-4 text-content-secondary" />
+            系統管理
           </button>
 
           <!-- Theme Selector -->

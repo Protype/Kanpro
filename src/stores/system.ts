@@ -1,0 +1,250 @@
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+import { useAuthStore } from './auth'
+
+/**
+ * KanproBridge 功能模組狀態（API 回傳格式）
+ */
+export interface BridgeFeature {
+  enabled: boolean
+  methods: Array<{ name: string; description: string }>
+}
+
+/**
+ * KanproBridge 外掛狀態（API 回傳格式）
+ */
+export interface KanproBridgeStatus {
+  name: string
+  version: string
+  description?: string
+  features: {
+    jwt_auth: BridgeFeature
+    user_metadata: BridgeFeature
+    user_avatar: BridgeFeature
+    user_password: BridgeFeature
+    user_profile: BridgeFeature
+  }
+}
+
+/**
+ * KanproBridge 模組定義
+ */
+export interface BridgeModule {
+  id: string
+  name: string
+  description: string
+  featureKey: keyof KanproBridgeStatus['features']  // API features 對應的 key
+}
+
+/**
+ * 預定義的 KanproBridge 模組清單
+ */
+export const BRIDGE_MODULES: BridgeModule[] = [
+  {
+    id: 'jwt',
+    name: 'JWT 認證',
+    description: '登入驗證、Token 管理',
+    featureKey: 'jwt_auth'
+  },
+  {
+    id: 'avatar',
+    name: '使用者頭像',
+    description: '頭像上傳與顯示',
+    featureKey: 'user_avatar'
+  },
+  {
+    id: 'metadata',
+    name: '使用者元資料',
+    description: '偏好設定儲存',
+    featureKey: 'user_metadata'
+  },
+  {
+    id: 'password',
+    name: '密碼管理',
+    description: '密碼變更功能',
+    featureKey: 'user_password'
+  },
+  {
+    id: 'profile',
+    name: '使用者設定檔',
+    description: '個人資料編輯',
+    featureKey: 'user_profile'
+  }
+]
+
+export const useSystemStore = defineStore('system', () => {
+  // === Kanboard 伺服器狀態 ===
+  const kanboardVersion = ref<string | null>(null)
+  const kanboardTimezone = ref<string | null>(null)
+  const apiLatency = ref<number | null>(null)
+  const connectionStatus = ref<'connected' | 'disconnected' | 'checking'>('checking')
+
+  // === KanproBridge 狀態 ===
+  const bridgeStatus = ref<KanproBridgeStatus | null>(null)
+  const bridgeError = ref<string | null>(null)
+
+  // === 載入狀態 ===
+  const isLoading = ref(false)
+  const error = ref<string | null>(null)
+
+  // === 計算屬性 ===
+
+  /**
+   * 取得 API URL（從 auth store）
+   */
+  const apiUrl = computed(() => {
+    const authStore = useAuthStore()
+    return authStore.apiUrl
+  })
+
+  /**
+   * 檢查模組是否啟用
+   */
+  function isModuleEnabled(moduleId: string): boolean {
+    if (!bridgeStatus.value) return false
+    if (!bridgeStatus.value.features) return false
+
+    const module = BRIDGE_MODULES.find(m => m.id === moduleId)
+    if (!module) return false
+
+    // 從 features 中取得對應功能的啟用狀態
+    const feature = bridgeStatus.value.features[module.featureKey]
+    return feature?.enabled ?? false
+  }
+
+  /**
+   * 取得模組狀態列表
+   */
+  const moduleStatuses = computed(() => {
+    return BRIDGE_MODULES.map(module => ({
+      ...module,
+      enabled: isModuleEnabled(module.id)
+    }))
+  })
+
+  // === 方法 ===
+
+  /**
+   * 載入 Kanboard 伺服器資訊
+   */
+  async function fetchKanboardInfo(): Promise<void> {
+    const authStore = useAuthStore()
+
+    connectionStatus.value = 'checking'
+
+    try {
+      const client = authStore.getClient()
+
+      // 測量 API 延遲
+      const startTime = performance.now()
+      const version = await client.call<string>('getVersion')
+      const endTime = performance.now()
+
+      apiLatency.value = Math.round(endTime - startTime)
+      kanboardVersion.value = version
+      connectionStatus.value = 'connected'
+
+      // 取得時區
+      const timezone = await client.call<string>('getTimezone')
+      kanboardTimezone.value = timezone
+    } catch (err) {
+      connectionStatus.value = 'disconnected'
+      error.value = err instanceof Error ? err.message : '無法連線到 Kanboard 伺服器'
+    }
+  }
+
+  /**
+   * 載入 KanproBridge 外掛狀態
+   */
+  async function fetchBridgeStatus(): Promise<void> {
+    const authStore = useAuthStore()
+
+    bridgeError.value = null
+
+    try {
+      const client = authStore.getClient()
+      const status = await client.call<KanproBridgeStatus>('getKanproBridgeStatus')
+      bridgeStatus.value = status
+    } catch (err) {
+      bridgeError.value = err instanceof Error ? err.message : '無法取得 KanproBridge 狀態'
+      bridgeStatus.value = null
+    }
+  }
+
+  /**
+   * 載入所有系統資訊
+   */
+  async function fetchAll(): Promise<void> {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      await Promise.all([
+        fetchKanboardInfo(),
+        fetchBridgeStatus()
+      ])
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  /**
+   * 測試 API 連線
+   */
+  async function testConnection(): Promise<{ success: boolean; latency?: number; error?: string }> {
+    const authStore = useAuthStore()
+
+    try {
+      const client = authStore.getClient()
+      const startTime = performance.now()
+      await client.call<string>('getVersion')
+      const endTime = performance.now()
+      const latency = Math.round(endTime - startTime)
+
+      return { success: true, latency }
+    } catch (err) {
+      return {
+        success: false,
+        error: err instanceof Error ? err.message : '連線失敗'
+      }
+    }
+  }
+
+  /**
+   * 重置狀態
+   */
+  function $reset(): void {
+    kanboardVersion.value = null
+    kanboardTimezone.value = null
+    apiLatency.value = null
+    connectionStatus.value = 'checking'
+    bridgeStatus.value = null
+    bridgeError.value = null
+    isLoading.value = false
+    error.value = null
+  }
+
+  return {
+    // 狀態
+    kanboardVersion,
+    kanboardTimezone,
+    apiLatency,
+    connectionStatus,
+    bridgeStatus,
+    bridgeError,
+    isLoading,
+    error,
+
+    // 計算屬性
+    apiUrl,
+    moduleStatuses,
+
+    // 方法
+    isModuleEnabled,
+    fetchKanboardInfo,
+    fetchBridgeStatus,
+    fetchAll,
+    testConnection,
+    $reset
+  }
+})

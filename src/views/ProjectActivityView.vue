@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useBoardStore } from '@/stores/board'
 import { useNotificationsStore } from '@/stores/notifications'
@@ -25,23 +25,23 @@ const activities = ref<Activity[]>([])
 const error = ref<string | null>(null)
 
 const eventLabels: Record<string, string> = {
-  'task.create': '建立任務',
-  'task.update': '更新任務',
-  'task.close': '關閉任務',
-  'task.open': '開啟任務',
-  'task.move.column': '移動任務欄位',
-  'task.move.swimlane': '移動任務泳道',
-  'task.move.position': '調整任務位置',
-  'task.assignee_change': '變更指派人',
-  'comment.create': '新增評論',
-  'comment.update': '更新評論',
-  'comment.delete': '刪除評論',
-  'subtask.create': '新增子任務',
-  'subtask.update': '更新子任務',
-  'subtask.delete': '刪除子任務',
-  'task_file.create': '上傳附件',
-  'task_internal_link.create_update': '建立任務連結',
-  'task_internal_link.delete': '刪除任務連結'
+  'task.create': '建立了任務',
+  'task.update': '更新了任務',
+  'task.close': '關閉了任務',
+  'task.open': '重新開啟了任務',
+  'task.move.column': '移動了任務至',
+  'task.move.swimlane': '將任務移至泳道',
+  'task.move.position': '調整了任務位置',
+  'task.assignee_change': '變更了任務指派人',
+  'comment.create': '發表了評論於',
+  'comment.update': '更新了評論於',
+  'comment.delete': '刪除了評論於',
+  'subtask.create': '新增了子任務',
+  'subtask.update': '更新了子任務',
+  'subtask.delete': '刪除了子任務',
+  'task_file.create': '上傳了附件至',
+  'task_internal_link.create_update': '建立了任務連結',
+  'task_internal_link.delete': '刪除了任務連結'
 }
 
 watch(() => route.params.id, async (newId) => {
@@ -59,13 +59,10 @@ const loadData = async () => {
   isLoading.value = true
   error.value = null
   try {
-    // Load project info if not loaded
     if (!boardStore.project || boardStore.project.id !== projectId.value) {
       await boardStore.fetchBoard(projectId.value)
     }
-    // Load project activities
     await notificationsStore.fetchActivities()
-    // Filter activities for this project
     activities.value = notificationsStore.activities.filter(
       a => a.project_id === projectId.value
     )
@@ -93,15 +90,61 @@ const formatDate = (timestamp: number): string => {
   if (diffHours < 24) return `${diffHours} 小時前`
   if (diffDays < 7) return `${diffDays} 天前`
 
-  return date.toLocaleDateString('zh-TW')
+  return date.toLocaleDateString('zh-TW', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 }
 
-const getTaskTitle = (activity: Activity): string => {
+// Helper to safely extract nested data from activity
+function getActivityTaskData(activity: Activity): Record<string, unknown> | null {
   if (activity.data?.task && typeof activity.data.task === 'object') {
-    const task = activity.data.task as { title?: string }
-    if (task.title) return task.title
+    return activity.data.task as Record<string, unknown>
   }
+  return null
+}
+
+function getActivityCommentData(activity: Activity): Record<string, unknown> | null {
+  if (activity.data?.comment && typeof activity.data.comment === 'object') {
+    return activity.data.comment as Record<string, unknown>
+  }
+  return null
+}
+
+function getTaskTitle(activity: Activity): string {
+  const task = getActivityTaskData(activity)
+  if (task?.title && typeof task.title === 'string') return task.title
   return activity.task_id ? `#${activity.task_id}` : ''
+}
+
+function getAuthorName(activity: Activity): string {
+  return activity.author_name || activity.author_username || '未知使用者'
+}
+
+function getAuthorInitial(activity: Activity): string {
+  return getAuthorName(activity).charAt(0).toUpperCase()
+}
+
+function getAssigneeName(activity: Activity): string | null {
+  const task = getActivityTaskData(activity)
+  if (!task) return null
+  const name = task.assignee_name || task.assignee_username
+  return typeof name === 'string' ? name : null
+}
+
+function getColumnName(activity: Activity): string | null {
+  const task = getActivityTaskData(activity)
+  return task?.column_title && typeof task.column_title === 'string' ? task.column_title : null
+}
+
+function getCommentContent(activity: Activity): string | null {
+  const comment = getActivityCommentData(activity)
+  if (!comment?.comment || typeof comment.comment !== 'string') return null
+  const content = comment.comment
+  return content.length > 100 ? content.substring(0, 100) + '...' : content
 }
 
 const handleActivityClick = (activity: Activity) => {
@@ -123,91 +166,166 @@ const handleSearchSelect = (task: Task) => {
   emit('close-search-modal')
 }
 
-const getEventIcon = (eventName: string): string => {
-  if (eventName.startsWith('task.create')) return 'plus'
-  if (eventName.startsWith('task.close')) return 'check'
-  if (eventName.startsWith('task.open')) return 'refresh'
-  if (eventName.startsWith('task.move')) return 'arrow'
-  if (eventName.startsWith('comment')) return 'chat'
-  if (eventName.startsWith('subtask')) return 'list'
-  if (eventName.startsWith('task_file')) return 'attachment'
-  if (eventName.startsWith('task_internal_link')) return 'link'
-  return 'activity'
+// Event icon and color mappings
+const eventIconMap: Record<string, string> = {
+  'task.create': 'plus-circle',
+  'task.close': 'check-circle',
+  'task.open': 'rotate',
+  'task.move': 'arrow-right',
+  'task.assignee': 'user',
+  'task.update': 'pencil',
+  'comment': 'chat',
+  'subtask': 'list-check',
+  'task_file': 'paperclip',
+  'task_internal_link': 'link'
 }
+
+const eventColorMap: Record<string, string> = {
+  'task.create': 'text-success bg-success/10',
+  'task.close': 'text-info bg-info/10',
+  'task.open': 'text-warning bg-warning/10',
+  'comment': 'text-accent bg-accent/10'
+}
+
+function getEventIcon(eventName: string): string {
+  for (const [prefix, icon] of Object.entries(eventIconMap)) {
+    if (eventName.startsWith(prefix)) return icon
+  }
+  return 'bolt'
+}
+
+function getEventIconColor(eventName: string): string {
+  for (const [prefix, color] of Object.entries(eventColorMap)) {
+    if (eventName.startsWith(prefix)) return color
+  }
+  return 'text-content-secondary bg-surface-tertiary'
+}
+
+// Group activities by date
+const groupedActivities = computed(() => {
+  const groups: { date: string; activities: Activity[] }[] = []
+  const dateMap = new Map<string, Activity[]>()
+
+  for (const activity of activities.value) {
+    const date = new Date(activity.date_creation * 1000)
+    const dateKey = date.toLocaleDateString('zh-TW', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+
+    if (!dateMap.has(dateKey)) {
+      dateMap.set(dateKey, [])
+    }
+    dateMap.get(dateKey)!.push(activity)
+  }
+
+  for (const [date, acts] of dateMap) {
+    groups.push({ date, activities: acts })
+  }
+
+  return groups
+})
 </script>
 
 <template>
-  <div class="p-6">
-    <div class="max-w-4xl mx-auto">
-      <!-- Header -->
-      <div class="mb-6">
-        <h1 class="text-2xl font-bold text-content">專案動態</h1>
-        <p v-if="boardStore.project" class="text-content-secondary mt-1">
-          {{ boardStore.project.name }} 的最近活動
-        </p>
-      </div>
-
+  <div class="h-full flex flex-col bg-surface-secondary overflow-auto">
+    <div class="p-6">
       <!-- Loading -->
       <div v-if="isLoading" class="flex justify-center py-12">
         <ph-icon icon="spinner" class="animate-spin h-8 w-8 text-accent" />
       </div>
 
       <!-- Error -->
-      <div v-else-if="error" class="bg-error/10 border border-error/20 rounded-lg p-4 text-error">
+      <div v-else-if="error" class="bg-error/10 border border-error/20 rounded-lg p-4 text-error max-w-2xl mx-auto">
         {{ error }}
         <button @click="loadData" class="ml-4 underline">重試</button>
       </div>
 
-      <!-- Activities -->
-      <div v-else class="space-y-4">
-        <div
-          v-for="activity in activities"
-          :key="activity.id"
-          @click="handleActivityClick(activity)"
-          class="bg-surface rounded-lg border border-edge p-4 cursor-pointer hover:bg-surface-hover transition-colors"
-        >
-          <div class="flex items-start gap-4">
-            <!-- Icon -->
-            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent">
-              <!-- Plus Icon -->
-              <ph-icon v-if="getEventIcon(activity.event_name) === 'plus'" icon="plus" class="w-5 h-5" />
-              <!-- Check Icon -->
-              <ph-icon v-else-if="getEventIcon(activity.event_name) === 'check'" icon="check" class="w-5 h-5" />
-              <!-- Refresh Icon -->
-              <ph-icon v-else-if="getEventIcon(activity.event_name) === 'refresh'" icon="rotate" class="w-5 h-5" />
-              <!-- Arrow Icon -->
-              <ph-icon v-else-if="getEventIcon(activity.event_name) === 'arrow'" icon="arrow-right" class="w-5 h-5" />
-              <!-- Chat Icon -->
-              <ph-icon v-else-if="getEventIcon(activity.event_name) === 'chat'" icon="comment" class="w-5 h-5" />
-              <!-- List Icon -->
-              <ph-icon v-else-if="getEventIcon(activity.event_name) === 'list'" icon="list-check" class="w-5 h-5" />
-              <!-- Attachment Icon -->
-              <ph-icon v-else-if="getEventIcon(activity.event_name) === 'attachment'" icon="paperclip" class="w-5 h-5" />
-              <!-- Link Icon -->
-              <ph-icon v-else-if="getEventIcon(activity.event_name) === 'link'" icon="link" class="w-5 h-5" />
-              <!-- Default Activity Icon -->
-              <ph-icon v-else icon="bolt" class="w-5 h-5" />
-            </div>
-
-            <!-- Content -->
-            <div class="flex-1 min-w-0">
-              <p class="text-content">
-                <span class="font-medium">{{ getEventLabel(activity.event_name) }}</span>
-                <span v-if="getTaskTitle(activity)" class="text-content-secondary">
-                  : {{ getTaskTitle(activity) }}
-                </span>
-              </p>
-              <p class="text-sm text-content-tertiary mt-1">
-                {{ formatDate(activity.date_creation) }}
-              </p>
-            </div>
-          </div>
-        </div>
-
+      <!-- Activities Timeline -->
+      <div v-else class="max-w-3xl mx-auto">
         <!-- Empty State -->
-        <div v-if="activities.length === 0" class="bg-surface rounded-lg border border-edge p-12 text-center">
+        <div v-if="activities.length === 0" class="card p-12 text-center">
           <ph-icon icon="bolt" class="w-16 h-16 mx-auto mb-4 text-content-tertiary" />
           <p class="text-content-secondary">沒有近期活動</p>
+        </div>
+
+        <!-- Grouped Activities -->
+        <div v-else class="space-y-8">
+          <div v-for="group in groupedActivities" :key="group.date">
+            <!-- Date Header -->
+            <div class="flex items-center gap-4 mb-4">
+              <div class="h-px flex-1 bg-edge"></div>
+              <span class="text-sm font-medium text-content-tertiary px-2">{{ group.date }}</span>
+              <div class="h-px flex-1 bg-edge"></div>
+            </div>
+
+            <!-- Activities for this date -->
+            <div class="space-y-3">
+              <div
+                v-for="activity in group.activities"
+                :key="activity.id"
+                @click="handleActivityClick(activity)"
+                class="card p-4 cursor-pointer hover:bg-surface-hover transition-colors"
+              >
+                <div class="flex gap-4">
+                  <!-- Icon -->
+                  <div
+                    :class="[
+                      'flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center',
+                      getEventIconColor(activity.event_name)
+                    ]"
+                  >
+                    <ph-icon :icon="getEventIcon(activity.event_name)" class="w-5 h-5" />
+                  </div>
+
+                  <!-- Content -->
+                  <div class="flex-1 min-w-0">
+                    <!-- Main info line -->
+                    <p class="text-content">
+                      <span class="font-semibold">{{ getAuthorName(activity) }}</span>
+                      <span class="text-content-secondary"> {{ getEventLabel(activity.event_name) }} </span>
+                      <span v-if="getTaskTitle(activity)" class="font-medium text-accent">
+                        {{ getTaskTitle(activity) }}
+                      </span>
+                    </p>
+
+                    <!-- Additional context -->
+                    <div class="mt-1 text-sm text-content-tertiary space-y-0.5">
+                      <!-- Column info for move events -->
+                      <p v-if="activity.event_name === 'task.move.column' && getColumnName(activity)">
+                        <ph-icon icon="arrow-right" class="w-3.5 h-3.5 inline mr-1" />
+                        欄位：{{ getColumnName(activity) }}
+                      </p>
+
+                      <!-- Assignee info -->
+                      <p v-if="activity.event_name === 'task.assignee_change' && getAssigneeName(activity)">
+                        <ph-icon icon="user" class="w-3.5 h-3.5 inline mr-1" />
+                        指派給：{{ getAssigneeName(activity) }}
+                      </p>
+
+                      <!-- Comment preview -->
+                      <p v-if="activity.event_name === 'comment.create' && getCommentContent(activity)" class="italic">
+                        「{{ getCommentContent(activity) }}」
+                      </p>
+                    </div>
+
+                    <!-- Timestamp -->
+                    <p class="text-xs text-content-tertiary mt-2">
+                      {{ formatDate(activity.date_creation) }}
+                    </p>
+                  </div>
+
+                  <!-- Author avatar -->
+                  <div class="flex-shrink-0">
+                    <div class="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-accent text-sm font-medium">
+                      {{ getAuthorInitial(activity) }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

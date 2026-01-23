@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-export type ToastType = 'success' | 'error' | 'warning' | 'info'
+export type ToastType = 'success' | 'error' | 'warning' | 'info' | 'loading'
 
 export interface Toast {
   id: string
@@ -42,6 +42,26 @@ export const useToastStore = defineStore('toast', () => {
     }
   }
 
+  /**
+   * 更新現有 toast 的類型和內容（用於 loading -> success/error 轉換）
+   */
+  function update(id: string, type: ToastType, title: string, message?: string, duration = DEFAULT_DURATION): void {
+    const toast = toasts.value.find(t => t.id === id)
+    if (toast) {
+      toast.type = type
+      toast.title = title
+      toast.message = message
+      toast.duration = duration
+
+      // 設定自動移除
+      if (duration > 0) {
+        setTimeout(() => {
+          remove(id)
+        }, duration)
+      }
+    }
+  }
+
   function success(title: string, message?: string, duration = DEFAULT_DURATION): string {
     return add('success', title, message, duration)
   }
@@ -58,6 +78,11 @@ export const useToastStore = defineStore('toast', () => {
     return add('info', title, message, duration)
   }
 
+  function loading(title: string, message?: string): string {
+    // loading toast 不自動消失（duration = 0）
+    return add('loading', title, message, 0)
+  }
+
   function clear(): void {
     toasts.value = []
   }
@@ -66,10 +91,12 @@ export const useToastStore = defineStore('toast', () => {
     toasts,
     add,
     remove,
+    update,
     success,
     error,
     warning,
     info,
+    loading,
     clear
   }
 })
@@ -84,6 +111,8 @@ export function useToast() {
     error: store.error,
     warning: store.warning,
     info: store.info,
+    loading: store.loading,
+    update: store.update,
     remove: store.remove,
     clear: store.clear
   }
