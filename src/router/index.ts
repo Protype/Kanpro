@@ -129,6 +129,11 @@ const router = createRouter({
               path: 'analytics',
               name: 'project-analytics',
               component: () => import('@/views/ProjectAnalyticsView.vue')
+            },
+            {
+              path: 'tasks/new',
+              name: 'task-create',
+              component: () => import('@/views/TaskCreateView.vue')
             }
           ]
         }
