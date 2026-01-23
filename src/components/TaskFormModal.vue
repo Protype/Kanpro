@@ -162,7 +162,7 @@ async function loadProjectData() {
     membersStore.fetchMembers(props.projectId),
     categoriesStore.fetchCategories(props.projectId),
     swimlanesStore.fetchSwimlanes(props.projectId),
-    tagsStore.fetchTags(props.projectId)
+    tagsStore.fetchProjectTags(props.projectId)
   ])
 }
 
