@@ -7,23 +7,34 @@ import type { ProjectMember, User } from '@/types'
  * 成員資料取得策略：
  *
  * 方式一（目前實作）：
- * - 從 getProjectUsers 取得 { userId: displayName } 格式
+ * - 從 getProjectUsers / getAssignableUsers 取得 { userId: displayName } 格式
  * - 再用 getUser 逐一取得每個使用者的完整資料
  *
  * 方式二（未來支援）：
  * - 如果 Kanpro Bridge API 有啟用，可一次取得完整成員資料
  * - TODO: 偵測 Bridge API 並自動切換
+ *
+ * API 使用場景：
+ * - getProjectUsers: 專案設定頁的成員管理（顯示所有成員，含瀏覽者）
+ * - getAssignableUsers: 任務指派人選擇器（只顯示可指派的人，不含瀏覽者）
  */
 
 export const useMembersStore = defineStore('members', () => {
+  // 專案所有成員（含瀏覽者）- 用於專案設定
   const members = ref<ProjectMember[]>([])
   const membersMap = ref<Record<string | number, string>>({})
+
+  // 可指派任務的成員（不含瀏覽者）- 用於任務指派
+  const assignableUsers = ref<ProjectMember[]>([])
+  const assignableUsersMap = ref<Record<string | number, string>>({})
+
   const allUsers = ref<User[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
   // Computed properties
   const membersCount = computed(() => members.value.length)
+  const assignableUsersCount = computed(() => assignableUsers.value.length)
 
   const availableUsers = computed(() => {
     const memberIds = members.value.map(m => m.id)
@@ -69,6 +80,58 @@ export const useMembersStore = defineStore('members', () => {
     }
   }
 
+  /**
+   * 從 API 回傳的 { userId: displayName } 格式建立完整的成員資料
+   */
+  async function buildMembersList(
+    projectId: number,
+    userIdMap: Record<string, string>,
+    includeRole: boolean = true
+  ): Promise<ProjectMember[]> {
+    const userIds = Object.keys(userIdMap).map(id => parseInt(id, 10))
+
+    const memberPromises = userIds.map(async (userId) => {
+      const [user, role] = await Promise.all([
+        fetchUser(userId),
+        includeRole ? fetchProjectUserRole(projectId, userId) : Promise.resolve('project-member' as const)
+      ])
+
+      if (user) {
+        // Kanboard API 可能回傳 '1'/'0' 字串或 boolean
+        const isActive = user.is_active === true ||
+          (user.is_active as unknown) === '1' ||
+          (user.is_active as unknown) === 1
+
+        return {
+          id: user.id,
+          username: user.username,
+          name: user.name || null,
+          email: user.email || null,
+          role: role,
+          is_active: isActive
+        } as ProjectMember
+      }
+
+      // 如果無法取得使用者資料，使用 displayName 作為 fallback
+      const displayName = userIdMap[userId.toString()] || `User ${userId}`
+      return {
+        id: userId,
+        username: displayName,
+        name: displayName,
+        email: null,
+        role: role,
+        is_active: true
+      } as ProjectMember
+    })
+
+    return Promise.all(memberPromises)
+  }
+
+  /**
+   * 取得專案所有成員（含瀏覽者）
+   * 使用 getProjectUsers API
+   * 用途：專案設定頁的成員管理
+   */
   async function fetchProjectMembers(projectId: number): Promise<void> {
     const authStore = useAuthStore()
 
@@ -86,44 +149,7 @@ export const useMembersStore = defineStore('members', () => {
       membersMap.value = result || {}
 
       // 取得每個使用者的完整資料和角色
-      const userIds = Object.keys(result || {}).map(id => parseInt(id, 10))
-
-      // 並行取得所有使用者資料和角色
-      const memberPromises = userIds.map(async (userId) => {
-        const [user, role] = await Promise.all([
-          fetchUser(userId),
-          fetchProjectUserRole(projectId, userId)
-        ])
-
-        if (user) {
-          // Kanboard API 可能回傳 '1'/'0' 字串或 boolean
-          const isActive = user.is_active === true ||
-            (user.is_active as unknown) === '1' ||
-            (user.is_active as unknown) === 1
-
-          return {
-            id: user.id,
-            username: user.username,
-            name: user.name || null,
-            email: user.email || null,
-            role: role,
-            is_active: isActive
-          } as ProjectMember
-        }
-
-        // 如果無法取得使用者資料，使用 membersMap 中的 displayName 作為 fallback
-        const displayName = result[userId.toString()] || `User ${userId}`
-        return {
-          id: userId,
-          username: displayName,
-          name: displayName,
-          email: null,
-          role: role,
-          is_active: true
-        } as ProjectMember
-      })
-
-      members.value = await Promise.all(memberPromises)
+      members.value = await buildMembersList(projectId, result || {}, true)
     } catch (err) {
       error.value = err instanceof Error ? err.message : '載入成員失敗'
       members.value = []
@@ -132,6 +158,45 @@ export const useMembersStore = defineStore('members', () => {
       isLoading.value = false
     }
   }
+
+  /**
+   * 取得可指派任務的成員（不含瀏覽者）
+   * 使用 getAssignableUsers API
+   * 用途：任務指派人選擇器
+   */
+  async function fetchAssignableUsers(projectId: number): Promise<void> {
+    const authStore = useAuthStore()
+
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const client = authStore.getClient()
+      // getAssignableUsers returns { userId: displayName } format
+      // 只回傳可以被指派任務的使用者（不包含 project-viewer）
+      const result = await client.call<Record<string, string>>('getAssignableUsers', {
+        project_id: projectId
+      })
+
+      // Preserve the original ID->name mapping for quick lookup
+      assignableUsersMap.value = result || {}
+
+      // 取得每個使用者的完整資料（可指派的使用者不需要查角色，因為一定不是 viewer）
+      assignableUsers.value = await buildMembersList(projectId, result || {}, false)
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : '載入可指派使用者失敗'
+      assignableUsers.value = []
+      assignableUsersMap.value = {}
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  /**
+   * 取得可指派任務的成員（alias for fetchAssignableUsers）
+   * 用於 TaskFormModal 等任務相關元件
+   */
+  const fetchMembers = fetchAssignableUsers
 
   /**
    * 獲取所有用戶（需要 admin 權限）
@@ -197,19 +262,37 @@ export const useMembersStore = defineStore('members', () => {
   function clearMembers(): void {
     members.value = []
     membersMap.value = {}
+    assignableUsers.value = []
+    assignableUsersMap.value = {}
     error.value = null
   }
 
   return {
+    // 專案所有成員（含瀏覽者）
     members,
     membersMap,
+    membersCount,
+
+    // 可指派任務的成員（不含瀏覽者）
+    assignableUsers,
+    assignableUsersMap,
+    assignableUsersCount,
+
+    // 所有使用者（需 admin 權限）
     allUsers,
+    availableUsers,
+
+    // 狀態
     isLoading,
     error,
-    membersCount,
-    availableUsers,
-    fetchProjectMembers,
-    fetchAllUsers,
+
+    // 取得成員
+    fetchProjectMembers,    // 用於專案設定
+    fetchAssignableUsers,   // 用於任務指派
+    fetchMembers,           // alias for fetchAssignableUsers
+    fetchAllUsers,          // 需 admin 權限
+
+    // 成員管理
     addProjectUser,
     removeProjectUser,
     changeProjectUserRole,

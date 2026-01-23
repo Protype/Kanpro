@@ -133,7 +133,8 @@ export function useCommandBarDropdown() {
 
   function loadMemberOptions() {
     const membersStore = useMembersStore()
-    options.value = membersStore.members.map(m => ({
+    // 使用 assignableUsers 而非 members，因為任務只能指派給可指派的成員（不含瀏覽者）
+    options.value = membersStore.assignableUsers.map(m => ({
       id: m.id,
       label: m.name || m.username,
       value: m.username,

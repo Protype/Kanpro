@@ -130,8 +130,9 @@ const loadDropdownData = async () => {
   if (!currentProjectId.value) return
 
   // Load in parallel
+  // 使用 fetchMembers (alias for fetchAssignableUsers) 因為 CommandBar 用於任務指派
   await Promise.all([
-    membersStore.fetchProjectMembers(currentProjectId.value),
+    membersStore.fetchMembers(currentProjectId.value),
     tagsStore.fetchProjectTags(currentProjectId.value),
     columnsStore.fetchColumns(currentProjectId.value)
   ])

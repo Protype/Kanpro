@@ -66,15 +66,16 @@ const colors = [
 const isValid = computed(() => title.value.trim().length > 0)
 
 const columns = computed(() => boardStore.columns)
-const members = computed(() => membersStore.members)
+// 使用 assignableUsers 而非 members，因為任務只能指派給可指派的成員（不含瀏覽者）
+const assignableUsers = computed(() => membersStore.assignableUsers)
 const categories = computed(() => categoriesStore.categories)
 const swimlanes = computed(() => swimlanesStore.activeSwimlanes)
 const availableTags = computed(() => tagsStore.tags)
 
 const filteredMembers = computed(() => {
   const query = ownerSearchQuery.value.toLowerCase()
-  if (!query) return members.value
-  return members.value.filter(m =>
+  if (!query) return assignableUsers.value
+  return assignableUsers.value.filter(m =>
     m.username.toLowerCase().includes(query) ||
     (m.name?.toLowerCase().includes(query) ?? false)
   )
@@ -82,7 +83,7 @@ const filteredMembers = computed(() => {
 
 const selectedOwner = computed(() => {
   if (!ownerId.value) return null
-  return members.value.find(m => m.id === ownerId.value) || null
+  return assignableUsers.value.find(m => m.id === ownerId.value) || null
 })
 
 const filteredTags = computed(() => {

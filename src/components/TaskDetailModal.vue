@@ -78,13 +78,14 @@ const currentColumn = computed(() => {
 })
 
 // B 層欄位相關
-const members = computed(() => membersStore.members)
+// 使用 assignableUsers 而非 members，因為任務只能指派給可指派的成員（不含瀏覽者）
+const assignableUsers = computed(() => membersStore.assignableUsers)
 const categories = computed(() => categoriesStore.categories)
 const swimlanes = computed(() => swimlanesStore.activeSwimlanes)
 
 const currentOwner = computed(() => {
   if (!props.task?.owner_id) return null
-  return members.value.find(m => m.id === props.task?.owner_id)
+  return assignableUsers.value.find(m => m.id === props.task?.owner_id)
 })
 
 const currentCategory = computed(() => {
@@ -483,7 +484,7 @@ const updateCategory = async (categoryId: number | null) => {
                   >
                     <option value="">未指派</option>
                     <option
-                      v-for="member in members"
+                      v-for="member in assignableUsers"
                       :key="member.id"
                       :value="member.id"
                     >
