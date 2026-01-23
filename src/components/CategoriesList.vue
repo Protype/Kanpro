@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useCategoriesStore } from '@/stores/categories'
+import { useToast } from '@/stores/toast'
 import type { Category } from '@/types'
 
 const props = defineProps<{
@@ -12,6 +13,7 @@ const emit = defineEmits<{
 }>()
 
 const categoriesStore = useCategoriesStore()
+const toast = useToast()
 
 // Form state
 const isAdding = ref(false)
@@ -45,17 +47,19 @@ const handleAddCategory = async () => {
   if (!newCategoryName.value.trim() || isSubmitting.value) return
 
   isSubmitting.value = true
+  const loadingToast = toast.loading('新增類別中...')
   try {
     await categoriesStore.addCategory(
       props.projectId,
       newCategoryName.value.trim()
     )
     await categoriesStore.fetchCategories(props.projectId)
+    toast.update(loadingToast, 'success', '類別已新增')
     cancelAdding()
     emit('updated')
   } catch (error) {
     console.error('Failed to add category:', error)
-    alert('新增類別失敗')
+    toast.update(loadingToast, 'error', '新增類別失敗')
   } finally {
     isSubmitting.value = false
   }
@@ -74,17 +78,19 @@ const handleSaveCategory = async () => {
   if (!editingCategoryId.value || !editName.value.trim() || isSubmitting.value) return
 
   isSubmitting.value = true
+  const loadingToast = toast.loading('更新類別中...')
   try {
     await categoriesStore.updateCategory(
       editingCategoryId.value,
       editName.value.trim()
     )
     await categoriesStore.fetchCategories(props.projectId)
+    toast.update(loadingToast, 'success', '類別已更新')
     cancelEditing()
     emit('updated')
   } catch (error) {
     console.error('Failed to update category:', error)
-    alert('更新類別失敗')
+    toast.update(loadingToast, 'error', '更新類別失敗')
   } finally {
     isSubmitting.value = false
   }
@@ -93,50 +99,51 @@ const handleSaveCategory = async () => {
 const handleRemoveCategory = async (category: Category) => {
   if (!confirm(`確定要刪除類別「${category.name}」嗎？此操作無法復原。`)) return
 
+  const loadingToast = toast.loading('刪除類別中...')
   try {
     await categoriesStore.removeCategory(category.id)
     await categoriesStore.fetchCategories(props.projectId)
+    toast.update(loadingToast, 'success', '類別已刪除')
     emit('updated')
   } catch (error) {
     console.error('Failed to remove category:', error)
-    alert('刪除類別失敗')
+    toast.update(loadingToast, 'error', '刪除類別失敗')
   }
 }
 </script>
 
 <template>
-  <div class="space-y-4">
+  <div class="p-5">
     <!-- Header -->
-    <div class="flex items-center justify-between">
-      <h3 class="text-lg font-semibold text-gray-900">
-        類別管理
-        <span v-if="categoriesStore.categoriesCount > 0" class="text-gray-400 text-sm font-normal">
-          ({{ categoriesStore.categoriesCount }})
+    <div class="flex items-center justify-between mb-4 h-8">
+      <div class="flex items-center gap-2">
+        <ph-icon icon="tag" class="w-5 h-5 text-content-tertiary" />
+        <h3 class="text-base font-semibold text-content">
+          類別管理
+        </h3>
+        <span v-if="categoriesStore.categoriesCount > 0" class="text-xs text-content-tertiary bg-surface-secondary px-1.5 py-0.5 rounded">
+          {{ categoriesStore.categoriesCount }}
         </span>
-      </h3>
+      </div>
       <button
         v-if="!isAdding"
         @click="startAdding"
-        class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+        class="w-8 h-8 flex items-center justify-center text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary rounded-md border border-edge transition-colors"
+        title="新增類別"
       >
-        + 新增類別
+        <ph-icon icon="plus" class="w-4 h-4" />
       </button>
     </div>
 
-    <!-- Loading -->
-    <div v-if="categoriesStore.isLoading" class="text-center py-4">
-      <ph-icon icon="spinner" class="animate-spin h-6 w-6 text-blue-600 mx-auto" />
-    </div>
-
-    <div v-else class="space-y-3">
+    <div class="space-y-3">
       <!-- Add category form -->
-      <div v-if="isAdding" class="bg-gray-50 rounded-lg p-4 space-y-3">
+      <div v-if="isAdding" class="bg-surface-secondary rounded-lg p-4 space-y-3 border border-edge">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">類別名稱 *</label>
           <input
             v-model="newCategoryName"
             type="text"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            :disabled="isSubmitting"
+            class="w-full px-3 py-2 text-sm bg-surface border border-edge rounded-lg text-content focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed"
             placeholder="輸入類別名稱"
           />
         </div>
@@ -144,55 +151,56 @@ const handleRemoveCategory = async (category: Category) => {
           <button
             @click="cancelAdding"
             :disabled="isSubmitting"
-            class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
+            class="px-4 py-2 text-sm text-content-secondary hover:text-content transition-colors disabled:opacity-50"
           >
             取消
           </button>
           <button
             @click="handleAddCategory"
             :disabled="!newCategoryName.trim() || isSubmitting"
-            class="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+            class="px-4 py-2 text-sm font-medium bg-accent text-white rounded-lg hover:bg-accent/90 disabled:opacity-50 transition-colors flex items-center gap-2"
           >
+            <ph-icon v-if="isSubmitting" icon="spinner" class="w-4 h-4 animate-spin" />
             新增
           </button>
         </div>
       </div>
 
       <!-- Categories list -->
-      <div class="bg-white rounded-lg border divide-y">
+      <div class="space-y-2">
         <div
           v-for="category in categoriesStore.categories"
           :key="category.id"
-          class="p-4"
+          class="p-3 bg-surface-secondary/50 rounded-lg hover:bg-surface-secondary transition-colors"
         >
           <!-- View mode -->
           <div v-if="editingCategoryId !== category.id" class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <!-- Category icon -->
-              <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-                <ph-icon icon="tag" class="w-4 h-4 text-gray-500" />
+              <div class="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
+                <ph-icon icon="tag" class="w-4 h-4 text-accent" />
               </div>
 
               <!-- Category info -->
-              <div>
-                <div class="font-medium text-gray-900">{{ category.name }}</div>
-                <div v-if="category.description" class="text-sm text-gray-500">
+              <div class="min-w-0">
+                <div class="font-medium text-sm text-content truncate">{{ category.name }}</div>
+                <div v-if="category.description" class="text-xs text-content-tertiary truncate">
                   {{ category.description }}
                 </div>
               </div>
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1">
               <button
                 @click="startEditing(category)"
-                class="p-2 text-gray-400 hover:text-gray-600"
+                class="p-1.5 text-content-tertiary hover:text-accent hover:bg-accent/10 rounded-md transition-colors"
                 title="編輯"
               >
                 <ph-icon icon="pen-to-square" class="w-4 h-4" />
               </button>
               <button
                 @click="handleRemoveCategory(category)"
-                class="p-2 text-gray-400 hover:text-red-500"
+                class="p-1.5 text-content-tertiary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md transition-colors"
                 title="刪除"
               >
                 <ph-icon icon="trash" class="w-4 h-4" />
@@ -203,26 +211,28 @@ const handleRemoveCategory = async (category: Category) => {
           <!-- Edit mode -->
           <div v-else class="space-y-3">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">類別名稱 *</label>
               <input
                 v-model="editName"
                 type="text"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                :disabled="isSubmitting"
+                class="w-full px-3 py-2 text-sm bg-surface border border-edge rounded-lg text-content focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed"
+                placeholder="輸入類別名稱"
               />
             </div>
             <div class="flex gap-2 justify-end">
               <button
                 @click="cancelEditing"
                 :disabled="isSubmitting"
-                class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800"
+                class="px-4 py-2 text-sm text-content-secondary hover:text-content transition-colors disabled:opacity-50"
               >
                 取消
               </button>
               <button
                 @click="handleSaveCategory"
                 :disabled="!editName.trim() || isSubmitting"
-                class="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                class="px-4 py-2 text-sm font-medium bg-accent text-white rounded-lg hover:bg-accent/90 disabled:opacity-50 transition-colors flex items-center gap-2"
               >
+                <ph-icon v-if="isSubmitting" icon="spinner" class="w-4 h-4 animate-spin" />
                 儲存
               </button>
             </div>
@@ -231,10 +241,11 @@ const handleRemoveCategory = async (category: Category) => {
 
         <!-- Empty state -->
         <div
-          v-if="categoriesStore.categories.length === 0 && !categoriesStore.isLoading"
-          class="p-8 text-center text-gray-500"
+          v-if="categoriesStore.categories.length === 0"
+          class="py-8 text-center text-content-tertiary text-sm"
         >
-          沒有類別
+          <ph-icon icon="tag" class="w-8 h-8 mx-auto mb-2 opacity-30" />
+          <p>尚無類別</p>
         </div>
       </div>
     </div>

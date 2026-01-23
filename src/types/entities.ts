@@ -41,6 +41,12 @@ export interface Project {
   end_date?: string | null
   identifier?: string | null
   last_modified?: number
+  // 優先級設定
+  priority_default?: number
+  priority_start?: number
+  priority_end?: number
+  // 專案 Email
+  email?: string | null
 }
 
 /**

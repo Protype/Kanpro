@@ -104,6 +104,13 @@ const handleCreateTask = async (data: {
   description: string
   color_id: string
   column_id: number
+  owner_id?: number
+  swimlane_id?: number
+  category_id?: number
+  date_due?: string
+  priority?: number
+  score?: number
+  tags?: string[]
 }) => {
   try {
     await tasksStore.createTask({
@@ -112,7 +119,13 @@ const handleCreateTask = async (data: {
       description: data.description || undefined,
       color_id: data.color_id,
       column_id: data.column_id,
-      swimlane_id: defaultSwimlaneId.value || undefined
+      swimlane_id: data.swimlane_id || defaultSwimlaneId.value || undefined,
+      owner_id: data.owner_id,
+      category_id: data.category_id,
+      date_due: data.date_due,
+      priority: data.priority,
+      score: data.score,
+      tags: data.tags
     })
     showTaskModal.value = false
     await boardStore.fetchBoard(projectId.value)
@@ -325,6 +338,7 @@ const hasMultipleSwimlanes = computed(() => boardStore.swimlanes.length > 1)
       :project-id="projectId"
       :columns="boardStore.columns"
       :default-column-id="defaultColumnId"
+      :default-swimlane-id="defaultSwimlaneId"
       @close="showTaskModal = false"
       @submit="handleCreateTask"
     />

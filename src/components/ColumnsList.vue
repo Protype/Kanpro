@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useColumnsStore } from '@/stores/columns'
+import { useToast } from '@/stores/toast'
+import draggable from 'vuedraggable'
 import type { Column } from '@/types'
 
 const props = defineProps<{
@@ -12,6 +14,7 @@ const emit = defineEmits<{
 }>()
 
 const columnsStore = useColumnsStore()
+const toast = useToast()
 
 // Form state
 const isAdding = ref(false)
@@ -26,15 +29,33 @@ const editTitle = ref('')
 const editTaskLimit = ref(0)
 const editDescription = ref('')
 
+// Drag state
+const localColumns = ref<Column[]>([])
+const savingColumnIds = ref<Set<number>>(new Set())
+
+// Sync local columns with store
+const syncLocalColumns = () => {
+  localColumns.value = [...columnsStore.sortedColumns]
+}
+
 onMounted(async () => {
   await columnsStore.fetchColumns(props.projectId)
+  syncLocalColumns()
 })
 
 watch(() => props.projectId, async (newId) => {
   if (newId) {
     await columnsStore.fetchColumns(newId)
+    syncLocalColumns()
   }
 })
+
+watch(() => columnsStore.sortedColumns, () => {
+  // Only sync if not currently dragging/saving
+  if (savingColumnIds.value.size === 0) {
+    syncLocalColumns()
+  }
+}, { deep: true })
 
 const startAdding = () => {
   isAdding.value = true
@@ -51,6 +72,7 @@ const handleAddColumn = async () => {
   if (!newColumnTitle.value.trim() || isSubmitting.value) return
 
   isSubmitting.value = true
+  const loadingToast = toast.loading('新增欄位中...')
   try {
     await columnsStore.addColumn(
       props.projectId,
@@ -59,11 +81,13 @@ const handleAddColumn = async () => {
       newColumnDescription.value.trim()
     )
     await columnsStore.fetchColumns(props.projectId)
+    syncLocalColumns()
+    toast.update(loadingToast, 'success', '欄位已新增')
     cancelAdding()
     emit('updated')
   } catch (error) {
     console.error('Failed to add column:', error)
-    alert('新增欄位失敗')
+    toast.update(loadingToast, 'error', '新增欄位失敗')
   } finally {
     isSubmitting.value = false
   }
@@ -84,6 +108,7 @@ const handleSaveColumn = async () => {
   if (!editingColumnId.value || !editTitle.value.trim() || isSubmitting.value) return
 
   isSubmitting.value = true
+  const loadingToast = toast.loading('更新欄位中...')
   try {
     await columnsStore.updateColumn(
       editingColumnId.value,
@@ -92,11 +117,13 @@ const handleSaveColumn = async () => {
       editDescription.value.trim()
     )
     await columnsStore.fetchColumns(props.projectId)
+    syncLocalColumns()
+    toast.update(loadingToast, 'success', '欄位已更新')
     cancelEditing()
     emit('updated')
   } catch (error) {
     console.error('Failed to update column:', error)
-    alert('更新欄位失敗')
+    toast.update(loadingToast, 'error', '更新欄位失敗')
   } finally {
     isSubmitting.value = false
   }
@@ -105,233 +132,249 @@ const handleSaveColumn = async () => {
 const handleRemoveColumn = async (column: Column) => {
   if (!confirm(`確定要刪除欄位「${column.title}」嗎？此操作無法復原。`)) return
 
+  savingColumnIds.value.add(column.id)
+  const loadingToast = toast.loading('刪除欄位中...')
   try {
     await columnsStore.removeColumn(column.id)
     await columnsStore.fetchColumns(props.projectId)
+    syncLocalColumns()
+    toast.update(loadingToast, 'success', '欄位已刪除')
     emit('updated')
   } catch (error) {
     console.error('Failed to remove column:', error)
-    alert('刪除欄位失敗')
+    toast.update(loadingToast, 'error', '刪除欄位失敗')
+  } finally {
+    savingColumnIds.value.delete(column.id)
   }
 }
 
-const handleMoveUp = async (column: Column) => {
-  if (column.position <= 1) return
+const handleDragEnd = async (event: any) => {
+  const { oldIndex, newIndex } = event
+  if (oldIndex === newIndex) return
+
+  const movedColumn = localColumns.value[newIndex]
+  if (!movedColumn) return
+
+  // New position is 1-based
+  const newPosition = newIndex + 1
+
+  // Mark as saving
+  savingColumnIds.value.add(movedColumn.id)
 
   try {
-    await columnsStore.changeColumnPosition(props.projectId, column.id, column.position - 1)
+    await columnsStore.changeColumnPosition(props.projectId, movedColumn.id, newPosition)
     await columnsStore.fetchColumns(props.projectId)
+    syncLocalColumns()
     emit('updated')
   } catch (error) {
-    console.error('Failed to move column:', error)
-    alert('移動欄位失敗')
+    console.error('Failed to reorder column:', error)
+    toast.error('移動欄位失敗')
+    // Revert on error
+    syncLocalColumns()
+  } finally {
+    savingColumnIds.value.delete(movedColumn.id)
   }
 }
 
-const handleMoveDown = async (column: Column) => {
-  if (column.position >= columnsStore.columnsCount) return
-
-  try {
-    await columnsStore.changeColumnPosition(props.projectId, column.id, column.position + 1)
-    await columnsStore.fetchColumns(props.projectId)
-    emit('updated')
-  } catch (error) {
-    console.error('Failed to move column:', error)
-    alert('移動欄位失敗')
-  }
-}
+const isColumnSaving = (columnId: number) => savingColumnIds.value.has(columnId)
 </script>
 
 <template>
-  <div class="space-y-4">
+  <div class="p-5">
     <!-- Header -->
-    <div class="flex items-center justify-between">
-      <h3 class="text-lg font-semibold text-content">
-        欄位管理
-        <span v-if="columnsStore.columnsCount > 0" class="text-content-tertiary text-sm font-normal">
-          ({{ columnsStore.columnsCount }})
+    <div class="flex items-center justify-between mb-4 h-8">
+      <div class="flex items-center gap-2">
+        <ph-icon icon="columns" class="w-5 h-5 text-content-tertiary" />
+        <h3 class="text-base font-semibold text-content">
+          欄位管理
+        </h3>
+        <span v-if="columnsStore.columnsCount > 0" class="text-xs text-content-tertiary bg-surface-secondary px-1.5 py-0.5 rounded">
+          {{ columnsStore.columnsCount }}
         </span>
-      </h3>
+      </div>
       <button
         v-if="!isAdding"
         @click="startAdding"
-        class="px-3 py-1.5 text-sm bg-accent text-content-inverse rounded-md hover:bg-accent-hover"
+        class="w-8 h-8 flex items-center justify-center text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary rounded-md border border-edge transition-colors"
+        title="新增欄位"
       >
-        + 新增欄位
+        <ph-icon icon="plus" class="w-4 h-4" />
       </button>
     </div>
 
-    <!-- Loading -->
-    <div v-if="columnsStore.isLoading" class="text-center py-4">
-      <ph-icon icon="spinner" class="animate-spin h-6 w-6 text-accent mx-auto" />
-    </div>
-
-    <div v-else class="space-y-3">
+    <div class="space-y-3">
       <!-- Add column form -->
-      <div v-if="isAdding" class="bg-surface-secondary rounded-lg p-4 space-y-3">
-        <div class="space-y-3">
-          <div>
-            <label class="block text-sm font-medium text-content-secondary mb-1">欄位名稱 *</label>
-            <input
-              v-model="newColumnTitle"
-              type="text"
-              class="w-full px-3 py-2 border border-edge rounded-md focus:outline-none focus:ring-2 focus:ring-accent bg-surface text-content"
-              placeholder="輸入欄位名稱"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-content-secondary mb-1">WIP 限制</label>
-            <input
-              v-model.number="newColumnTaskLimit"
-              type="number"
-              min="0"
-              class="w-full px-3 py-2 border border-edge rounded-md focus:outline-none focus:ring-2 focus:ring-accent bg-surface text-content"
-              placeholder="0 表示不限制"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-content-secondary mb-1">描述</label>
-            <input
-              v-model="newColumnDescription"
-              type="text"
-              class="w-full px-3 py-2 border border-edge rounded-md focus:outline-none focus:ring-2 focus:ring-accent bg-surface text-content"
-              placeholder="選填"
-            />
-          </div>
+      <div v-if="isAdding" class="bg-surface-secondary rounded-lg p-4 space-y-3 border border-edge">
+        <div>
+          <input
+            v-model="newColumnTitle"
+            type="text"
+            :disabled="isSubmitting"
+            class="w-full px-3 py-2 text-sm bg-surface border border-edge rounded-lg text-content focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed"
+            placeholder="輸入欄位名稱"
+          />
+        </div>
+        <div>
+          <input
+            v-model.number="newColumnTaskLimit"
+            type="number"
+            min="0"
+            :disabled="isSubmitting"
+            class="w-full px-3 py-2 text-sm bg-surface border border-edge rounded-lg text-content focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed"
+            placeholder="WIP 限制（0 表示不限制）"
+          />
+        </div>
+        <div>
+          <input
+            v-model="newColumnDescription"
+            type="text"
+            :disabled="isSubmitting"
+            class="w-full px-3 py-2 text-sm bg-surface border border-edge rounded-lg text-content focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed"
+            placeholder="描述（選填）"
+          />
         </div>
         <div class="flex gap-2 justify-end">
           <button
             @click="cancelAdding"
             :disabled="isSubmitting"
-            class="px-4 py-2 text-sm text-content-secondary hover:text-content"
+            class="px-4 py-2 text-sm text-content-secondary hover:text-content transition-colors disabled:opacity-50"
           >
             取消
           </button>
           <button
             @click="handleAddColumn"
             :disabled="!newColumnTitle.trim() || isSubmitting"
-            class="px-4 py-2 text-sm bg-accent text-content-inverse rounded-md hover:bg-accent-hover disabled:opacity-50"
+            class="px-4 py-2 text-sm font-medium bg-accent text-white rounded-lg hover:bg-accent/90 disabled:opacity-50 transition-colors flex items-center gap-2"
           >
+            <ph-icon v-if="isSubmitting" icon="spinner" class="w-4 h-4 animate-spin" />
             新增
           </button>
         </div>
       </div>
 
       <!-- Columns list -->
-      <div class="bg-surface rounded-lg border border-edge divide-y divide-edge">
-        <div
-          v-for="column in columnsStore.sortedColumns"
-          :key="column.id"
-          class="p-4"
-        >
-          <!-- View mode -->
-          <div v-if="editingColumnId !== column.id" class="flex items-center justify-between">
-            <div class="flex items-center gap-4">
-              <!-- Position controls -->
-              <div class="flex flex-col">
-                <button
-                  @click="handleMoveUp(column)"
-                  :disabled="column.position <= 1"
-                  class="p-1 text-content-tertiary hover:text-content-secondary disabled:opacity-30"
-                  title="上移"
-                >
-                  <ph-icon icon="chevron-up" class="w-4 h-4" />
-                </button>
-                <button
-                  @click="handleMoveDown(column)"
-                  :disabled="column.position >= columnsStore.columnsCount"
-                  class="p-1 text-content-tertiary hover:text-content-secondary disabled:opacity-30"
-                  title="下移"
-                >
-                  <ph-icon icon="chevron-down" class="w-4 h-4" />
-                </button>
+      <draggable
+        v-model="localColumns"
+        item-key="id"
+        handle=".drag-handle"
+        ghost-class="opacity-50"
+        @end="handleDragEnd"
+        class="space-y-2"
+      >
+        <template #item="{ element: column }">
+          <div
+            class="p-3 bg-surface-secondary/50 rounded-lg hover:bg-surface-secondary transition-colors"
+          >
+            <!-- View mode -->
+            <div v-if="editingColumnId !== column.id" class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <!-- Drag handle / Loading indicator -->
+                <div class="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center relative">
+                  <ph-icon
+                    v-if="isColumnSaving(column.id)"
+                    icon="spinner"
+                    class="w-4 h-4 text-accent animate-spin"
+                  />
+                  <ph-icon
+                    v-else
+                    icon="dots-six-vertical"
+                    class="w-4 h-4 text-accent drag-handle cursor-grab active:cursor-grabbing"
+                  />
+                </div>
+
+                <!-- Column info -->
+                <div class="min-w-0">
+                  <div class="font-medium text-sm text-content truncate flex items-center gap-2">
+                    {{ column.title }}
+                    <span v-if="column.task_limit > 0" class="text-xs px-1.5 py-0.5 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded">
+                      WIP: {{ column.task_limit }}
+                    </span>
+                  </div>
+                  <div v-if="column.description" class="text-xs text-content-tertiary truncate">
+                    {{ column.description }}
+                  </div>
+                </div>
               </div>
 
-              <!-- Column info -->
+              <div class="flex items-center gap-1">
+                <button
+                  @click="startEditing(column)"
+                  :disabled="isColumnSaving(column.id)"
+                  class="p-1.5 text-content-tertiary hover:text-accent hover:bg-accent/10 rounded-md transition-colors disabled:opacity-50"
+                  title="編輯"
+                >
+                  <ph-icon icon="pen-to-square" class="w-4 h-4" />
+                </button>
+                <button
+                  @click="handleRemoveColumn(column)"
+                  :disabled="isColumnSaving(column.id)"
+                  class="p-1.5 text-content-tertiary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md transition-colors disabled:opacity-50"
+                  title="刪除"
+                >
+                  <ph-icon icon="trash" class="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            <!-- Edit mode -->
+            <div v-else class="space-y-3">
               <div>
-                <div class="font-medium text-content">
-                  {{ column.title }}
-                  <span v-if="column.task_limit > 0" class="text-sm text-content-secondary ml-2">
-                    (WIP: {{ column.task_limit }})
-                  </span>
-                </div>
-                <div v-if="column.description" class="text-sm text-content-secondary">
-                  {{ column.description }}
-                </div>
+                <input
+                  v-model="editTitle"
+                  type="text"
+                  :disabled="isSubmitting"
+                  class="w-full px-3 py-2 text-sm bg-surface border border-edge rounded-lg text-content focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed"
+                  placeholder="輸入欄位名稱"
+                />
+              </div>
+              <div>
+                <input
+                  v-model.number="editTaskLimit"
+                  type="number"
+                  min="0"
+                  :disabled="isSubmitting"
+                  class="w-full px-3 py-2 text-sm bg-surface border border-edge rounded-lg text-content focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed"
+                  placeholder="WIP 限制（0 表示不限制）"
+                />
+              </div>
+              <div>
+                <input
+                  v-model="editDescription"
+                  type="text"
+                  :disabled="isSubmitting"
+                  class="w-full px-3 py-2 text-sm bg-surface border border-edge rounded-lg text-content focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed"
+                  placeholder="描述（選填）"
+                />
+              </div>
+              <div class="flex gap-2 justify-end">
+                <button
+                  @click="cancelEditing"
+                  :disabled="isSubmitting"
+                  class="px-4 py-2 text-sm text-content-secondary hover:text-content transition-colors disabled:opacity-50"
+                >
+                  取消
+                </button>
+                <button
+                  @click="handleSaveColumn"
+                  :disabled="!editTitle.trim() || isSubmitting"
+                  class="px-4 py-2 text-sm font-medium bg-accent text-white rounded-lg hover:bg-accent/90 disabled:opacity-50 transition-colors flex items-center gap-2"
+                >
+                  <ph-icon v-if="isSubmitting" icon="spinner" class="w-4 h-4 animate-spin" />
+                  儲存
+                </button>
               </div>
             </div>
-
-            <div class="flex items-center gap-2">
-              <button
-                @click="startEditing(column)"
-                class="p-2 text-content-tertiary hover:text-content-secondary"
-                title="編輯"
-              >
-                <ph-icon icon="pen-to-square" class="w-4 h-4" />
-              </button>
-              <button
-                @click="handleRemoveColumn(column)"
-                class="p-2 text-content-tertiary hover:text-error"
-                title="刪除"
-              >
-                <ph-icon icon="trash" class="w-4 h-4" />
-              </button>
-            </div>
           </div>
+        </template>
+      </draggable>
 
-          <!-- Edit mode -->
-          <div v-else class="space-y-3">
-            <div>
-              <label class="block text-sm font-medium text-content-secondary mb-1">欄位名稱 *</label>
-              <input
-                v-model="editTitle"
-                type="text"
-                class="w-full px-3 py-2 border border-edge rounded-md focus:outline-none focus:ring-2 focus:ring-accent bg-surface text-content"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-content-secondary mb-1">WIP 限制</label>
-              <input
-                v-model.number="editTaskLimit"
-                type="number"
-                min="0"
-                class="w-full px-3 py-2 border border-edge rounded-md focus:outline-none focus:ring-2 focus:ring-accent bg-surface text-content"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-content-secondary mb-1">描述</label>
-              <input
-                v-model="editDescription"
-                type="text"
-                class="w-full px-3 py-2 border border-edge rounded-md focus:outline-none focus:ring-2 focus:ring-accent bg-surface text-content"
-              />
-            </div>
-            <div class="flex gap-2 justify-end">
-              <button
-                @click="cancelEditing"
-                :disabled="isSubmitting"
-                class="px-4 py-2 text-sm text-content-secondary hover:text-content"
-              >
-                取消
-              </button>
-              <button
-                @click="handleSaveColumn"
-                :disabled="!editTitle.trim() || isSubmitting"
-                class="px-4 py-2 text-sm bg-accent text-content-inverse rounded-md hover:bg-accent-hover disabled:opacity-50"
-              >
-                儲存
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Empty state -->
-        <div
-          v-if="columnsStore.columns.length === 0 && !columnsStore.isLoading"
-          class="p-8 text-center text-content-secondary"
-        >
-          沒有欄位
-        </div>
+      <!-- Empty state -->
+      <div
+        v-if="localColumns.length === 0"
+        class="py-8 text-center text-content-tertiary text-sm"
+      >
+        <ph-icon icon="columns" class="w-8 h-8 mx-auto mb-2 opacity-30" />
+        <p>尚無欄位</p>
       </div>
     </div>
   </div>

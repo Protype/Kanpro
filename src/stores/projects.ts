@@ -21,6 +21,22 @@ export interface CreateProjectParams {
 }
 
 /**
+ * Kanboard updateProject API 支援的完整參數
+ */
+export interface UpdateProjectParams {
+  name?: string
+  description?: string
+  identifier?: string
+  owner_id?: number
+  start_date?: string
+  end_date?: string
+  priority_default?: number
+  priority_start?: number
+  priority_end?: number
+  email?: string
+}
+
+/**
  * 建立專案的選項（包含建立後的額外操作）
  */
 export interface CreateProjectOptions extends CreateProjectParams {
@@ -77,7 +93,7 @@ export const useProjectsStore = defineStore('projects', () => {
 
   async function updateProject(
     projectId: number,
-    data: { name?: string; description?: string; start_date?: string; end_date?: string }
+    data: UpdateProjectParams
   ): Promise<boolean> {
     const authStore = useAuthStore()
     const client = authStore.getClient()
@@ -87,6 +103,24 @@ export const useProjectsStore = defineStore('projects', () => {
       ...data
     })
     return result
+  }
+
+  /**
+   * 取得單一專案詳細資訊
+   */
+  async function fetchProjectById(projectId: number): Promise<Project | null> {
+    const authStore = useAuthStore()
+    const client = authStore.getClient()
+
+    try {
+      const result = await client.call<Project>('getProjectById', {
+        project_id: projectId
+      })
+      return result
+    } catch (err) {
+      console.error('Failed to fetch project:', err)
+      return null
+    }
   }
 
   async function removeProject(projectId: number): Promise<boolean> {
@@ -193,6 +227,7 @@ export const useProjectsStore = defineStore('projects', () => {
     activeProjects,
     filteredProjects,
     fetchProjects,
+    fetchProjectById,
     getProjectById,
     updateProject,
     removeProject,

@@ -286,6 +286,47 @@ describe('Projects Store', () => {
       })
     })
 
+    it('should support all Kanboard API fields', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 1,
+          result: true
+        })
+      })
+
+      const store = useProjectsStore()
+      await store.updateProject(1, {
+        name: 'Full Project',
+        description: 'Full description',
+        identifier: 'PROJ',
+        owner_id: 2,
+        start_date: '2026-01-01',
+        end_date: '2026-12-31',
+        priority_default: 2,
+        priority_start: 0,
+        priority_end: 4,
+        email: 'project@example.com'
+      })
+
+      const callBody = JSON.parse(mockFetch.mock.calls[0][1].body)
+      expect(callBody.method).toBe('updateProject')
+      expect(callBody.params).toEqual({
+        project_id: 1,
+        name: 'Full Project',
+        description: 'Full description',
+        identifier: 'PROJ',
+        owner_id: 2,
+        start_date: '2026-01-01',
+        end_date: '2026-12-31',
+        priority_default: 2,
+        priority_start: 0,
+        priority_end: 4,
+        email: 'project@example.com'
+      })
+    })
+
     it('should throw error on update failure', async () => {
       mockFetch.mockRejectedValueOnce(new Error('Update failed'))
 
@@ -294,6 +335,53 @@ describe('Projects Store', () => {
       await expect(
         store.updateProject(1, { name: 'New Name' })
       ).rejects.toThrow('Update failed')
+    })
+  })
+
+  describe('fetchProjectById', () => {
+    it('should fetch single project details', async () => {
+      const projectDetail = {
+        id: 1,
+        name: 'Project Alpha',
+        description: 'First project',
+        identifier: 'ALPHA',
+        owner_id: 1,
+        start_date: '2026-01-01',
+        end_date: '2026-12-31',
+        priority_default: 0,
+        priority_start: 0,
+        priority_end: 3,
+        email: 'alpha@example.com',
+        is_active: true,
+        is_public: false,
+        is_private: true
+      }
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 1,
+          result: projectDetail
+        })
+      })
+
+      const store = useProjectsStore()
+      const result = await store.fetchProjectById(1)
+
+      expect(result).toEqual(projectDetail)
+      const callBody = JSON.parse(mockFetch.mock.calls[0][1].body)
+      expect(callBody.method).toBe('getProjectById')
+      expect(callBody.params).toEqual({ project_id: 1 })
+    })
+
+    it('should return null on fetch failure', async () => {
+      mockFetch.mockRejectedValueOnce(new Error('Not found'))
+
+      const store = useProjectsStore()
+      const result = await store.fetchProjectById(999)
+
+      expect(result).toBeNull()
     })
   })
 
