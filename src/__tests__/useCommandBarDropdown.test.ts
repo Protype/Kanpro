@@ -42,6 +42,11 @@ describe('useCommandBarDropdown', () => {
         { id: 1, name: 'John Doe', username: 'john' },
         { id: 2, name: 'Jane Smith', username: 'jane' },
         { id: 3, name: 'Bob Wilson', username: 'bob' }
+      ],
+      assignableUsers: [
+        { id: 1, name: 'John Doe', username: 'john' },
+        { id: 2, name: 'Jane Smith', username: 'jane' },
+        { id: 3, name: 'Bob Wilson', username: 'bob' }
       ]
     } as any)
 

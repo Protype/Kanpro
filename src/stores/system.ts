@@ -23,6 +23,7 @@ export interface KanproBridgeStatus {
     user_avatar: BridgeFeature
     user_password: BridgeFeature
     user_profile: BridgeFeature
+    project_user: BridgeFeature
   }
 }
 
@@ -69,6 +70,12 @@ export const BRIDGE_MODULES: BridgeModule[] = [
     name: '使用者設定檔',
     description: '個人資料編輯',
     featureKey: 'user_profile'
+  },
+  {
+    id: 'project_user',
+    name: '專案成員擴展',
+    description: '取得完整專案成員資料',
+    featureKey: 'project_user'
   }
 ]
 

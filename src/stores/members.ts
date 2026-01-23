@@ -1,23 +1,38 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useAuthStore } from './auth'
+import { useSystemStore } from './system'
 import type { ProjectMember, User } from '@/types'
 
 /**
  * 成員資料取得策略：
  *
- * 方式一（目前實作）：
+ * 方式一（標準 Kanboard API）：
  * - 從 getProjectUsers / getAssignableUsers 取得 { userId: displayName } 格式
  * - 再用 getUser 逐一取得每個使用者的完整資料
  *
- * 方式二（未來支援）：
- * - 如果 Kanpro Bridge API 有啟用，可一次取得完整成員資料
- * - TODO: 偵測 Bridge API 並自動切換
+ * 方式二（Kanpro Bridge 擴展 API）：
+ * - 如果 Kanpro Bridge 的 project_user 功能有啟用
+ * - 使用 getProjectUsersExtended / getAssignableUsersExtended 一次取得完整資料
+ * - 回傳格式包含: id, username, name, email, role, is_active, project_role
  *
  * API 使用場景：
- * - getProjectUsers: 專案設定頁的成員管理（顯示所有成員，含瀏覽者）
- * - getAssignableUsers: 任務指派人選擇器（只顯示可指派的人，不含瀏覽者）
+ * - getProjectUsers / getProjectUsersExtended: 專案設定頁的成員管理（顯示所有成員，含瀏覽者）
+ * - getAssignableUsers / getAssignableUsersExtended: 任務指派人選擇器（只顯示可指派的人，不含瀏覽者）
  */
+
+/**
+ * Kanpro Bridge Extended API 回傳的使用者格式
+ */
+interface ExtendedProjectUser {
+  id: number
+  username: string
+  name: string | null
+  email: string | null
+  role: string  // 系統角色 (app-admin, app-manager, app-user)
+  is_active: boolean | string | number
+  project_role: 'project-manager' | 'project-member' | 'project-viewer'
+}
 
 export const useMembersStore = defineStore('members', () => {
   // 專案所有成員（含瀏覽者）- 用於專案設定
@@ -128,9 +143,37 @@ export const useMembersStore = defineStore('members', () => {
   }
 
   /**
+   * 檢查 Kanpro Bridge 的 project_user 功能是否啟用
+   */
+  function isProjectUserExtendedEnabled(): boolean {
+    const systemStore = useSystemStore()
+    return systemStore.isModuleEnabled('project_user')
+  }
+
+  /**
+   * 從 Extended API 回傳格式轉換為 ProjectMember
+   */
+  function convertExtendedUserToMember(user: ExtendedProjectUser): ProjectMember {
+    const isActive = user.is_active === true ||
+      (user.is_active as unknown) === '1' ||
+      (user.is_active as unknown) === 1
+
+    return {
+      id: user.id,
+      username: user.username,
+      name: user.name || null,
+      email: user.email || null,
+      role: user.project_role,
+      is_active: isActive
+    }
+  }
+
+  /**
    * 取得專案所有成員（含瀏覽者）
-   * 使用 getProjectUsers API
    * 用途：專案設定頁的成員管理
+   *
+   * 如果 Kanpro Bridge project_user 功能啟用，使用 getProjectUsersExtended
+   * 否則使用標準 getProjectUsers API
    */
   async function fetchProjectMembers(projectId: number): Promise<void> {
     const authStore = useAuthStore()
@@ -140,16 +183,35 @@ export const useMembersStore = defineStore('members', () => {
 
     try {
       const client = authStore.getClient()
-      // getProjectUsers returns { userId: displayName } format
-      const result = await client.call<Record<string, string>>('getProjectUsers', {
-        project_id: projectId
-      })
 
-      // Preserve the original ID->name mapping for quick lookup
-      membersMap.value = result || {}
+      // 檢查是否使用 Extended API
+      if (isProjectUserExtendedEnabled()) {
+        // 使用 Kanpro Bridge Extended API - 一次取得完整資料
+        const result = await client.call<ExtendedProjectUser[]>('getProjectUsersExtended', {
+          project_id: projectId
+        })
 
-      // 取得每個使用者的完整資料和角色
-      members.value = await buildMembersList(projectId, result || {}, true)
+        const extendedUsers = result || []
+        members.value = extendedUsers.map(convertExtendedUserToMember)
+
+        // 建立 ID->name 對應表供其他地方使用
+        membersMap.value = {}
+        for (const user of extendedUsers) {
+          membersMap.value[user.id] = user.name || user.username
+        }
+      } else {
+        // 使用標準 Kanboard API
+        // getProjectUsers returns { userId: displayName } format
+        const result = await client.call<Record<string, string>>('getProjectUsers', {
+          project_id: projectId
+        })
+
+        // Preserve the original ID->name mapping for quick lookup
+        membersMap.value = result || {}
+
+        // 取得每個使用者的完整資料和角色
+        members.value = await buildMembersList(projectId, result || {}, true)
+      }
     } catch (err) {
       error.value = err instanceof Error ? err.message : '載入成員失敗'
       members.value = []
@@ -161,8 +223,10 @@ export const useMembersStore = defineStore('members', () => {
 
   /**
    * 取得可指派任務的成員（不含瀏覽者）
-   * 使用 getAssignableUsers API
    * 用途：任務指派人選擇器
+   *
+   * 如果 Kanpro Bridge project_user 功能啟用，使用 getAssignableUsersExtended
+   * 否則使用標準 getAssignableUsers API
    */
   async function fetchAssignableUsers(projectId: number): Promise<void> {
     const authStore = useAuthStore()
@@ -172,17 +236,36 @@ export const useMembersStore = defineStore('members', () => {
 
     try {
       const client = authStore.getClient()
-      // getAssignableUsers returns { userId: displayName } format
-      // 只回傳可以被指派任務的使用者（不包含 project-viewer）
-      const result = await client.call<Record<string, string>>('getAssignableUsers', {
-        project_id: projectId
-      })
 
-      // Preserve the original ID->name mapping for quick lookup
-      assignableUsersMap.value = result || {}
+      // 檢查是否使用 Extended API
+      if (isProjectUserExtendedEnabled()) {
+        // 使用 Kanpro Bridge Extended API - 一次取得完整資料
+        const result = await client.call<ExtendedProjectUser[]>('getAssignableUsersExtended', {
+          project_id: projectId
+        })
 
-      // 取得每個使用者的完整資料（可指派的使用者不需要查角色，因為一定不是 viewer）
-      assignableUsers.value = await buildMembersList(projectId, result || {}, false)
+        const extendedUsers = result || []
+        assignableUsers.value = extendedUsers.map(convertExtendedUserToMember)
+
+        // 建立 ID->name 對應表供其他地方使用
+        assignableUsersMap.value = {}
+        for (const user of extendedUsers) {
+          assignableUsersMap.value[user.id] = user.name || user.username
+        }
+      } else {
+        // 使用標準 Kanboard API
+        // getAssignableUsers returns { userId: displayName } format
+        // 只回傳可以被指派任務的使用者（不包含 project-viewer）
+        const result = await client.call<Record<string, string>>('getAssignableUsers', {
+          project_id: projectId
+        })
+
+        // Preserve the original ID->name mapping for quick lookup
+        assignableUsersMap.value = result || {}
+
+        // 取得每個使用者的完整資料（可指派的使用者不需要查角色，因為一定不是 viewer）
+        assignableUsers.value = await buildMembersList(projectId, result || {}, false)
+      }
     } catch (err) {
       error.value = err instanceof Error ? err.message : '載入可指派使用者失敗'
       assignableUsers.value = []

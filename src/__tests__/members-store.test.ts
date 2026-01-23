@@ -2,28 +2,38 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useMembersStore } from '@/stores/members'
 import { useAuthStore } from '@/stores/auth'
-import type { ProjectMember, User } from '@/types'
+import { useSystemStore } from '@/stores/system'
+import type { User } from '@/types'
 
 const mockFetch = vi.fn()
 
-const mockMembers: Record<string, ProjectMember> = {
-  '1': {
+// Standard API returns { userId: displayName } format
+const mockProjectUsersMap: Record<string, string> = {
+  '1': 'Admin User',
+  '2': 'User One'
+}
+
+// Extended API returns full user objects
+const mockExtendedProjectUsers = [
+  {
     id: 1,
     username: 'admin',
     name: 'Admin User',
     email: 'admin@example.com',
-    role: 'project-manager',
-    is_active: true
+    role: 'app-admin',
+    is_active: true,
+    project_role: 'project-manager' as const
   },
-  '2': {
+  {
     id: 2,
     username: 'user1',
     name: 'User One',
     email: 'user1@example.com',
-    role: 'project-member',
-    is_active: true
+    role: 'app-user',
+    is_active: true,
+    project_role: 'project-member' as const
   }
-}
+]
 
 const mockUsers: User[] = [
   {
@@ -52,6 +62,23 @@ const mockUsers: User[] = [
   }
 ]
 
+// Helper to setup system store with bridge status
+function setupSystemStoreWithBridge(enabled: boolean = true) {
+  const systemStore = useSystemStore()
+  systemStore.bridgeStatus = {
+    name: 'KanproBridge',
+    version: '1.0.0',
+    features: {
+      jwt_auth: { enabled: true, methods: [] },
+      user_metadata: { enabled: true, methods: [] },
+      user_avatar: { enabled: true, methods: [] },
+      user_password: { enabled: true, methods: [] },
+      user_profile: { enabled: true, methods: [] },
+      project_user: { enabled, methods: [] }
+    }
+  }
+}
+
 describe('Members Store', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
@@ -60,9 +87,14 @@ describe('Members Store', () => {
 
     // Setup auth store with credentials
     const authStore = useAuthStore()
-    authStore._setTestCredentials({ apiUrl: 'http://localhost/jsonrpc.php',
-    username: 'admin',
-    password: 'admin' })
+    authStore._setTestCredentials({
+      apiUrl: 'http://localhost/jsonrpc.php',
+      username: 'admin',
+      password: 'admin'
+    })
+
+    // Setup system store with bridge enabled by default
+    setupSystemStoreWithBridge(true)
   })
 
   afterEach(() => {
@@ -80,13 +112,13 @@ describe('Members Store', () => {
   })
 
   describe('fetchProjectMembers', () => {
-    it('should fetch and store project members', async () => {
+    it('should fetch and store project members using Extended API', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({
           jsonrpc: '2.0',
           id: 1,
-          result: mockMembers
+          result: mockExtendedProjectUsers
         })
       })
 
@@ -94,7 +126,67 @@ describe('Members Store', () => {
       await store.fetchProjectMembers(1)
 
       expect(store.members.length).toBe(2)
+      expect(store.members[0].username).toBe('admin')
+      expect(store.members[0].role).toBe('project-manager')
       expect(store.isLoading).toBe(false)
+    })
+
+    it('should use standard API when Extended API is disabled', async () => {
+      // Disable Extended API
+      setupSystemStoreWithBridge(false)
+
+      // Standard API returns { userId: displayName } format
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 1,
+          result: mockProjectUsersMap
+        })
+      })
+      // Mock getUser for user 1
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 2,
+          result: { id: 1, username: 'admin', name: 'Admin User', email: 'admin@example.com', is_active: true }
+        })
+      })
+      // Mock getProjectUserRole for user 1
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 3,
+          result: 'project-manager'
+        })
+      })
+      // Mock getUser for user 2
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 4,
+          result: { id: 2, username: 'user1', name: 'User One', email: 'user1@example.com', is_active: true }
+        })
+      })
+      // Mock getProjectUserRole for user 2
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 5,
+          result: 'project-member'
+        })
+      })
+
+      const store = useMembersStore()
+      await store.fetchProjectMembers(1)
+
+      expect(store.members.length).toBe(2)
+      const callBody = JSON.parse(mockFetch.mock.calls[0][1].body)
+      expect(callBody.method).toBe('getProjectUsers')
     })
 
     it('should handle fetch error', async () => {
@@ -107,13 +199,13 @@ describe('Members Store', () => {
       expect(store.error).toBe('Network error')
     })
 
-    it('should call API with correct parameters', async () => {
+    it('should call Extended API with correct parameters', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({
           jsonrpc: '2.0',
           id: 1,
-          result: mockMembers
+          result: mockExtendedProjectUsers
         })
       })
 
@@ -121,7 +213,7 @@ describe('Members Store', () => {
       await store.fetchProjectMembers(5)
 
       const callBody = JSON.parse(mockFetch.mock.calls[0][1].body)
-      expect(callBody.method).toBe('getProjectUsers')
+      expect(callBody.method).toBe('getProjectUsersExtended')
       expect(callBody.params).toEqual({ project_id: 5 })
     })
   })
@@ -287,7 +379,7 @@ describe('Members Store', () => {
         json: () => Promise.resolve({
           jsonrpc: '2.0',
           id: 1,
-          result: mockMembers
+          result: mockExtendedProjectUsers
         })
       })
 
@@ -298,13 +390,13 @@ describe('Members Store', () => {
     })
 
     it('should return available users', async () => {
-      // First fetch members
+      // First fetch members (Extended API)
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({
           jsonrpc: '2.0',
           id: 1,
-          result: mockMembers
+          result: mockExtendedProjectUsers
         })
       })
       // Then fetch all users
@@ -312,7 +404,7 @@ describe('Members Store', () => {
         ok: true,
         json: () => Promise.resolve({
           jsonrpc: '2.0',
-          id: 1,
+          id: 2,
           result: mockUsers
         })
       })
@@ -334,7 +426,7 @@ describe('Members Store', () => {
         json: () => Promise.resolve({
           jsonrpc: '2.0',
           id: 1,
-          result: mockMembers
+          result: mockExtendedProjectUsers
         })
       })
 

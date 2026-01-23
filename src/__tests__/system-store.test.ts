@@ -85,7 +85,8 @@ describe('System Store', () => {
           user_metadata: { enabled: false, methods: [] },
           user_avatar: { enabled: false, methods: [] },
           user_password: { enabled: false, methods: [] },
-          user_profile: { enabled: false, methods: [] }
+          user_profile: { enabled: false, methods: [] },
+          project_user: { enabled: false, methods: [] }
         }
       }
       expect(store.isModuleEnabled('jwt')).toBe(true)
@@ -101,7 +102,8 @@ describe('System Store', () => {
           user_metadata: { enabled: false, methods: [] },
           user_avatar: { enabled: false, methods: [] },
           user_password: { enabled: false, methods: [] },
-          user_profile: { enabled: false, methods: [] }
+          user_profile: { enabled: false, methods: [] },
+          project_user: { enabled: false, methods: [] }
         }
       }
       expect(store.isModuleEnabled('jwt')).toBe(false)
@@ -117,7 +119,8 @@ describe('System Store', () => {
           user_metadata: { enabled: true, methods: [] },
           user_avatar: { enabled: true, methods: [] },
           user_password: { enabled: true, methods: [] },
-          user_profile: { enabled: true, methods: [] }
+          user_profile: { enabled: true, methods: [] },
+          project_user: { enabled: true, methods: [] }
         }
       }
       expect(store.isModuleEnabled('unknown')).toBe(false)
@@ -135,7 +138,8 @@ describe('System Store', () => {
           user_metadata: { enabled: false, methods: [] },
           user_avatar: { enabled: true, methods: [] },
           user_password: { enabled: true, methods: [] },
-          user_profile: { enabled: false, methods: [] }
+          user_profile: { enabled: false, methods: [] },
+          project_user: { enabled: false, methods: [] }
         }
       }
 
@@ -231,7 +235,8 @@ describe('System Store', () => {
           user_metadata: { enabled: true, methods: [] },
           user_avatar: { enabled: true, methods: [] },
           user_password: { enabled: true, methods: [] },
-          user_profile: { enabled: false, methods: [] }
+          user_profile: { enabled: false, methods: [] },
+          project_user: { enabled: false, methods: [] }
         }
       }
 
@@ -339,7 +344,8 @@ describe('System Store', () => {
           user_metadata: { enabled: true, methods: [] },
           user_avatar: { enabled: true, methods: [] },
           user_password: { enabled: true, methods: [] },
-          user_profile: { enabled: true, methods: [] }
+          user_profile: { enabled: true, methods: [] },
+          project_user: { enabled: true, methods: [] }
         }
       }
       store.bridgeError = 'some error'
