@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { getAvatarColor, getAvatarInitial, getUserDisplayName } from '@/utils/avatar'
+import type { ProjectMember } from '@/types'
 
 describe('Avatar Utilities', () => {
   describe('getAvatarColor', () => {
@@ -91,6 +92,52 @@ describe('Avatar Utilities', () => {
 
     it('should return empty string when both name and username are missing', () => {
       expect(getUserDisplayName({})).toBe('')
+    })
+  })
+
+  describe('ProjectMember with avatar', () => {
+    it('should support avatar field in ProjectMember', () => {
+      const member: ProjectMember = {
+        id: 1,
+        username: 'testuser',
+        name: 'Test User',
+        email: 'test@example.com',
+        role: 'project-member',
+        is_active: true,
+        avatar: 'base64encodedimage'
+      }
+
+      expect(member.avatar).toBe('base64encodedimage')
+      expect(getUserDisplayName(member)).toBe('Test User')
+      expect(getAvatarInitial(getUserDisplayName(member))).toBe('T')
+    })
+
+    it('should handle null avatar in ProjectMember', () => {
+      const member: ProjectMember = {
+        id: 1,
+        username: 'testuser',
+        name: 'Test User',
+        email: null,
+        role: 'project-member',
+        is_active: true,
+        avatar: null
+      }
+
+      expect(member.avatar).toBeNull()
+    })
+
+    it('should handle undefined avatar in ProjectMember', () => {
+      const member: ProjectMember = {
+        id: 1,
+        username: 'testuser',
+        name: 'Test User',
+        email: null,
+        role: 'project-member',
+        is_active: true
+        // avatar is optional and not provided
+      }
+
+      expect(member.avatar).toBeUndefined()
     })
   })
 })

@@ -115,7 +115,8 @@ function populateForm(project: Project) {
   ownerId.value = project.owner_id || null
   startDate.value = project.start_date || ''
   endDate.value = project.end_date || ''
-  isPublicAccessEnabled.value = project.is_public || false
+  // API 可能回傳 boolean | number | string，統一轉為 boolean
+  isPublicAccessEnabled.value = project.is_public === true || project.is_public === 1 || project.is_public === '1'
   priorityDefault.value = project.priority_default
   priorityStart.value = project.priority_start
   priorityEnd.value = project.priority_end

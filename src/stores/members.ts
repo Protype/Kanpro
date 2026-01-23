@@ -13,16 +13,17 @@ import type { ProjectMember, User } from '@/types'
  *
  * 方式二（Kanpro Bridge 擴展 API）：
  * - 如果 Kanpro Bridge 的 project_user 功能有啟用
- * - 使用 getProjectUsersExtended / getAssignableUsersExtended 一次取得完整資料
- * - 回傳格式包含: id, username, name, email, role, is_active, project_role
+ * - getProjectUsers / getAssignableUsers 會被覆蓋，直接回傳完整資料陣列
+ * - 回傳格式包含: id, username, name, email, role, is_active, project_role, avatar
  *
  * API 使用場景：
- * - getProjectUsers / getProjectUsersExtended: 專案設定頁的成員管理（顯示所有成員，含瀏覽者）
- * - getAssignableUsers / getAssignableUsersExtended: 任務指派人選擇器（只顯示可指派的人，不含瀏覽者）
+ * - getProjectUsers: 專案設定頁的成員管理（顯示所有成員，含瀏覽者）
+ * - getAssignableUsers: 任務指派人選擇器（只顯示可指派的人，不含瀏覽者）
  */
 
 /**
- * Kanpro Bridge Extended API 回傳的使用者格式
+ * Kanpro Bridge 擴展模式下的使用者格式
+ * 當 project_user 功能啟用時，getProjectUsers/getAssignableUsers 會回傳此格式
  */
 interface ExtendedProjectUser {
   id: number
@@ -32,6 +33,7 @@ interface ExtendedProjectUser {
   role: string  // 系統角色 (app-admin, app-manager, app-user)
   is_active: boolean | string | number
   project_role: 'project-manager' | 'project-member' | 'project-viewer'
+  avatar: string | null  // base64 encoded avatar image or null
 }
 
 export const useMembersStore = defineStore('members', () => {
@@ -151,7 +153,7 @@ export const useMembersStore = defineStore('members', () => {
   }
 
   /**
-   * 從 Extended API 回傳格式轉換為 ProjectMember
+   * 從擴展格式轉換為 ProjectMember
    */
   function convertExtendedUserToMember(user: ExtendedProjectUser): ProjectMember {
     const isActive = user.is_active === true ||
@@ -164,7 +166,8 @@ export const useMembersStore = defineStore('members', () => {
       name: user.name || null,
       email: user.email || null,
       role: user.project_role,
-      is_active: isActive
+      is_active: isActive,
+      avatar: user.avatar || null
     }
   }
 
@@ -172,8 +175,8 @@ export const useMembersStore = defineStore('members', () => {
    * 取得專案所有成員（含瀏覽者）
    * 用途：專案設定頁的成員管理
    *
-   * 如果 Kanpro Bridge project_user 功能啟用，使用 getProjectUsersExtended
-   * 否則使用標準 getProjectUsers API
+   * 如果 Kanpro Bridge project_user 功能啟用，getProjectUsers 會被覆蓋回傳陣列格式
+   * 否則使用標準 Kanboard API 回傳 { userId: displayName } 格式
    */
   async function fetchProjectMembers(projectId: number): Promise<void> {
     const authStore = useAuthStore()
@@ -184,10 +187,10 @@ export const useMembersStore = defineStore('members', () => {
     try {
       const client = authStore.getClient()
 
-      // 檢查是否使用 Extended API
+      // 檢查是否啟用擴展模式
       if (isProjectUserExtendedEnabled()) {
-        // 使用 Kanpro Bridge Extended API - 一次取得完整資料
-        const result = await client.call<ExtendedProjectUser[]>('getProjectUsersExtended', {
+        // Kanpro Bridge 已覆蓋 API - 回傳完整資料陣列
+        const result = await client.call<ExtendedProjectUser[]>('getProjectUsers', {
           project_id: projectId
         })
 
@@ -225,8 +228,8 @@ export const useMembersStore = defineStore('members', () => {
    * 取得可指派任務的成員（不含瀏覽者）
    * 用途：任務指派人選擇器
    *
-   * 如果 Kanpro Bridge project_user 功能啟用，使用 getAssignableUsersExtended
-   * 否則使用標準 getAssignableUsers API
+   * 如果 Kanpro Bridge project_user 功能啟用，getAssignableUsers 會被覆蓋回傳陣列格式
+   * 否則使用標準 Kanboard API 回傳 { userId: displayName } 格式
    */
   async function fetchAssignableUsers(projectId: number): Promise<void> {
     const authStore = useAuthStore()
@@ -237,10 +240,10 @@ export const useMembersStore = defineStore('members', () => {
     try {
       const client = authStore.getClient()
 
-      // 檢查是否使用 Extended API
+      // 檢查是否啟用擴展模式
       if (isProjectUserExtendedEnabled()) {
-        // 使用 Kanpro Bridge Extended API - 一次取得完整資料
-        const result = await client.call<ExtendedProjectUser[]>('getAssignableUsersExtended', {
+        // Kanpro Bridge 已覆蓋 API - 回傳完整資料陣列
+        const result = await client.call<ExtendedProjectUser[]>('getAssignableUsers', {
           project_id: projectId
         })
 

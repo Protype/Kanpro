@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useTasksStore } from '@/stores/tasks'
 import { useMembersStore } from '@/stores/members'
 import { useCategoriesStore } from '@/stores/categories'
@@ -72,31 +72,11 @@ const formattedDueDate = computed(() => {
   return new Date(props.task.date_due * 1000).toLocaleDateString('zh-TW')
 })
 
-const currentColumn = computed(() => {
-  if (!props.task) return null
-  return props.columns.find(col => col.id === props.task?.column_id)
-})
-
 // B 層欄位相關
 // 使用 assignableUsers 而非 members，因為任務只能指派給可指派的成員（不含瀏覽者）
 const assignableUsers = computed(() => membersStore.assignableUsers)
 const categories = computed(() => categoriesStore.categories)
 const swimlanes = computed(() => swimlanesStore.activeSwimlanes)
-
-const currentOwner = computed(() => {
-  if (!props.task?.owner_id) return null
-  return assignableUsers.value.find(m => m.id === props.task?.owner_id)
-})
-
-const currentCategory = computed(() => {
-  if (!props.task?.category_id) return null
-  return categories.value.find(c => c.id === props.task?.category_id)
-})
-
-const currentSwimlane = computed(() => {
-  if (!props.task?.swimlane_id) return null
-  return swimlanes.value.find(s => s.id === props.task?.swimlane_id)
-})
 
 watch(() => props.isOpen, async (open) => {
   if (open && props.task) {

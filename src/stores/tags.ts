@@ -75,6 +75,9 @@ export const useTagsStore = defineStore('tags', () => {
     fetchProjectTags,
     fetchTaskTags,
     setTaskTags,
-    clearTags
+    clearTags,
+    // Aliases for backward compatibility
+    tags: projectTags,
+    fetchTags: fetchProjectTags
   }
 })

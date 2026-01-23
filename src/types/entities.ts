@@ -235,4 +235,5 @@ export interface ProjectMember {
   email: string | null
   role: 'project-manager' | 'project-member' | 'project-viewer'
   is_active: boolean
+  avatar?: string | null  // base64 encoded avatar image (from Kanpro Bridge)
 }

@@ -105,9 +105,9 @@
                 >
                   <div
                     class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0"
-                    :style="{ backgroundColor: getAvatarColor(activity.author_username) }"
+                    :style="{ backgroundColor: getAvatarColor(activity.author_username || '') }"
                   >
-                    {{ getInitial(activity.author_username) }}
+                    {{ getInitial(activity.author_username || '') }}
                   </div>
                   <div class="flex-1 min-w-0">
                     <div class="flex flex-wrap items-center gap-1 text-sm">

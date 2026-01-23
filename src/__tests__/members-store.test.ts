@@ -13,7 +13,7 @@ const mockProjectUsersMap: Record<string, string> = {
   '2': 'User One'
 }
 
-// Extended API returns full user objects
+// Extended format (when project_user feature is enabled, API returns full user objects)
 const mockExtendedProjectUsers = [
   {
     id: 1,
@@ -22,7 +22,8 @@ const mockExtendedProjectUsers = [
     email: 'admin@example.com',
     role: 'app-admin',
     is_active: true,
-    project_role: 'project-manager' as const
+    project_role: 'project-manager' as const,
+    avatar: 'base64encodedavatar1'
   },
   {
     id: 2,
@@ -31,7 +32,8 @@ const mockExtendedProjectUsers = [
     email: 'user1@example.com',
     role: 'app-user',
     is_active: true,
-    project_role: 'project-member' as const
+    project_role: 'project-member' as const,
+    avatar: null
   }
 ]
 
@@ -199,7 +201,7 @@ describe('Members Store', () => {
       expect(store.error).toBe('Network error')
     })
 
-    it('should call Extended API with correct parameters', async () => {
+    it('should call getProjectUsers API with correct parameters (Extended format when enabled)', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: () => Promise.resolve({
@@ -213,8 +215,26 @@ describe('Members Store', () => {
       await store.fetchProjectMembers(5)
 
       const callBody = JSON.parse(mockFetch.mock.calls[0][1].body)
-      expect(callBody.method).toBe('getProjectUsersExtended')
+      // When project_user feature is enabled, same API returns extended format
+      expect(callBody.method).toBe('getProjectUsers')
       expect(callBody.params).toEqual({ project_id: 5 })
+    })
+
+    it('should include avatar in member data when available', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 1,
+          result: mockExtendedProjectUsers
+        })
+      })
+
+      const store = useMembersStore()
+      await store.fetchProjectMembers(1)
+
+      expect(store.members[0].avatar).toBe('base64encodedavatar1')
+      expect(store.members[1].avatar).toBeNull()
     })
   })
 

@@ -5,14 +5,15 @@ import { getAvatarColor, getAvatarInitial, getUserDisplayName } from '@/utils/av
 interface User {
   name?: string | null
   username?: string
+  avatar?: string | null  // base64 encoded avatar image
 }
 
 const props = withDefaults(defineProps<{
-  /** 使用者物件，需有 name 或 username */
+  /** 使用者物件，需有 name 或 username，可包含 avatar (base64) */
   user?: User | null
   /** 直接傳入名稱（優先於 user） */
   name?: string | null
-  /** 頭像圖片 URL 或 Base64 資料 */
+  /** 頭像圖片 URL 或 Base64 資料（優先於 user.avatar） */
   imageUrl?: string | null
   /** 頭像大小：'xs' | 'sm' | 'md' | 'lg' | 'xl' */
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
@@ -28,6 +29,9 @@ const displayName = computed(() => {
 const initial = computed(() => getAvatarInitial(displayName.value))
 const bgColor = computed(() => getAvatarColor(displayName.value))
 
+// 優先使用 imageUrl，其次使用 user.avatar
+const avatarImage = computed(() => props.imageUrl || props.user?.avatar || null)
+
 const sizeClasses = computed(() => {
   switch (props.size) {
     case 'xs': return 'w-5 h-5 text-[10px]'
@@ -42,8 +46,8 @@ const sizeClasses = computed(() => {
 
 <template>
   <img
-    v-if="imageUrl"
-    :src="imageUrl.startsWith('data:') ? imageUrl : `data:image/png;base64,${imageUrl}`"
+    v-if="avatarImage"
+    :src="avatarImage.startsWith('data:') ? avatarImage : `data:image/png;base64,${avatarImage}`"
     :alt="displayName"
     class="rounded-full object-cover"
     :class="sizeClasses"

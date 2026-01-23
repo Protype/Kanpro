@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useColumnsStore } from '@/stores/columns'
 import { useToast } from '@/stores/toast'
 import draggable from 'vuedraggable'
