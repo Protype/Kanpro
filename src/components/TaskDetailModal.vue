@@ -512,7 +512,7 @@ const updateCategory = async (categoryId: number | null) => {
                 </div>
 
                 <!-- Swimlane -->
-                <div v-if="swimlanes.length > 0">
+                <div>
                   <h3 class="text-sm font-medium text-content-secondary mb-2">泳道</h3>
                   <select
                     :value="task.swimlane_id || ''"
@@ -532,7 +532,7 @@ const updateCategory = async (categoryId: number | null) => {
                 </div>
 
                 <!-- Category -->
-                <div v-if="categories.length > 0">
+                <div>
                   <h3 class="text-sm font-medium text-content-secondary mb-2">類別</h3>
                   <select
                     :value="task.category_id || ''"
