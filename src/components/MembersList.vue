@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useMembersStore } from '@/stores/members'
+import { useGroupsStore } from '@/stores/groups'
 import { useToast } from '@/stores/toast'
 import UserAvatar from '@/components/UserAvatar.vue'
-import type { ProjectMember, User } from '@/types'
+import type { ProjectMember, User, Group } from '@/types'
 
 const props = defineProps<{
   projectId: number
@@ -14,16 +15,25 @@ const emit = defineEmits<{
 }>()
 
 const membersStore = useMembersStore()
+const groupsStore = useGroupsStore()
 const toast = useToast()
 
 const isAdding = ref(false)
 const isSubmitting = ref(false)
 const selectedUserId = ref<number | null>(null)
-const selectedRole = ref<'project-manager' | 'project-member' | 'project-viewer'>('project-member')
+const selectedGroupId = ref<number | null>(null)
+const selectedRole = ref<string>('project-member')
+
+// Type selection: 'user' or 'group'
+const addType = ref<'user' | 'group'>('user')
 
 // 使用者選擇器狀態（類似擁有者選擇器）
 const showUserDropdown = ref(false)
 const userSearchQuery = ref('')
+
+// 群組選擇器狀態
+const showGroupDropdown = ref(false)
+const groupSearchQuery = ref('')
 
 const getRoleBadgeClass = (role: string): string => {
   switch (role) {
@@ -34,9 +44,11 @@ const getRoleBadgeClass = (role: string): string => {
     case 'project-viewer':
       return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
     default:
-      return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+      // 自定義角色使用綠色樣式
+      return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
   }
 }
+
 
 const filteredUsers = computed(() => {
   const query = userSearchQuery.value.toLowerCase()
@@ -47,33 +59,58 @@ const filteredUsers = computed(() => {
   )
 })
 
+const filteredGroups = computed(() => {
+  const query = groupSearchQuery.value.toLowerCase()
+  if (!query) return groupsStore.groups
+  return groupsStore.groups.filter(g =>
+    g.name.toLowerCase().includes(query)
+  )
+})
+
+const selectedGroup = computed(() => {
+  if (!selectedGroupId.value) return null
+  return groupsStore.groups.find(g => g.id === selectedGroupId.value) || null
+})
+
 const selectedUser = computed(() => {
   if (!selectedUserId.value) return null
   return membersStore.availableUsers.find(u => u.id === selectedUserId.value) || null
 })
 
 onMounted(async () => {
-  await membersStore.fetchProjectMembers(props.projectId)
-  await membersStore.fetchAllUsers()
+  await Promise.all([
+    membersStore.fetchProjectMembers(props.projectId),
+    membersStore.fetchProjectRoles(props.projectId),
+    membersStore.fetchAllUsers(),
+    groupsStore.fetchAllGroups()
+  ])
 })
 
 watch(() => props.projectId, async (newId) => {
   if (newId) {
-    await membersStore.fetchProjectMembers(newId)
+    await Promise.all([
+      membersStore.fetchProjectMembers(newId),
+      membersStore.fetchProjectRoles(newId)
+    ])
   }
 })
 
 const startAdding = async () => {
   await membersStore.fetchAllUsers()
+  await groupsStore.fetchAllGroups()
   isAdding.value = true
 }
 
 const cancelAdding = () => {
   isAdding.value = false
   selectedUserId.value = null
+  selectedGroupId.value = null
   selectedRole.value = 'project-member'
+  addType.value = 'user'
   userSearchQuery.value = ''
+  groupSearchQuery.value = ''
   showUserDropdown.value = false
+  showGroupDropdown.value = false
 }
 
 const selectUser = (user: User) => {
@@ -87,21 +124,40 @@ const clearUser = () => {
   showUserDropdown.value = false
 }
 
+const selectGroup = (group: Group) => {
+  selectedGroupId.value = group.id
+  groupSearchQuery.value = ''
+  showGroupDropdown.value = false
+}
+
+const clearGroup = () => {
+  selectedGroupId.value = null
+  showGroupDropdown.value = false
+}
+
 const handleAddMember = async () => {
-  if (!selectedUserId.value || isSubmitting.value) return
+  if (addType.value === 'user' && !selectedUserId.value) return
+  if (addType.value === 'group' && !selectedGroupId.value) return
+  if (isSubmitting.value) return
 
   isSubmitting.value = true
-  const loadingToast = toast.loading('新增成員中...')
+  const loadingToast = toast.loading(addType.value === 'user' ? '新增成員中...' : '新增群組中...')
   try {
-    await membersStore.addProjectUser(props.projectId, selectedUserId.value, selectedRole.value)
+    // 支援自定義角色，role 參數為 string
+    const role = selectedRole.value as 'project-manager' | 'project-member' | 'project-viewer'
+    if (addType.value === 'user' && selectedUserId.value) {
+      await membersStore.addProjectUser(props.projectId, selectedUserId.value, role)
+    } else if (addType.value === 'group' && selectedGroupId.value) {
+      await membersStore.addProjectGroup(props.projectId, selectedGroupId.value, role)
+    }
     await membersStore.fetchProjectMembers(props.projectId)
     await membersStore.fetchAllUsers()
-    toast.update(loadingToast, 'success', '成員已新增')
+    toast.update(loadingToast, 'success', addType.value === 'user' ? '成員已新增' : '群組已新增')
     cancelAdding()
     emit('updated')
   } catch (error) {
     console.error('Failed to add member:', error)
-    toast.update(loadingToast, 'error', '新增成員失敗')
+    toast.update(loadingToast, 'error', addType.value === 'user' ? '新增成員失敗' : '新增群組失敗')
   } finally {
     isSubmitting.value = false
   }
@@ -123,12 +179,14 @@ const handleRemoveMember = async (member: ProjectMember) => {
   }
 }
 
-const handleChangeRole = async (member: ProjectMember, newRole: 'project-manager' | 'project-member' | 'project-viewer') => {
+const handleChangeRole = async (member: ProjectMember, newRole: string) => {
   if (member.role === newRole) return
 
   const loadingToast = toast.loading('變更角色中...')
   try {
-    await membersStore.changeProjectUserRole(props.projectId, member.id, newRole)
+    // 支援自定義角色
+    const role = newRole as 'project-manager' | 'project-member' | 'project-viewer'
+    await membersStore.changeProjectUserRole(props.projectId, member.id, role)
     await membersStore.fetchProjectMembers(props.projectId)
     toast.update(loadingToast, 'success', '角色已變更')
     emit('updated')
@@ -144,6 +202,9 @@ function handleClickOutside(event: MouseEvent) {
   if (!target.closest('.user-dropdown-container')) {
     showUserDropdown.value = false
   }
+  if (!target.closest('.group-dropdown-container')) {
+    showGroupDropdown.value = false
+  }
 }
 
 onMounted(() => {
@@ -156,9 +217,9 @@ onMounted(() => {
     <!-- Header -->
     <div class="flex items-center justify-between mb-4 h-8">
       <div class="flex items-center gap-2">
-        <ph-icon icon="users" class="w-5 h-5 text-content-tertiary" />
+        <ph-icon icon="shield-check" class="w-5 h-5 text-content-tertiary" />
         <h3 class="text-base font-semibold text-content">
-          專案成員
+          權限管理
         </h3>
         <span v-if="membersStore.membersCount > 0" class="text-xs text-content-tertiary bg-surface-secondary px-1.5 py-0.5 rounded">
           {{ membersStore.membersCount }}
@@ -168,7 +229,7 @@ onMounted(() => {
         v-if="!isAdding"
         @click="startAdding"
         class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
-        title="新增成員"
+        title="新增成員或群組"
       >
         <ph-icon icon="user-plus" weight="fill" class="w-5 h-5" />
       </button>
@@ -177,9 +238,37 @@ onMounted(() => {
     <div class="space-y-3">
       <!-- Add member form -->
       <div v-if="isAdding" class="bg-surface-secondary rounded-lg p-4 space-y-3 border border-edge">
+        <!-- Type toggle -->
+        <div class="flex gap-2">
+          <button
+            type="button"
+            @click="addType = 'user'"
+            :disabled="isSubmitting"
+            class="flex-1 px-3 py-2 text-sm rounded-lg transition-colors disabled:opacity-50"
+            :class="addType === 'user'
+              ? 'bg-accent text-white'
+              : 'bg-surface border border-edge text-content-secondary hover:bg-surface-hover'"
+          >
+            <ph-icon icon="user" class="w-4 h-4 inline-block mr-1" />
+            使用者
+          </button>
+          <button
+            type="button"
+            @click="addType = 'group'"
+            :disabled="isSubmitting"
+            class="flex-1 px-3 py-2 text-sm rounded-lg transition-colors disabled:opacity-50"
+            :class="addType === 'group'
+              ? 'bg-accent text-white'
+              : 'bg-surface border border-edge text-content-secondary hover:bg-surface-hover'"
+          >
+            <ph-icon icon="users-three" class="w-4 h-4 inline-block mr-1" />
+            群組
+          </button>
+        </div>
+
         <div class="grid grid-cols-2 gap-3">
-          <!-- 使用者選擇器（類似擁有者選擇器） -->
-          <div class="user-dropdown-container">
+          <!-- 使用者選擇器 -->
+          <div v-if="addType === 'user'" class="user-dropdown-container">
             <div class="relative">
               <button
                 type="button"
@@ -247,6 +336,78 @@ onMounted(() => {
             </div>
           </div>
 
+          <!-- 群組選擇器 -->
+          <div v-if="addType === 'group'" class="group-dropdown-container">
+            <div class="relative">
+              <button
+                type="button"
+                @click="showGroupDropdown = !showGroupDropdown"
+                :disabled="isSubmitting"
+                class="w-full h-10 px-3 bg-surface border border-edge rounded-lg text-left flex items-center gap-2 hover:bg-surface-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <template v-if="selectedGroup">
+                  <div class="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
+                    <ph-icon icon="users-three" class="w-3.5 h-3.5 text-accent" />
+                  </div>
+                  <span class="flex-1 truncate text-sm text-content">
+                    {{ selectedGroup.name }}
+                  </span>
+                  <button
+                    type="button"
+                    @click.stop="clearGroup"
+                    class="text-content-tertiary hover:text-content-secondary flex-shrink-0"
+                    :disabled="isSubmitting"
+                  >
+                    <ph-icon icon="xmark" class="w-4 h-4" />
+                  </button>
+                </template>
+                <template v-else>
+                  <span class="flex-1 text-sm text-content-tertiary">選擇群組...</span>
+                </template>
+                <ph-icon icon="chevron-down" class="w-4 h-4 text-content-tertiary flex-shrink-0" />
+              </button>
+
+              <!-- Group Dropdown -->
+              <Transition name="dropdown">
+                <div
+                  v-if="showGroupDropdown"
+                  class="absolute z-10 w-full mt-1 bg-surface border border-edge rounded-lg shadow-lg max-h-48 overflow-y-auto"
+                >
+                  <!-- Search -->
+                  <div class="p-2 border-b border-edge">
+                    <input
+                      v-model="groupSearchQuery"
+                      type="text"
+                      placeholder="搜尋群組..."
+                      class="w-full px-2 py-1 text-sm bg-surface-secondary border border-edge rounded text-content placeholder:text-content-tertiary focus:outline-none focus:ring-1 focus:ring-accent"
+                    />
+                  </div>
+                  <!-- Group List -->
+                  <div class="py-1">
+                    <button
+                      v-for="group in filteredGroups"
+                      :key="group.id"
+                      type="button"
+                      @click="selectGroup(group)"
+                      class="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-surface-hover transition-colors"
+                      :class="{ 'bg-accent/10': selectedGroupId === group.id }"
+                    >
+                      <div class="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center">
+                        <ph-icon icon="users-three" class="w-3.5 h-3.5 text-accent" />
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="text-sm text-content truncate">{{ group.name }}</div>
+                      </div>
+                    </button>
+                    <div v-if="filteredGroups.length === 0" class="px-3 py-2 text-sm text-content-tertiary">
+                      找不到群組
+                    </div>
+                  </div>
+                </div>
+              </Transition>
+            </div>
+          </div>
+
           <!-- 角色選擇器 -->
           <div>
             <select
@@ -254,9 +415,13 @@ onMounted(() => {
               :disabled="isSubmitting"
               class="w-full h-10 px-3 text-sm bg-surface border border-edge rounded-lg text-content focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <option value="project-manager">專案經理</option>
-              <option value="project-member">專案成員</option>
-              <option value="project-viewer">瀏覽者</option>
+              <option
+                v-for="role in membersStore.projectRoles"
+                :key="role.id"
+                :value="role.id"
+              >
+                {{ role.name }}{{ role.isCustom ? ' ✦' : '' }}
+              </option>
             </select>
           </div>
         </div>
@@ -270,7 +435,7 @@ onMounted(() => {
           </button>
           <button
             @click="handleAddMember"
-            :disabled="!selectedUserId || isSubmitting"
+            :disabled="(addType === 'user' && !selectedUserId) || (addType === 'group' && !selectedGroupId) || isSubmitting"
             class="px-4 py-2 text-sm font-medium bg-accent text-white rounded-lg hover:bg-accent/90 disabled:opacity-50 transition-colors flex items-center gap-2"
           >
             <ph-icon v-if="isSubmitting" icon="spinner" class="w-4 h-4 animate-spin" />
@@ -306,15 +471,19 @@ onMounted(() => {
             <!-- Role selector -->
             <select
               :value="member.role"
-              @change="handleChangeRole(member, ($event.target as HTMLSelectElement).value as 'project-manager' | 'project-member' | 'project-viewer')"
+              @change="handleChangeRole(member, ($event.target as HTMLSelectElement).value)"
               :class="[
                 'px-2 py-1 text-xs font-medium rounded-md cursor-pointer transition-colors',
                 getRoleBadgeClass(member.role)
               ]"
             >
-              <option value="project-manager">專案經理</option>
-              <option value="project-member">專案成員</option>
-              <option value="project-viewer">瀏覽者</option>
+              <option
+                v-for="role in membersStore.projectRoles"
+                :key="role.id"
+                :value="role.id"
+              >
+                {{ role.name }}{{ role.isCustom ? ' ✦' : '' }}
+              </option>
             </select>
 
             <!-- Remove button -->
