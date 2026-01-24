@@ -422,5 +422,13 @@
     "systemSettings": "System settings",
     "userManagement": "User management",
     "groupManagement": "Group management"
+  },
+  "dashboard": {
+    "activityOverview": "Activity overview for all projects",
+    "openTasksAssigned": "Open tasks assigned to you",
+    "noTasksAssigned": "No tasks assigned to you",
+    "viewAll": "View all",
+    "statistics": "Statistics",
+    "activeProjects": "Active projects"
   }
 }

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useProjectsStore } from '@/stores/projects'
 import { useDashboardStore } from '@/stores/dashboard'
 import SearchModal from '@/components/SearchModal.vue'
@@ -15,6 +16,7 @@ const emit = defineEmits<{
 }>()
 
 const router = useRouter()
+const { t } = useI18n()
 const projectsStore = useProjectsStore()
 const dashboardStore = useDashboardStore()
 
@@ -72,8 +74,8 @@ const handleSearchSelect = (task: Task) => {
     <main class="mx-auto max-w-7xl px-4 py-6">
       <!-- Header -->
       <div class="mb-6">
-        <h1 class="text-2xl font-bold text-content">儀表板</h1>
-        <p class="text-content-secondary mt-1">所有專案的活動總覽</p>
+        <h1 class="text-2xl font-bold text-content">{{ t('nav.dashboard') }}</h1>
+        <p class="text-content-secondary mt-1">{{ t('dashboard.activityOverview') }}</p>
       </div>
 
       <!-- Loading -->
@@ -88,7 +90,7 @@ const handleSearchSelect = (task: Task) => {
           <div v-if="dashboardStore.hasOverdueTasks" class="alert-error">
             <div class="flex items-center gap-2 mb-3">
               <ph-icon icon="triangle-exclamation" class="w-5 h-5" />
-              <h2 class="text-lg font-semibold">逾期任務 ({{ dashboardStore.overdueTasks.length }})</h2>
+              <h2 class="text-lg font-semibold">{{ t('task.overdue') }} ({{ dashboardStore.overdueTasks.length }})</h2>
             </div>
             <div class="space-y-2">
               <div
@@ -103,7 +105,7 @@ const handleSearchSelect = (task: Task) => {
                   <span class="font-medium text-content">{{ task.title }}</span>
                 </div>
                 <div class="mt-1 text-sm text-error">
-                  到期日: {{ task.date_due ? formatDate(task.date_due) : '-' }}
+                  {{ t('task.dueDate') }}: {{ task.date_due ? formatDate(task.date_due) : '-' }}
                 </div>
               </div>
             </div>
@@ -112,8 +114,8 @@ const handleSearchSelect = (task: Task) => {
           <!-- My Tasks -->
           <div class="card">
             <div class="p-4 border-b border-edge">
-              <h2 class="text-lg font-semibold text-content">我的任務</h2>
-              <p class="text-sm text-content-secondary">指派給您的開啟中任務</p>
+              <h2 class="text-lg font-semibold text-content">{{ t('nav.myTasks') }}</h2>
+              <p class="text-sm text-content-secondary">{{ t('dashboard.openTasksAssigned') }}</p>
             </div>
             <div class="divide-y divide-edge">
               <div
@@ -147,7 +149,7 @@ const handleSearchSelect = (task: Task) => {
               </div>
               <div v-if="dashboardStore.myTasks.length === 0" class="empty-state">
                 <ph-icon icon="clipboard-list" class="empty-state-icon" />
-                <p class="empty-state-description">目前沒有指派給您的任務</p>
+                <p class="empty-state-description">{{ t('dashboard.noTasksAssigned') }}</p>
               </div>
             </div>
           </div>
@@ -158,9 +160,9 @@ const handleSearchSelect = (task: Task) => {
           <!-- Quick Access: Projects -->
           <div class="card">
             <div class="p-4 border-b border-edge flex justify-between items-center">
-              <h2 class="text-lg font-semibold text-content">專案</h2>
+              <h2 class="text-lg font-semibold text-content">{{ t('project.projects') }}</h2>
               <button @click="goToProjects" class="link text-sm">
-                查看全部
+                {{ t('dashboard.viewAll') }}
               </button>
             </div>
             <div class="divide-y divide-edge">
@@ -176,26 +178,26 @@ const handleSearchSelect = (task: Task) => {
                 </p>
               </div>
               <div v-if="projectsStore.activeProjects.length === 0" class="p-4 text-center text-content-secondary">
-                沒有專案
+                {{ t('project.noProjects') }}
               </div>
             </div>
           </div>
 
           <!-- Stats -->
           <div class="card p-4">
-            <h2 class="text-lg font-semibold text-content mb-4">統計</h2>
+            <h2 class="text-lg font-semibold text-content mb-4">{{ t('dashboard.statistics') }}</h2>
             <div class="grid grid-cols-2 gap-4">
               <div class="bg-info/10 rounded-lg p-3 text-center">
                 <div class="text-2xl font-bold text-info">{{ dashboardStore.myTasks.length }}</div>
-                <div class="text-sm text-info">我的任務</div>
+                <div class="text-sm text-info">{{ t('nav.myTasks') }}</div>
               </div>
               <div class="bg-error/10 rounded-lg p-3 text-center">
                 <div class="text-2xl font-bold text-error">{{ dashboardStore.overdueTasks.length }}</div>
-                <div class="text-sm text-error">逾期任務</div>
+                <div class="text-sm text-error">{{ t('task.overdue') }}</div>
               </div>
               <div class="bg-success/10 rounded-lg p-3 text-center">
                 <div class="text-2xl font-bold text-success">{{ projectsStore.activeProjects.length }}</div>
-                <div class="text-sm text-success">啟用專案</div>
+                <div class="text-sm text-success">{{ t('dashboard.activeProjects') }}</div>
               </div>
             </div>
           </div>

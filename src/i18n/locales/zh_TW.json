@@ -422,5 +422,13 @@
     "systemSettings": "系統設定",
     "userManagement": "使用者管理",
     "groupManagement": "群組管理"
+  },
+  "dashboard": {
+    "activityOverview": "所有專案的活動總覽",
+    "openTasksAssigned": "指派給您的開啟中任務",
+    "noTasksAssigned": "目前沒有指派給您的任務",
+    "viewAll": "查看全部",
+    "statistics": "統計",
+    "activeProjects": "啟用專案"
   }
 }
