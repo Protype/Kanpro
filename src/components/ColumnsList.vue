@@ -195,10 +195,10 @@ const isColumnSaving = (columnId: number) => savingColumnIds.value.has(columnId)
       <button
         v-if="!isAdding"
         @click="startAdding"
-        class="w-8 h-8 flex items-center justify-center text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary rounded-md border border-edge transition-colors"
+        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
         title="新增欄位"
       >
-        <ph-icon icon="plus" class="w-4 h-4" />
+        <ph-icon icon="columns-plus-right" weight="fill" class="w-5 h-5" />
       </button>
     </div>
 
@@ -263,13 +263,13 @@ const isColumnSaving = (columnId: number) => savingColumnIds.value.has(columnId)
       >
         <template #item="{ element: column }">
           <div
-            class="p-3 bg-surface-secondary/50 rounded-lg hover:bg-surface-secondary transition-colors"
+            class="group p-3 bg-surface-secondary/50 rounded-lg hover:bg-surface-secondary transition-colors"
           >
             <!-- View mode -->
             <div v-if="editingColumnId !== column.id" class="flex items-center justify-between">
               <div class="flex items-center gap-3">
                 <!-- Drag handle / Loading indicator -->
-                <div class="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center relative">
+                <div class="w-8 h-8 rounded-lg bg-surface-tertiary group-hover:bg-accent/15 flex items-center justify-center relative transition-colors">
                   <ph-icon
                     v-if="isColumnSaving(column.id)"
                     icon="spinner"
@@ -278,7 +278,8 @@ const isColumnSaving = (columnId: number) => savingColumnIds.value.has(columnId)
                   <ph-icon
                     v-else
                     icon="dots-six-vertical"
-                    class="w-4 h-4 text-accent drag-handle cursor-grab active:cursor-grabbing"
+                    weight="bold"
+                    class="w-4 h-4 text-content-tertiary group-hover:text-accent drag-handle cursor-grab active:cursor-grabbing transition-colors"
                   />
                 </div>
 
@@ -300,7 +301,7 @@ const isColumnSaving = (columnId: number) => savingColumnIds.value.has(columnId)
                 <button
                   @click="startEditing(column)"
                   :disabled="isColumnSaving(column.id)"
-                  class="p-1.5 text-content-tertiary hover:text-accent hover:bg-accent/10 rounded-md transition-colors disabled:opacity-50"
+                  class="p-1.5 text-content-tertiary group-hover:text-content-secondary hover:!text-accent hover:bg-accent/10 rounded-md transition-colors disabled:opacity-50"
                   title="編輯"
                 >
                   <ph-icon icon="pen-to-square" class="w-4 h-4" />
@@ -308,7 +309,7 @@ const isColumnSaving = (columnId: number) => savingColumnIds.value.has(columnId)
                 <button
                   @click="handleRemoveColumn(column)"
                   :disabled="isColumnSaving(column.id)"
-                  class="p-1.5 text-content-tertiary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md transition-colors disabled:opacity-50"
+                  class="p-1.5 text-content-tertiary group-hover:text-content-secondary hover:!text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md transition-colors disabled:opacity-50"
                   title="刪除"
                 >
                   <ph-icon icon="trash" class="w-4 h-4" />

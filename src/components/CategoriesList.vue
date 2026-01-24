@@ -128,10 +128,10 @@ const handleRemoveCategory = async (category: Category) => {
       <button
         v-if="!isAdding"
         @click="startAdding"
-        class="w-8 h-8 flex items-center justify-center text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary rounded-md border border-edge transition-colors"
+        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
         title="新增類別"
       >
-        <ph-icon icon="plus" class="w-4 h-4" />
+        <ph-icon icon="stack-plus" weight="fill" class="w-5 h-5" />
       </button>
     </div>
 
@@ -171,14 +171,14 @@ const handleRemoveCategory = async (category: Category) => {
         <div
           v-for="category in categoriesStore.categories"
           :key="category.id"
-          class="p-3 bg-surface-secondary/50 rounded-lg hover:bg-surface-secondary transition-colors"
+          class="group p-3 bg-surface-secondary/50 rounded-lg hover:bg-surface-secondary transition-colors"
         >
           <!-- View mode -->
           <div v-if="editingCategoryId !== category.id" class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <!-- Category icon -->
-              <div class="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
-                <ph-icon icon="tag" class="w-4 h-4 text-accent" />
+              <div class="w-8 h-8 rounded-lg bg-surface-tertiary group-hover:bg-accent/15 flex items-center justify-center transition-colors">
+                <ph-icon icon="tag" class="w-4 h-4 text-content-tertiary group-hover:text-accent transition-colors" />
               </div>
 
               <!-- Category info -->
@@ -193,14 +193,14 @@ const handleRemoveCategory = async (category: Category) => {
             <div class="flex items-center gap-1">
               <button
                 @click="startEditing(category)"
-                class="p-1.5 text-content-tertiary hover:text-accent hover:bg-accent/10 rounded-md transition-colors"
+                class="p-1.5 text-content-tertiary group-hover:text-content-secondary hover:!text-accent hover:bg-accent/10 rounded-md transition-colors"
                 title="編輯"
               >
                 <ph-icon icon="pen-to-square" class="w-4 h-4" />
               </button>
               <button
                 @click="handleRemoveCategory(category)"
-                class="p-1.5 text-content-tertiary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md transition-colors"
+                class="p-1.5 text-content-tertiary group-hover:text-content-secondary hover:!text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md transition-colors"
                 title="刪除"
               >
                 <ph-icon icon="trash" class="w-4 h-4" />

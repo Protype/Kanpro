@@ -167,10 +167,10 @@ onMounted(() => {
       <button
         v-if="!isAdding"
         @click="startAdding"
-        class="w-8 h-8 flex items-center justify-center text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary rounded-md border border-edge transition-colors"
+        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
         title="新增成員"
       >
-        <ph-icon icon="plus" class="w-4 h-4" />
+        <ph-icon icon="user-plus" weight="fill" class="w-5 h-5" />
       </button>
     </div>
 
@@ -284,7 +284,7 @@ onMounted(() => {
         <div
           v-for="member in membersStore.members"
           :key="member.id"
-          class="flex items-center justify-between p-3 bg-surface-secondary/50 rounded-lg hover:bg-surface-secondary transition-colors"
+          class="group flex items-center justify-between p-3 bg-surface-secondary/50 rounded-lg hover:bg-surface-secondary transition-colors"
         >
           <div class="flex items-center gap-3">
             <!-- Avatar -->
@@ -320,7 +320,7 @@ onMounted(() => {
             <!-- Remove button -->
             <button
               @click="handleRemoveMember(member)"
-              class="p-1.5 text-content-tertiary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md transition-colors"
+              class="p-1.5 text-content-tertiary group-hover:text-content-secondary hover:!text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md transition-colors"
               title="移除成員"
             >
               <ph-icon icon="trash" class="w-4 h-4" />

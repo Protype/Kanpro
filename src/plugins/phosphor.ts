@@ -25,6 +25,10 @@ import {
   PhFolderPlus,
   PhFolderSimplePlus,
   PhCirclesThreePlus,
+  PhUserPlus,
+  PhColumnsPlusRight,
+  PhRowsPlusBottom,
+  PhStackPlus,
 
   // 側邊欄導航
   PhGauge,
@@ -146,6 +150,10 @@ export const iconComponents = {
   'folder-plus': PhFolderPlus,
   'folder-simple-plus': PhFolderSimplePlus,
   'circles-three-plus': PhCirclesThreePlus,
+  'user-plus': PhUserPlus,
+  'columns-plus-right': PhColumnsPlusRight,
+  'rows-plus-bottom': PhRowsPlusBottom,
+  'stack-plus': PhStackPlus,
 
   // 側邊欄導航
   'gauge': PhGauge,

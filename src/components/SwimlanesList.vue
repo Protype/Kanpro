@@ -211,10 +211,10 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
       <button
         v-if="!isAdding"
         @click="startAdding"
-        class="w-8 h-8 flex items-center justify-center text-content-tertiary hover:text-content-secondary hover:bg-surface-secondary rounded-md border border-edge transition-colors"
+        class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
         title="新增泳道"
       >
-        <ph-icon icon="plus" class="w-4 h-4" />
+        <ph-icon icon="rows-plus-bottom" weight="fill" class="w-5 h-5" />
       </button>
     </div>
 
@@ -269,13 +269,13 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
       >
         <template #item="{ element: swimlane }">
           <div
-            class="p-3 bg-surface-secondary/50 rounded-lg hover:bg-surface-secondary transition-colors"
+            class="group p-3 bg-surface-secondary/50 rounded-lg hover:bg-surface-secondary transition-colors"
           >
             <!-- View mode -->
             <div v-if="editingSwimlaneId !== swimlane.id" class="flex items-center justify-between">
               <div class="flex items-center gap-3">
                 <!-- Drag handle / Loading indicator -->
-                <div class="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center relative">
+                <div class="w-8 h-8 rounded-lg bg-surface-tertiary group-hover:bg-accent/15 flex items-center justify-center relative transition-colors">
                   <ph-icon
                     v-if="isSwimlaneSaving(swimlane.id)"
                     icon="spinner"
@@ -284,7 +284,8 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
                   <ph-icon
                     v-else
                     icon="dots-six-vertical"
-                    class="w-4 h-4 text-accent drag-handle cursor-grab active:cursor-grabbing"
+                    weight="bold"
+                    class="w-4 h-4 text-content-tertiary group-hover:text-accent drag-handle cursor-grab active:cursor-grabbing transition-colors"
                   />
                 </div>
 
@@ -310,7 +311,7 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
                 <button
                   @click="handleToggleActive(swimlane)"
                   :disabled="isSwimlaneSaving(swimlane.id)"
-                  class="p-1.5 text-content-tertiary hover:text-accent hover:bg-accent/10 rounded-md transition-colors disabled:opacity-50"
+                  class="p-1.5 text-content-tertiary group-hover:text-content-secondary hover:!text-accent hover:bg-accent/10 rounded-md transition-colors disabled:opacity-50"
                   :title="swimlane.is_active ? '停用' : '啟用'"
                 >
                   <ph-icon v-if="swimlane.is_active" icon="eye" class="w-4 h-4" />
@@ -319,7 +320,7 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
                 <button
                   @click="startEditing(swimlane)"
                   :disabled="isSwimlaneSaving(swimlane.id)"
-                  class="p-1.5 text-content-tertiary hover:text-accent hover:bg-accent/10 rounded-md transition-colors disabled:opacity-50"
+                  class="p-1.5 text-content-tertiary group-hover:text-content-secondary hover:!text-accent hover:bg-accent/10 rounded-md transition-colors disabled:opacity-50"
                   title="編輯"
                 >
                   <ph-icon icon="pen-to-square" class="w-4 h-4" />
@@ -327,7 +328,7 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
                 <button
                   @click="handleRemoveSwimlane(swimlane)"
                   :disabled="isSwimlaneSaving(swimlane.id)"
-                  class="p-1.5 text-content-tertiary hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md transition-colors disabled:opacity-50"
+                  class="p-1.5 text-content-tertiary group-hover:text-content-secondary hover:!text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md transition-colors disabled:opacity-50"
                   title="刪除"
                 >
                   <ph-icon icon="trash" class="w-4 h-4" />
