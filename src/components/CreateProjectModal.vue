@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useProjectsStore, type CreateProjectOptions } from '@/stores/projects'
 import { useUsersStore } from '@/stores/users'
 import { useAuthStore } from '@/stores/auth'
+import { useProjectDraftStore } from '@/stores/projectDraft'
 import UserAvatar from '@/components/UserAvatar.vue'
 import type { User } from '@/types'
 
@@ -15,9 +17,11 @@ const emit = defineEmits<{
   created: [projectId: number]
 }>()
 
+const router = useRouter()
 const projectsStore = useProjectsStore()
 const usersStore = useUsersStore()
 const authStore = useAuthStore()
+const projectDraftStore = useProjectDraftStore()
 
 // === 主區域欄位 ===
 const name = ref('')
@@ -92,6 +96,27 @@ function resetForm() {
 
 function toggleAdvanced() {
   showAdvanced.value = !showAdvanced.value
+}
+
+function handleExpand() {
+  // 儲存目前填寫的資料到 draft store
+  projectDraftStore.updateDraft({
+    name: name.value,
+    description: description.value,
+    identifier: identifier.value,
+    ownerId: ownerId.value,
+    startDate: startDate.value,
+    endDate: endDate.value,
+    priorityDefault: priorityDefault.value,
+    priorityStart: priorityStart.value,
+    priorityEnd: priorityEnd.value,
+    email: projectEmail.value,
+    disablePublicAccess: disablePublicAccess.value
+  })
+
+  // 關閉燈箱並導向專案建立頁
+  emit('close')
+  router.push('/projects/new')
 }
 
 function selectOwner(user: User) {
@@ -201,6 +226,16 @@ onMounted(() => {
                   <span>進階設定</span>
                   <!-- Chevron: > when collapsed, < when expanded -->
                   <ph-icon :icon="showAdvanced ? 'chevron-left' : 'chevron-right'" class="w-3.5 h-3.5" />
+                </button>
+                <!-- Expand to full page button -->
+                <button
+                  type="button"
+                  data-testid="expand-button"
+                  @click="handleExpand"
+                  class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium leading-none rounded transition-colors bg-surface-secondary text-content-tertiary hover:text-content-secondary"
+                  title="展開為完整頁面"
+                >
+                  <ph-icon icon="arrows-out" class="w-3.5 h-3.5" />
                 </button>
               </div>
               <button
