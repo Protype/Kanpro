@@ -1,13 +1,19 @@
 <script setup lang="ts">
 import type { Task } from '@/types'
+import UserAvatar from '@/components/UserAvatar.vue'
+import { computed } from 'vue'
 
-defineProps<{
+const props = defineProps<{
   task: Task
 }>()
 
 const emit = defineEmits<{
   click: [task: Task]
 }>()
+
+const ownerDisplayName = computed(() => {
+  return props.task.owner_name || props.task.owner_username || null
+})
 
 const colorClasses: Record<string, string> = {
   yellow: 'border-l-yellow-500 bg-yellow-50',
@@ -66,10 +72,8 @@ function formatDate(timestamp?: number): string {
     <!-- Meta info -->
     <div class="mt-2 flex items-center justify-between text-xs text-gray-500">
       <!-- Assignee -->
-      <div v-if="task.owner_id" class="flex items-center">
-        <div class="w-5 h-5 rounded-full bg-gray-300 flex items-center justify-center text-[10px] text-white">
-          {{ task.owner_id }}
-        </div>
+      <div v-if="task.owner_id && ownerDisplayName" class="flex items-center">
+        <UserAvatar :name="ownerDisplayName" size="xs" />
       </div>
       <div v-else></div>
 
