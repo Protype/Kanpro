@@ -118,7 +118,26 @@
     "removeProject": "Remove project",
     "duplicateProject": "Duplicate project",
     "noProjects": "No projects",
-    "createFirstProject": "Create your first project"
+    "createFirstProject": "Create your first project",
+    "notFound": "Project not found",
+    "loadFailed": "Failed to load project",
+    "nameRequired": "Project name is required",
+    "settingsUpdated": "Project settings have been updated",
+    "projectDeleted": "Project has been deleted",
+    "enterProjectName": "Enter project name",
+    "enterDescription": "Enter project description (optional)",
+    "identifierPlaceholder": "e.g., PROJ",
+    "identifierHint": "Used as task number prefix, e.g., PROJ-123",
+    "selectOwner": "Select owner",
+    "defaultPriority": "Default priority",
+    "priorityRange": "Priority range",
+    "projectEmail": "Project notification email",
+    "enablePublicAccess": "Enable public access",
+    "publicAccessDescription": "Allow unauthenticated users to view this project",
+    "deleteWarning": "This action cannot be undone. All tasks and data in this project will be permanently deleted.",
+    "confirmDelete": "Confirm delete project",
+    "confirmDeleteMessage": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+    "confirmDeleteButton": "Confirm delete"
   },
   "task": {
     "task": "Task",
@@ -273,7 +292,8 @@
     "removeUser": "Remove user",
     "createUser": "Create user",
     "editUser": "Edit user",
-    "noUsers": "No users"
+    "noUsers": "No users",
+    "searchUsers": "Search users..."
   },
   "group": {
     "group": "Group",
@@ -429,7 +449,9 @@
     "changeFailed": "Change failed",
     "validationError": "Validation error",
     "operationFailed": "Operation failed",
-    "insufficientPermissions": "Insufficient permissions"
+    "insufficientPermissions": "Insufficient permissions",
+    "deleting": "Deleting...",
+    "deleteFailed": "Delete failed"
   },
   "analytics": {
     "analytics": "Analytics",

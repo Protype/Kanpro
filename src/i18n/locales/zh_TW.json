@@ -118,7 +118,26 @@
     "removeProject": "刪除專案",
     "duplicateProject": "複製專案",
     "noProjects": "沒有專案",
-    "createFirstProject": "建立您的第一個專案"
+    "createFirstProject": "建立您的第一個專案",
+    "notFound": "找不到專案",
+    "loadFailed": "載入專案失敗",
+    "nameRequired": "專案名稱不能為空",
+    "settingsUpdated": "專案設定已更新",
+    "projectDeleted": "專案已刪除",
+    "enterProjectName": "輸入專案名稱",
+    "enterDescription": "輸入專案描述（選填）",
+    "identifierPlaceholder": "例如：PROJ",
+    "identifierHint": "用於任務編號前綴，如：PROJ-123",
+    "selectOwner": "選擇擁有者",
+    "defaultPriority": "預設優先級",
+    "priorityRange": "優先級範圍",
+    "projectEmail": "專案通知 Email",
+    "enablePublicAccess": "啟用公開存取",
+    "publicAccessDescription": "允許未登入的使用者檢視此專案",
+    "deleteWarning": "刪除後無法恢復，專案中的所有任務和資料將被永久刪除。",
+    "confirmDelete": "確認刪除專案",
+    "confirmDeleteMessage": "您確定要刪除「{name}」嗎？此操作無法復原。",
+    "confirmDeleteButton": "確認刪除"
   },
   "task": {
     "task": "任務",
@@ -273,7 +292,8 @@
     "removeUser": "刪除使用者",
     "createUser": "新增使用者",
     "editUser": "編輯使用者",
-    "noUsers": "沒有使用者"
+    "noUsers": "沒有使用者",
+    "searchUsers": "搜尋使用者..."
   },
   "group": {
     "group": "群組",
@@ -429,7 +449,9 @@
     "changeFailed": "變更失敗",
     "validationError": "驗證錯誤",
     "operationFailed": "操作失敗",
-    "insufficientPermissions": "權限不足"
+    "insufficientPermissions": "權限不足",
+    "deleting": "刪除中...",
+    "deleteFailed": "刪除失敗"
   },
   "analytics": {
     "analytics": "分析",
