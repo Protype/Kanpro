@@ -635,6 +635,7 @@ onUnmounted(() => {
                 <option value="project-viewer">檢視者</option>
               </select>
               <button
+                type="button"
                 @click="addMember"
                 :disabled="!newMemberUserId"
                 class="btn-secondary px-3"
@@ -657,6 +658,7 @@ onUnmounted(() => {
                   </span>
                 </div>
                 <button
+                  type="button"
                   @click="removeMember(member.userId)"
                   class="text-content-tertiary hover:text-red-500 transition-colors"
                 >
@@ -692,6 +694,7 @@ onUnmounted(() => {
                 class="input text-sm w-24"
               />
               <button
+                type="button"
                 @click="addCategory"
                 :disabled="!newCategoryName.trim()"
                 class="btn-secondary px-3"
@@ -708,6 +711,7 @@ onUnmounted(() => {
               >
                 <span class="text-sm text-content">{{ category.name }}</span>
                 <button
+                  type="button"
                   @click="removeCategory(index)"
                   class="text-content-tertiary hover:text-red-500 transition-colors"
                 >
@@ -744,6 +748,7 @@ onUnmounted(() => {
                 class="input text-sm w-24"
               />
               <button
+                type="button"
                 @click="addColumn"
                 :disabled="!newColumnTitle.trim()"
                 class="btn-secondary px-3"
@@ -765,6 +770,7 @@ onUnmounted(() => {
                   </span>
                 </div>
                 <button
+                  type="button"
                   @click="removeColumn(index)"
                   class="text-content-tertiary hover:text-red-500 transition-colors"
                 >
@@ -794,6 +800,7 @@ onUnmounted(() => {
                 class="input text-sm flex-1"
               />
               <button
+                type="button"
                 @click="addSwimlane"
                 :disabled="!newSwimlaneName.trim()"
                 class="btn-secondary px-3"
@@ -810,6 +817,7 @@ onUnmounted(() => {
               >
                 <span class="text-sm text-content">{{ swimlane.name }}</span>
                 <button
+                  type="button"
                   @click="removeSwimlane(index)"
                   class="text-content-tertiary hover:text-red-500 transition-colors"
                 >
