@@ -354,7 +354,7 @@ defineExpose({
                   <button
                     type="button"
                     @click="toggleAdvanced"
-                    class="flex items-center gap-1 px-2 py-1 text-xs font-medium leading-none rounded transition-colors"
+                    class="flex items-center gap-1 ps-2 pe-1 py-1 text-xs font-medium leading-none rounded transition-colors"
                     :class="showAdvanced
                       ? 'bg-surface-tertiary text-content-secondary'
                       : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-tertiary'"
