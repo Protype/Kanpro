@@ -60,6 +60,56 @@ export const useTagsStore = defineStore('tags', () => {
     return result
   }
 
+  async function createTag(
+    projectId: number,
+    tagName: string,
+    colorId?: string
+  ): Promise<number | false> {
+    const authStore = useAuthStore()
+    const client = authStore.getClient()
+
+    const params: { project_id: number; tag: string; color_id?: string } = {
+      project_id: projectId,
+      tag: tagName
+    }
+    if (colorId) {
+      params.color_id = colorId
+    }
+
+    const result = await client.call<number | false>('createTag', params)
+    return result
+  }
+
+  async function updateTag(
+    tagId: number,
+    tagName: string,
+    colorId?: string
+  ): Promise<boolean> {
+    const authStore = useAuthStore()
+    const client = authStore.getClient()
+
+    const params: { tag_id: number; tag: string; color_id?: string } = {
+      tag_id: tagId,
+      tag: tagName
+    }
+    if (colorId !== undefined) {
+      params.color_id = colorId
+    }
+
+    const result = await client.call<boolean>('updateTag', params)
+    return result
+  }
+
+  async function removeTag(tagId: number): Promise<boolean> {
+    const authStore = useAuthStore()
+    const client = authStore.getClient()
+
+    const result = await client.call<boolean>('removeTag', {
+      tag_id: tagId
+    })
+    return result
+  }
+
   function clearTags(): void {
     projectTags.value = []
     taskTags.value = []
@@ -75,6 +125,9 @@ export const useTagsStore = defineStore('tags', () => {
     fetchProjectTags,
     fetchTaskTags,
     setTaskTags,
+    createTag,
+    updateTag,
+    removeTag,
     clearTags,
     // Aliases for backward compatibility
     tags: projectTags,
