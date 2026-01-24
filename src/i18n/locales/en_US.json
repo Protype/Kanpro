@@ -410,5 +410,10 @@
     "removeAction": "Remove action",
     "event": "Event",
     "trigger": "Trigger"
+  },
+  "sidebar": {
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar",
+    "noDescription": "No description"
   }
 }

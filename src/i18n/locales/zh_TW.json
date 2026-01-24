@@ -410,5 +410,10 @@
     "removeAction": "刪除動作",
     "event": "事件",
     "trigger": "觸發條件"
+  },
+  "sidebar": {
+    "collapse": "折疊側邊欄",
+    "expand": "展開側邊欄",
+    "noDescription": "無描述"
   }
 }

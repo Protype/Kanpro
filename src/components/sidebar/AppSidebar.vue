@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useSidebarStore } from '@/stores/sidebar'
 import { useProjectsStore } from '@/stores/projects'
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 const sidebarStore = useSidebarStore()
 const projectsStore = useProjectsStore()
 
@@ -17,12 +19,12 @@ onMounted(async () => {
 })
 
 // Navigation items
-const globalNavItems = [
-  { name: 'dashboard', label: '儀表板', icon: 'dashboard', route: '/dashboard' },
-  { name: 'activity', label: '動態總覽', icon: 'activity', route: '/activity' },
-  { name: 'all-tasks', label: '任務總覽', icon: 'tasks', route: '/' },
-  { name: 'my-tasks', label: '我的任務', icon: 'user', route: '/my-tasks' }
-]
+const globalNavItems = computed(() => [
+  { name: 'dashboard', label: t('nav.dashboard'), icon: 'dashboard', route: '/dashboard' },
+  { name: 'activity', label: t('activity.activity'), icon: 'activity', route: '/activity' },
+  { name: 'all-tasks', label: t('nav.allTasks'), icon: 'tasks', route: '/' },
+  { name: 'my-tasks', label: t('nav.myTasks'), icon: 'user', route: '/my-tasks' }
+])
 
 const isActive = (routePath: string) => {
   return route.path === routePath
@@ -65,7 +67,7 @@ const handleProjectClick = (projectId: number) => {
       <button
         @click="toggleSidebar"
         class="absolute -right-3 top-1/2 -translate-y-1/2 p-1 bg-surface border border-edge rounded-full text-content-tertiary hover:text-content-secondary hover:bg-surface-hover transition-all cursor-pointer z-10 opacity-0 group-hover:opacity-100"
-        :title="sidebarStore.isExpanded ? '折疊側邊欄' : '展開側邊欄'"
+        :title="sidebarStore.isExpanded ? t('sidebar.collapse') : t('sidebar.expand')"
       >
         <ph-icon
           icon="chevron-left"
@@ -110,13 +112,13 @@ const handleProjectClick = (projectId: number) => {
           class="flex items-center justify-between mb-3"
         >
           <span class="text-xs font-medium text-content-tertiary uppercase tracking-wider">
-            專案
+            {{ t('project.projects') }}
           </span>
           <router-link
             to="/projects"
             class="text-xs text-accent hover:text-accent-hover cursor-pointer"
           >
-            全部
+            {{ t('common.all') }}
           </router-link>
         </div>
 
@@ -150,7 +152,7 @@ const handleProjectClick = (projectId: number) => {
                 {{ project.description }}
               </p>
               <p v-else class="text-xs text-content-tertiary">
-                無描述
+                {{ t('sidebar.noDescription') }}
               </p>
             </template>
           </button>
