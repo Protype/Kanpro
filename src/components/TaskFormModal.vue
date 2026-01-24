@@ -68,22 +68,25 @@ const showTagDropdown = ref(false)
 const ownerSearchQuery = ref('')
 const showOwnerDropdown = ref(false)
 
-// === 顏色選項 ===
+// === 顏色選項（按色相環排列：暖色→冷色→中性色）===
 const colors = [
-  { id: 'yellow', name: '黃色', class: 'bg-yellow-500' },
-  { id: 'blue', name: '藍色', class: 'bg-blue-500' },
-  { id: 'green', name: '綠色', class: 'bg-green-500' },
-  { id: 'purple', name: '紫色', class: 'bg-purple-500' },
+  // 暖色系
   { id: 'red', name: '紅色', class: 'bg-red-500' },
-  { id: 'orange', name: '橘色', class: 'bg-orange-500' },
-  { id: 'grey', name: '灰色', class: 'bg-gray-500' },
-  { id: 'cyan', name: '青色', class: 'bg-cyan-500' },
-  { id: 'lime', name: '萊姆綠', class: 'bg-lime-500' },
   { id: 'pink', name: '粉紅', class: 'bg-pink-500' },
-  { id: 'teal', name: '藍綠', class: 'bg-teal-500' },
-  { id: 'amber', name: '琥珀', class: 'bg-amber-500' },
-  { id: 'brown', name: '棕色', class: 'bg-amber-800' },
   { id: 'deep_orange', name: '深橘', class: 'bg-orange-700' },
+  { id: 'orange', name: '橘色', class: 'bg-orange-500' },
+  { id: 'amber', name: '琥珀', class: 'bg-amber-500' },
+  { id: 'yellow', name: '黃色', class: 'bg-yellow-500' },
+  { id: 'lime', name: '萊姆綠', class: 'bg-lime-500' },
+  { id: 'green', name: '綠色', class: 'bg-green-500' },
+  // 冷色系
+  { id: 'teal', name: '藍綠', class: 'bg-teal-500' },
+  { id: 'cyan', name: '青色', class: 'bg-cyan-500' },
+  { id: 'blue', name: '藍色', class: 'bg-blue-500' },
+  { id: 'purple', name: '紫色', class: 'bg-purple-500' },
+  // 中性色
+  { id: 'brown', name: '棕色', class: 'bg-amber-800' },
+  { id: 'grey', name: '灰色', class: 'bg-gray-500' },
   { id: 'dark_grey', name: '深灰', class: 'bg-gray-700' },
   { id: 'white', name: '白色', class: 'bg-white border border-edge' }
 ]
@@ -428,9 +431,9 @@ defineExpose({
                 </div>
 
                 <!-- Column & Color Row -->
-                <div class="flex gap-4">
+                <div class="grid grid-cols-2 gap-4">
                   <!-- Column -->
-                  <div class="flex-1">
+                  <div>
                     <label for="task-column" class="block text-sm font-medium text-content mb-1">
                       欄位
                     </label>
@@ -451,11 +454,11 @@ defineExpose({
                   </div>
 
                   <!-- Color -->
-                  <div class="shrink-0">
+                  <div>
                     <label class="block text-sm font-medium text-content mb-1">
                       顏色
                     </label>
-                    <div class="flex gap-1.5 h-[38px] items-center">
+                    <div class="grid grid-cols-8 gap-1">
                       <button
                         v-for="color in colors"
                         :key="color.id"
@@ -463,7 +466,7 @@ defineExpose({
                         @click="colorId = color.id"
                         :disabled="isSubmitting"
                         :class="[
-                          'w-5 h-5 rounded-full transition-all',
+                          'w-4 h-4 rounded-full transition-all',
                           color.class,
                           colorId === color.id ? 'ring-2 ring-offset-1 ring-content-tertiary scale-110' : 'hover:scale-110'
                         ]"
