@@ -19,10 +19,37 @@ const toast = useToast()
 const isAdding = ref(false)
 const isSubmitting = ref(false)
 const newCategoryName = ref('')
+const newCategoryColor = ref('yellow')
 
 // Edit state
 const editingCategoryId = ref<number | null>(null)
 const editName = ref('')
+const editColor = ref('yellow')
+
+// Available colors (Kanboard standard colors)
+const colorOptions = [
+  { id: 'yellow', label: '黃色', class: 'bg-yellow-400' },
+  { id: 'blue', label: '藍色', class: 'bg-blue-500' },
+  { id: 'green', label: '綠色', class: 'bg-green-500' },
+  { id: 'purple', label: '紫色', class: 'bg-purple-500' },
+  { id: 'red', label: '紅色', class: 'bg-red-500' },
+  { id: 'orange', label: '橙色', class: 'bg-orange-500' },
+  { id: 'grey', label: '灰色', class: 'bg-gray-500' },
+  { id: 'brown', label: '棕色', class: 'bg-amber-700' },
+  { id: 'deep_orange', label: '深橙', class: 'bg-orange-700' },
+  { id: 'dark_grey', label: '深灰', class: 'bg-gray-700' },
+  { id: 'pink', label: '粉紅', class: 'bg-pink-500' },
+  { id: 'teal', label: '青色', class: 'bg-teal-500' },
+  { id: 'cyan', label: '青藍', class: 'bg-cyan-500' },
+  { id: 'lime', label: '萊姆', class: 'bg-lime-500' },
+  { id: 'light_green', label: '淺綠', class: 'bg-green-400' },
+  { id: 'amber', label: '琥珀', class: 'bg-amber-500' }
+]
+
+const getColorClass = (colorId: string | null | undefined): string => {
+  const color = colorOptions.find(c => c.id === colorId)
+  return color?.class || 'bg-surface-tertiary'
+}
 
 onMounted(async () => {
   await categoriesStore.fetchCategories(props.projectId)
@@ -37,6 +64,7 @@ watch(() => props.projectId, async (newId) => {
 const startAdding = () => {
   isAdding.value = true
   newCategoryName.value = ''
+  newCategoryColor.value = 'yellow'
 }
 
 const cancelAdding = () => {
@@ -51,7 +79,8 @@ const handleAddCategory = async () => {
   try {
     await categoriesStore.addCategory(
       props.projectId,
-      newCategoryName.value.trim()
+      newCategoryName.value.trim(),
+      newCategoryColor.value
     )
     await categoriesStore.fetchCategories(props.projectId)
     toast.update(loadingToast, 'success', '類別已新增')
@@ -68,6 +97,7 @@ const handleAddCategory = async () => {
 const startEditing = (category: Category) => {
   editingCategoryId.value = category.id
   editName.value = category.name
+  editColor.value = category.color_id || 'yellow'
 }
 
 const cancelEditing = () => {
@@ -82,7 +112,8 @@ const handleSaveCategory = async () => {
   try {
     await categoriesStore.updateCategory(
       editingCategoryId.value,
-      editName.value.trim()
+      editName.value.trim(),
+      editColor.value
     )
     await categoriesStore.fetchCategories(props.projectId)
     toast.update(loadingToast, 'success', '類別已更新')
@@ -144,8 +175,27 @@ const handleRemoveCategory = async (category: Category) => {
             type="text"
             :disabled="isSubmitting"
             class="w-full px-3 py-2 text-sm bg-surface border border-edge rounded-lg text-content focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed"
-            placeholder="輸入類別名稱"
+            placeholder="類別名稱"
           />
+        </div>
+        <!-- Color picker -->
+        <div>
+          <label class="block text-xs text-content-tertiary mb-2">顏色</label>
+          <div class="flex flex-wrap gap-1.5">
+            <button
+              v-for="color in colorOptions"
+              :key="color.id"
+              type="button"
+              @click="newCategoryColor = color.id"
+              :disabled="isSubmitting"
+              class="w-6 h-6 rounded-full transition-all disabled:opacity-50"
+              :class="[
+                color.class,
+                newCategoryColor === color.id ? 'ring-2 ring-offset-2 ring-accent' : 'hover:scale-110'
+              ]"
+              :title="color.label"
+            />
+          </div>
         </div>
         <div class="flex gap-2 justify-end">
           <button
@@ -176,17 +226,17 @@ const handleRemoveCategory = async (category: Category) => {
           <!-- View mode -->
           <div v-if="editingCategoryId !== category.id" class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <!-- Category icon -->
-              <div class="w-8 h-8 rounded-lg bg-surface-tertiary group-hover:bg-accent/15 flex items-center justify-center transition-colors">
-                <ph-icon icon="tag" class="w-4 h-4 text-content-tertiary group-hover:text-accent transition-colors" />
+              <!-- Category color indicator -->
+              <div
+                class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+                :class="getColorClass(category.color_id)"
+              >
+                <ph-icon icon="tag" class="w-4 h-4 text-white" />
               </div>
 
               <!-- Category info -->
               <div class="min-w-0">
                 <div class="font-medium text-sm text-content truncate">{{ category.name }}</div>
-                <div v-if="category.description" class="text-xs text-content-tertiary truncate">
-                  {{ category.description }}
-                </div>
               </div>
             </div>
 
@@ -216,8 +266,27 @@ const handleRemoveCategory = async (category: Category) => {
                 type="text"
                 :disabled="isSubmitting"
                 class="w-full px-3 py-2 text-sm bg-surface border border-edge rounded-lg text-content focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed"
-                placeholder="輸入類別名稱"
+                placeholder="類別名稱"
               />
+            </div>
+            <!-- Color picker -->
+            <div>
+              <label class="block text-xs text-content-tertiary mb-2">顏色</label>
+              <div class="flex flex-wrap gap-1.5">
+                <button
+                  v-for="color in colorOptions"
+                  :key="color.id"
+                  type="button"
+                  @click="editColor = color.id"
+                  :disabled="isSubmitting"
+                  class="w-6 h-6 rounded-full transition-all disabled:opacity-50"
+                  :class="[
+                    color.class,
+                    editColor === color.id ? 'ring-2 ring-offset-2 ring-accent' : 'hover:scale-110'
+                  ]"
+                  :title="color.label"
+                />
+              </div>
             </div>
             <div class="flex gap-2 justify-end">
               <button

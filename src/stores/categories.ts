@@ -33,29 +33,41 @@ export const useCategoriesStore = defineStore('categories', () => {
 
   async function addCategory(
     projectId: number,
-    name: string
+    name: string,
+    colorId?: string
   ): Promise<number> {
     const authStore = useAuthStore()
     const client = authStore.getClient()
 
-    const result = await client.call<number>('createCategory', {
+    const params: { project_id: number; name: string; color_id?: string } = {
       project_id: projectId,
       name: name
-    })
+    }
+    if (colorId) {
+      params.color_id = colorId
+    }
+
+    const result = await client.call<number>('createCategory', params)
     return result
   }
 
   async function updateCategory(
     categoryId: number,
-    name: string
+    name: string,
+    colorId?: string
   ): Promise<boolean> {
     const authStore = useAuthStore()
     const client = authStore.getClient()
 
-    const result = await client.call<boolean>('updateCategory', {
+    const params: { category_id: number; name: string; color_id?: string } = {
       category_id: categoryId,
       name: name
-    })
+    }
+    if (colorId !== undefined) {
+      params.color_id = colorId
+    }
+
+    const result = await client.call<boolean>('updateCategory', params)
     return result
   }
 
