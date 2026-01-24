@@ -74,10 +74,8 @@ const selectedOwner = computed(() => {
 // === Load project data ===
 onMounted(async () => {
   await loadProjectData()
-  // 載入使用者列表用於擁有者選擇
-  if (usersStore.users.length === 0) {
-    usersStore.fetchAllUsers()
-  }
+  // 載入使用者列表用於擁有者選擇（每次都重新載入以確保頭像等資料是最新的）
+  usersStore.fetchAllUsers()
 })
 
 watch(projectId, async () => {
