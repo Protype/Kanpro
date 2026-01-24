@@ -442,10 +442,10 @@ defineExpose({
 
                 <!-- Color -->
                 <div>
-                  <label class="block text-sm font-medium text-content mb-2">
+                  <label class="block text-sm font-medium text-content mb-1">
                     顏色
                   </label>
-                  <div class="flex flex-wrap gap-2">
+                  <div class="flex flex-wrap gap-1.5">
                     <button
                       v-for="color in colors"
                       :key="color.id"
@@ -453,9 +453,9 @@ defineExpose({
                       @click="colorId = color.id"
                       :disabled="isSubmitting"
                       :class="[
-                        'w-8 h-8 rounded-full transition-transform',
+                        'w-5 h-5 rounded-full transition-all',
                         color.class,
-                        colorId === color.id ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : 'hover:scale-105'
+                        colorId === color.id ? 'ring-2 ring-offset-1 ring-content-tertiary scale-110' : 'hover:scale-110'
                       ]"
                       :title="color.name"
                     ></button>

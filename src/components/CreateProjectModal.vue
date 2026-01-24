@@ -214,29 +214,31 @@ onMounted(() => {
             <div class="flex items-center justify-between p-4 h-14 border-b border-edge">
               <div class="flex items-center gap-3">
                 <h3 class="text-lg font-semibold text-content">新增專案</h3>
-                <!-- Advanced Settings Toggle (styled like search bar) -->
-                <button
-                  type="button"
-                  @click="toggleAdvanced"
-                  class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium leading-none rounded transition-colors"
-                  :class="showAdvanced
-                    ? 'bg-surface-tertiary text-content-secondary'
-                    : 'bg-surface-secondary text-content-tertiary hover:text-content-secondary'"
-                >
-                  <span>進階設定</span>
-                  <!-- Chevron: > when collapsed, < when expanded -->
-                  <ph-icon :icon="showAdvanced ? 'chevron-left' : 'chevron-right'" class="w-3.5 h-3.5" />
-                </button>
-                <!-- Expand to full page button -->
-                <button
-                  type="button"
-                  data-testid="expand-button"
-                  @click="handleExpand"
-                  class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium leading-none rounded transition-colors bg-surface-secondary text-content-tertiary hover:text-content-secondary"
-                  title="展開為完整頁面"
-                >
-                  <ph-icon icon="arrows-out" class="w-3.5 h-3.5" />
-                </button>
+                <!-- Button Group: Advanced + Expand -->
+                <div class="flex items-center gap-0 rounded-md bg-surface-secondary px-1 py-0.5">
+                  <!-- Advanced Settings Toggle -->
+                  <button
+                    type="button"
+                    @click="toggleAdvanced"
+                    class="flex items-center gap-1 ps-2 pe-1 py-1 text-xs font-medium leading-none rounded transition-colors"
+                    :class="showAdvanced
+                      ? 'bg-surface-tertiary text-content-secondary'
+                      : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-tertiary'"
+                  >
+                    <span>進階設定</span>
+                    <ph-icon :icon="showAdvanced ? 'chevron-left' : 'chevron-right'" class="w-3.5 h-3.5" />
+                  </button>
+                  <!-- Expand to full page button -->
+                  <button
+                    type="button"
+                    data-testid="expand-button"
+                    @click="handleExpand"
+                    class="flex items-center justify-center p-1 rounded transition-colors text-content-tertiary hover:text-content-secondary hover:bg-surface-tertiary"
+                    title="展開為完整頁面"
+                  >
+                    <ph-icon icon="arrows-out" class="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
               <button
                 type="button"
