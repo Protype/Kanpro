@@ -58,10 +58,10 @@ export interface UpdateProjectParams {
  */
 export interface CreateProjectOptions extends CreateProjectParams {
   /**
-   * 建立後是否停用公開存取
-   * 預設專案是 is_public=0（已停用），此選項用於確保停用
+   * 建立後是否啟用公開存取
+   * 預設專案是 is_public=0（停用），勾選此選項會呼叫 enableProjectPublicAccess
    */
-  disablePublicAccess?: boolean
+  enablePublicAccess?: boolean
 }
 
 export const useProjectsStore = defineStore('projects', () => {
@@ -231,7 +231,7 @@ export const useProjectsStore = defineStore('projects', () => {
     const client = authStore.getClient()
 
     // 分離建立後操作選項與 API 參數
-    const { disablePublicAccess, ...apiParams } = options
+    const { enablePublicAccess, ...apiParams } = options
 
     // 過濾掉 undefined 值
     const params: Record<string, unknown> = {}
@@ -245,9 +245,9 @@ export const useProjectsStore = defineStore('projects', () => {
       const projectId = await client.call<number | false>('createProject', params)
 
       if (projectId !== false) {
-        // 建立成功後，若需要限制公開存取
-        if (disablePublicAccess) {
-          await disableProjectPublicAccess(projectId)
+        // 建立成功後，若需要啟用公開存取
+        if (enablePublicAccess) {
+          await enableProjectPublicAccess(projectId)
         }
 
         // 重新載入專案列表

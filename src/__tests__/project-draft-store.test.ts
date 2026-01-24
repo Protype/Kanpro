@@ -22,7 +22,7 @@ describe('ProjectDraft Store', () => {
         priorityStart: undefined,
         priorityEnd: undefined,
         email: '',
-        disablePublicAccess: false
+        enablePublicAccess: false
       })
     })
 

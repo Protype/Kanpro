@@ -36,7 +36,7 @@ const priorityDefault = ref<number | undefined>(undefined)
 const priorityStart = ref<number | undefined>(undefined)
 const priorityEnd = ref<number | undefined>(undefined)
 const projectEmail = ref('')
-const disablePublicAccess = ref(false)
+const enablePublicAccess = ref(false)
 
 // === UI 狀態 ===
 const isSubmitting = ref(false)
@@ -87,7 +87,7 @@ function resetForm() {
   priorityStart.value = undefined
   priorityEnd.value = undefined
   projectEmail.value = ''
-  disablePublicAccess.value = false
+  enablePublicAccess.value = false
   errorMessage.value = ''
   showAdvanced.value = false
   ownerSearchQuery.value = ''
@@ -111,7 +111,7 @@ function handleExpand() {
     priorityStart: priorityStart.value,
     priorityEnd: priorityEnd.value,
     email: projectEmail.value,
-    disablePublicAccess: disablePublicAccess.value
+    enablePublicAccess: enablePublicAccess.value
   })
 
   // 關閉燈箱並導向專案建立頁
@@ -142,7 +142,7 @@ async function handleSubmit() {
     priority_start: priorityStart.value,
     priority_end: priorityEnd.value,
     email: projectEmail.value.trim() || undefined,
-    disablePublicAccess: disablePublicAccess.value
+    enablePublicAccess: enablePublicAccess.value
   }
 
   try {
@@ -469,21 +469,21 @@ onUnmounted(() => {
                         />
                       </div>
 
-                      <!-- Disable Public Access (full width) -->
+                      <!-- Enable Public Access (full width) -->
                       <div class="col-span-2 flex items-start gap-3 pt-2 border-t border-edge">
                         <input
-                          id="disable-public-access"
-                          v-model="disablePublicAccess"
+                          id="enable-public-access"
+                          v-model="enablePublicAccess"
                           type="checkbox"
                           :disabled="isSubmitting"
                           class="mt-0.5 w-4 h-4 rounded border-edge text-accent focus:ring-accent focus:ring-offset-0"
                         />
                         <div>
-                          <label for="disable-public-access" class="text-sm text-content font-medium cursor-pointer">
-                            限制公開存取
+                          <label for="enable-public-access" class="text-sm text-content font-medium cursor-pointer">
+                            啟用公開存取
                           </label>
                           <p class="text-xs text-content-tertiary mt-0.5">
-                            建立後將自動關閉公開存取功能
+                            允許任何人透過公開連結檢視專案（唯讀）
                           </p>
                         </div>
                       </div>

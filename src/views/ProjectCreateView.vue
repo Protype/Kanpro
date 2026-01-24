@@ -63,9 +63,9 @@ const projectEmail = computed({
   get: () => draftStore.draft.email,
   set: (val) => draftStore.updateDraft({ email: val })
 })
-const disablePublicAccess = computed({
-  get: () => draftStore.draft.disablePublicAccess,
-  set: (val) => draftStore.updateDraft({ disablePublicAccess: val })
+const enablePublicAccess = computed({
+  get: () => draftStore.draft.enablePublicAccess,
+  set: (val) => draftStore.updateDraft({ enablePublicAccess: val })
 })
 
 // === UI 狀態 ===
@@ -223,7 +223,7 @@ async function handleCreate() {
       priority_start: priorityStart.value,
       priority_end: priorityEnd.value,
       email: projectEmail.value.trim() || undefined,
-      disablePublicAccess: disablePublicAccess.value
+      enablePublicAccess: enablePublicAccess.value
     })
 
     if (projectId === false) {
@@ -533,18 +533,18 @@ onUnmounted(() => {
             <!-- 公開存取 -->
             <div class="flex items-start gap-3 pt-3 border-t border-edge">
               <input
-                id="disablePublicAccess"
-                v-model="disablePublicAccess"
+                id="enablePublicAccess"
+                v-model="enablePublicAccess"
                 type="checkbox"
                 :disabled="isCreating"
                 class="mt-0.5 w-4 h-4 rounded border-edge text-accent focus:ring-accent focus:ring-offset-0"
               />
               <div>
-                <label for="disablePublicAccess" class="text-sm text-content font-medium cursor-pointer">
-                  限制公開存取
+                <label for="enablePublicAccess" class="text-sm text-content font-medium cursor-pointer">
+                  啟用公開存取
                 </label>
                 <p class="text-xs text-content-tertiary mt-0.5">
-                  建立後將自動關閉公開存取功能
+                  允許任何人透過公開連結檢視專案（唯讀）
                 </p>
               </div>
             </div>
