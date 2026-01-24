@@ -458,7 +458,7 @@ defineExpose({
                     <label class="block text-sm font-medium text-content mb-1">
                       顏色
                     </label>
-                    <div class="grid grid-cols-8 gap-1">
+                    <div class="grid grid-cols-8 gap-1.5">
                       <button
                         v-for="color in colors"
                         :key="color.id"
