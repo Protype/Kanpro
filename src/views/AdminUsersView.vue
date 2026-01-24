@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useUsersStore } from '@/stores/users'
 import { useToast } from '@/stores/toast'
-import { getAvatarColor, getAvatarInitial, getUserDisplayName } from '@/utils/avatar'
+import UserAvatar from '@/components/UserAvatar.vue'
 import type { User } from '@/types'
 
 const authStore = useAuthStore()
@@ -327,12 +327,7 @@ const handleRemoveUser = async (user: User) => {
             >
               <td class="table-cell">
                 <div class="flex items-center gap-3">
-                  <div
-                    class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-medium"
-                    :style="{ backgroundColor: getAvatarColor(getUserDisplayName(user)) }"
-                  >
-                    {{ getAvatarInitial(getUserDisplayName(user)) }}
-                  </div>
+                  <UserAvatar :user="user" size="sm" />
                   <div>
                     <p class="font-medium text-content">{{ user.name || user.username }}</p>
                     <p class="text-xs text-content-tertiary">@{{ user.username }}</p>

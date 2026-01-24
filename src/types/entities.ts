@@ -65,6 +65,8 @@ export interface Task {
   color_id: string
   priority: number
   owner_id: number
+  owner_name?: string | null
+  owner_username?: string | null
   creator_id: number
   date_creation: number
   date_modification: number

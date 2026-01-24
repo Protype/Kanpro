@@ -3,7 +3,8 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useTheme, type ThemeName, THEMES } from '@/composables/useTheme'
-import { getAvatarColor, getAvatarInitial, getUserDisplayName } from '@/utils/avatar'
+import { getUserDisplayName } from '@/utils/avatar'
+import UserAvatar from '@/components/UserAvatar.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -13,11 +14,15 @@ const isOpen = ref(false)
 const showThemeMenu = ref(false)
 
 const displayName = computed(() => getUserDisplayName(authStore.user))
-const avatarInitial = computed(() => getAvatarInitial(displayName.value))
-const avatarBgColor = computed(() => getAvatarColor(displayName.value))
 
-// 直接使用 store 的頭像資料（與其他元件同步）
-const avatarImageData = computed(() => authStore.avatarData)
+// 頭像圖片 URL（用於 UserAvatar）
+const avatarImageUrl = computed(() => {
+  const data = authStore.avatarData
+  return data ? `data:image/png;base64,${data}` : null
+})
+
+// 使用者物件（用於 UserAvatar）
+const userForAvatar = computed(() => authStore.user)
 
 // 檢查是否為管理員
 const isAdmin = computed(() => authStore.user?.role === 'app-admin')
@@ -90,19 +95,7 @@ onUnmounted(() => {
       class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-surface-hover transition-colors"
     >
       <!-- Avatar -->
-      <img
-        v-if="avatarImageData"
-        :src="`data:image/png;base64,${avatarImageData}`"
-        :alt="displayName"
-        class="w-8 h-8 rounded-full object-cover"
-      />
-      <div
-        v-else
-        class="w-8 h-8 rounded-full text-white flex items-center justify-center text-sm font-medium"
-        :style="{ backgroundColor: avatarBgColor }"
-      >
-        {{ avatarInitial }}
-      </div>
+      <UserAvatar :user="userForAvatar" :image-url="avatarImageUrl" size="sm" />
       <!-- Name (hidden on mobile) -->
       <span class="hidden sm:inline text-sm text-content">{{ displayName }}</span>
       <!-- Chevron -->
@@ -129,19 +122,7 @@ onUnmounted(() => {
         <!-- User Info Header -->
         <div class="px-4 py-3 border-b border-edge bg-surface-secondary">
           <div class="flex items-center gap-3">
-            <img
-              v-if="avatarImageData"
-              :src="`data:image/png;base64,${avatarImageData}`"
-              :alt="displayName"
-              class="w-10 h-10 rounded-full object-cover"
-            />
-            <div
-              v-else
-              class="w-10 h-10 rounded-full text-white flex items-center justify-center text-base font-medium"
-              :style="{ backgroundColor: avatarBgColor }"
-            >
-              {{ avatarInitial }}
-            </div>
+            <UserAvatar :user="userForAvatar" :image-url="avatarImageUrl" size="md" />
             <div class="flex-1 min-w-0">
               <p class="text-sm font-medium text-content truncate">{{ displayName }}</p>
               <p class="text-xs text-content-tertiary truncate">{{ authStore.user?.email || authStore.user?.username }}</p>

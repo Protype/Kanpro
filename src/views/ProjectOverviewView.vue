@@ -103,12 +103,7 @@
                   class="flex gap-3 py-3 border-b border-edge last:border-0 animate-slideIn"
                   :style="{ animationDelay: `${index * 50}ms` }"
                 >
-                  <div
-                    class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold flex-shrink-0"
-                    :style="{ backgroundColor: getAvatarColor(activity.author_username || '') }"
-                  >
-                    {{ getInitial(activity.author_username || '') }}
-                  </div>
+                  <UserAvatar :name="activity.author_name || activity.author_username" size="sm" />
                   <div class="flex-1 min-w-0">
                     <div class="flex flex-wrap items-center gap-1 text-sm">
                       <span class="font-medium text-content">{{ activity.author_username }}</span>
@@ -182,12 +177,7 @@
                 class="flex items-center gap-2 px-2 py-1.5 bg-surface-secondary rounded-lg"
                 :title="getMemberName(member)"
               >
-                <div
-                  class="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-medium flex-shrink-0"
-                  :style="{ backgroundColor: getAvatarColor(getMemberName(member)) }"
-                >
-                  {{ getInitial(getMemberName(member)) }}
-                </div>
+                <UserAvatar :name="getMemberName(member)" size="xs" />
                 <span class="text-sm text-content truncate max-w-24">{{ getMemberName(member) }}</span>
               </div>
             </div>
@@ -224,7 +214,7 @@ import { useBoardStore } from '@/stores/board'
 import { useMembersStore } from '@/stores/members'
 import { useProjectsStore } from '@/stores/projects'
 import { useAnalyticsStore } from '@/stores/analytics'
-import { getAvatarColor, getAvatarInitial } from '@/utils/avatar'
+import UserAvatar from '@/components/UserAvatar.vue'
 
 const route = useRoute()
 const boardStore = useBoardStore()
@@ -303,10 +293,6 @@ function getMemberName(member: unknown): string {
 function getColumnPercentage(count: number | undefined): number {
   if (totalTasks.value === 0) return 0
   return ((count || 0) / totalTasks.value) * 100
-}
-
-function getInitial(name: string | undefined): string {
-  return getAvatarInitial(name)
 }
 
 function formatEventName(eventName: string): string {
