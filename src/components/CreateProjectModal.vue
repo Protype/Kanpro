@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProjectsStore, type CreateProjectOptions } from '@/stores/projects'
 import { useUsersStore } from '@/stores/users'
@@ -179,8 +179,17 @@ function handleClickOutside(event: MouseEvent) {
   }
 }
 
+// 處理表單內部點擊（因為 @click.stop 阻止事件傳播到 document）
+function handleFormClick(event: MouseEvent) {
+  handleClickOutside(event)
+}
+
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
 })
 </script>
 
@@ -208,7 +217,7 @@ onMounted(() => {
               height: showAdvanced ? '540px' : '480px',
               maxWidth: '90vw'
             }"
-            @click.stop
+            @click.stop="handleFormClick"
           >
             <!-- Header -->
             <div class="flex items-center justify-between p-4 h-14 border-b border-edge">

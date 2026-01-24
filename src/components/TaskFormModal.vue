@@ -243,6 +243,11 @@ function handleClickOutside(event: MouseEvent) {
   }
 }
 
+// 處理表單內部點擊（因為 @click.stop 阻止事件傳播到 document）
+function handleFormClick(event: MouseEvent) {
+  handleClickOutside(event)
+}
+
 function addTag(tagName: string) {
   if (!selectedTags.value.includes(tagName)) {
     selectedTags.value.push(tagName)
@@ -351,7 +356,7 @@ defineExpose({
               height: showAdvanced ? '560px' : '500px',
               maxWidth: '90vw'
             }"
-            @click.stop
+            @click.stop="handleFormClick"
           >
             <!-- Header -->
             <div class="flex items-center justify-between p-4 h-14 border-b border-edge">
