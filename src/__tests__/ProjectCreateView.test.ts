@@ -161,7 +161,7 @@ describe('ProjectCreateView', () => {
     it('should render columns section', () => {
       const wrapper = mountView()
       const columnsSection = wrapper.text()
-      expect(columnsSection).toContain('狀態')
+      expect(columnsSection).toContain('清單')
     })
 
     it('should render swimlanes section', () => {
@@ -198,7 +198,7 @@ describe('ProjectCreateView', () => {
       const wrapper = mountView()
       const draftStore = useProjectDraftStore()
 
-      const inputs = wrapper.findAll('input[placeholder="狀態名稱"]')
+      const inputs = wrapper.findAll('input[placeholder="清單名稱"]')
       expect(inputs.length).toBeGreaterThan(0)
 
       const columnInput = inputs[0]

@@ -28,7 +28,7 @@ export const useColumnsStore = defineStore('columns', () => {
       })
       columns.value = result || []
     } catch (err) {
-      error.value = err instanceof Error ? err.message : '載入狀態失敗'
+      error.value = err instanceof Error ? err.message : '載入清單失敗'
       columns.value = []
     } finally {
       isLoading.value = false

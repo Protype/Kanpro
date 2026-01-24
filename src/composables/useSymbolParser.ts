@@ -12,7 +12,7 @@ export const SYMBOLS: SymbolDefinition[] = [
   { symbol: '^', name: 'project', description: '選擇專案', color: 'text-blue-500' },
   { symbol: '@', name: 'assignee', description: '指派人員', color: 'text-green-500' },
   { symbol: '#', name: 'tag', description: '標籤', color: 'text-purple-500' },
-  { symbol: ':', name: 'column', description: '狀態', color: 'text-orange-500' },
+  { symbol: ':', name: 'column', description: '清單', color: 'text-orange-500' },
   { symbol: '!', name: 'priority', description: '優先級', color: 'text-red-500' },
   { symbol: '>', name: 'due', description: '到期日', color: 'text-cyan-500' }
 ]

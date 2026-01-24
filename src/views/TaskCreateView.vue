@@ -327,7 +327,7 @@ function handleCancel() {
               <!-- Column -->
               <div>
                 <label for="task-column" class="block text-sm font-medium text-content mb-1">
-                  狀態
+                  清單
                 </label>
                 <select
                   id="task-column"

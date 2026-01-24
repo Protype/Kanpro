@@ -550,7 +550,7 @@ onUnmounted(() => {
                 <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-blue-500">^</code> 選擇專案</div>
                 <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-green-500">@</code> 指派人員</div>
                 <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-purple-500">#</code> 標籤（可新增）</div>
-                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-orange-500">:</code> 狀態</div>
+                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-orange-500">:</code> 清單</div>
                 <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-red-500">!</code> 優先級</div>
                 <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-cyan-500">&gt;</code> 到期日</div>
               </div>
