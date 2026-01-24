@@ -69,7 +69,7 @@ const handleAddSwimlane = async () => {
   if (!newSwimlaneName.value.trim() || isSubmitting.value) return
 
   isSubmitting.value = true
-  const loadingToast = toast.loading('新增泳道中...')
+  const loadingToast = toast.loading('新增分組中...')
   try {
     await swimlanesStore.addSwimlane(
       props.projectId,
@@ -78,12 +78,12 @@ const handleAddSwimlane = async () => {
     )
     await swimlanesStore.fetchSwimlanes(props.projectId)
     syncLocalSwimlanes()
-    toast.update(loadingToast, 'success', '泳道已新增')
+    toast.update(loadingToast, 'success', '分組已新增')
     cancelAdding()
     emit('updated')
   } catch (error) {
     console.error('Failed to add swimlane:', error)
-    toast.update(loadingToast, 'error', '新增泳道失敗')
+    toast.update(loadingToast, 'error', '新增分組失敗')
   } finally {
     isSubmitting.value = false
   }
@@ -103,7 +103,7 @@ const handleSaveSwimlane = async () => {
   if (!editingSwimlaneId.value || !editName.value.trim() || isSubmitting.value) return
 
   isSubmitting.value = true
-  const loadingToast = toast.loading('更新泳道中...')
+  const loadingToast = toast.loading('更新分組中...')
   try {
     await swimlanesStore.updateSwimlane(
       editingSwimlaneId.value,
@@ -112,31 +112,31 @@ const handleSaveSwimlane = async () => {
     )
     await swimlanesStore.fetchSwimlanes(props.projectId)
     syncLocalSwimlanes()
-    toast.update(loadingToast, 'success', '泳道已更新')
+    toast.update(loadingToast, 'success', '分組已更新')
     cancelEditing()
     emit('updated')
   } catch (error) {
     console.error('Failed to update swimlane:', error)
-    toast.update(loadingToast, 'error', '更新泳道失敗')
+    toast.update(loadingToast, 'error', '更新分組失敗')
   } finally {
     isSubmitting.value = false
   }
 }
 
 const handleRemoveSwimlane = async (swimlane: Swimlane) => {
-  if (!confirm(`確定要刪除泳道「${swimlane.name}」嗎？此操作無法復原。`)) return
+  if (!confirm(`確定要刪除分組「${swimlane.name}」嗎？此操作無法復原。`)) return
 
   savingSwimlaneIds.value.add(swimlane.id)
-  const loadingToast = toast.loading('刪除泳道中...')
+  const loadingToast = toast.loading('刪除分組中...')
   try {
     await swimlanesStore.removeSwimlane(props.projectId, swimlane.id)
     await swimlanesStore.fetchSwimlanes(props.projectId)
     syncLocalSwimlanes()
-    toast.update(loadingToast, 'success', '泳道已刪除')
+    toast.update(loadingToast, 'success', '分組已刪除')
     emit('updated')
   } catch (error) {
     console.error('Failed to remove swimlane:', error)
-    toast.update(loadingToast, 'error', '刪除泳道失敗')
+    toast.update(loadingToast, 'error', '刪除分組失敗')
   } finally {
     savingSwimlaneIds.value.delete(swimlane.id)
   }
@@ -145,7 +145,7 @@ const handleRemoveSwimlane = async (swimlane: Swimlane) => {
 const handleToggleActive = async (swimlane: Swimlane) => {
   const action = swimlane.is_active ? '停用' : '啟用'
   savingSwimlaneIds.value.add(swimlane.id)
-  const loadingToast = toast.loading(`${action}泳道中...`)
+  const loadingToast = toast.loading(`${action}分組中...`)
   try {
     if (swimlane.is_active) {
       await swimlanesStore.disableSwimlane(props.projectId, swimlane.id)
@@ -154,11 +154,11 @@ const handleToggleActive = async (swimlane: Swimlane) => {
     }
     await swimlanesStore.fetchSwimlanes(props.projectId)
     syncLocalSwimlanes()
-    toast.update(loadingToast, 'success', `泳道已${action}`)
+    toast.update(loadingToast, 'success', `分組已${action}`)
     emit('updated')
   } catch (error) {
     console.error('Failed to toggle swimlane status:', error)
-    toast.update(loadingToast, 'error', `${action}泳道失敗`)
+    toast.update(loadingToast, 'error', `${action}分組失敗`)
   } finally {
     savingSwimlaneIds.value.delete(swimlane.id)
   }
@@ -184,7 +184,7 @@ const handleDragEnd = async (event: any) => {
     emit('updated')
   } catch (error) {
     console.error('Failed to reorder swimlane:', error)
-    toast.error('移動泳道失敗')
+    toast.error('移動分組失敗')
     // Revert on error
     syncLocalSwimlanes()
   } finally {
@@ -202,7 +202,7 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
       <div class="flex items-center gap-2">
         <ph-icon icon="rows" class="w-5 h-5 text-content-tertiary" />
         <h3 class="text-base font-semibold text-content">
-          泳道管理
+          分組管理
         </h3>
         <span v-if="swimlanesStore.swimlanesCount > 0" class="text-xs text-content-tertiary bg-surface-secondary px-1.5 py-0.5 rounded">
           {{ swimlanesStore.swimlanesCount }}
@@ -212,11 +212,12 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
         v-if="!isAdding"
         @click="startAdding"
         class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
-        title="新增泳道"
+        title="新增分組"
       >
         <ph-icon icon="rows-plus-bottom" weight="fill" class="w-5 h-5" />
       </button>
     </div>
+    <p class="text-xs text-content-tertiary mb-4 -mt-2">專案中橫向任務分組</p>
 
     <div class="space-y-3">
       <!-- Add swimlane form -->
@@ -227,7 +228,7 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
             type="text"
             :disabled="isSubmitting"
             class="w-full px-3 py-2 text-sm bg-surface border border-edge rounded-lg text-content focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed"
-            placeholder="輸入泳道名稱"
+            placeholder="分組名稱"
           />
         </div>
         <div>
@@ -344,7 +345,7 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
                   type="text"
                   :disabled="isSubmitting"
                   class="w-full px-3 py-2 text-sm bg-surface border border-edge rounded-lg text-content focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed"
-                  placeholder="輸入泳道名稱"
+                  placeholder="分組名稱"
                 />
               </div>
               <div>
@@ -384,7 +385,7 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
         class="py-8 text-center text-content-tertiary text-sm"
       >
         <ph-icon icon="rows" class="w-8 h-8 mx-auto mb-2 opacity-30" />
-        <p>尚無泳道</p>
+        <p>尚無分組</p>
       </div>
     </div>
   </div>

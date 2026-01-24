@@ -6,9 +6,11 @@ import { useBoardStore } from '@/stores/board'
 import { useUsersStore } from '@/stores/users'
 import { useToast } from '@/stores/toast'
 import MembersList from '@/components/MembersList.vue'
+import ProjectRolesList from '@/components/ProjectRolesList.vue'
+import CategoriesList from '@/components/CategoriesList.vue'
+import TagsList from '@/components/TagsList.vue'
 import ColumnsList from '@/components/ColumnsList.vue'
 import SwimlanesList from '@/components/SwimlanesList.vue'
-import CategoriesList from '@/components/CategoriesList.vue'
 import SearchModal from '@/components/SearchModal.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import type { Task, Project, User } from '@/types'
@@ -476,24 +478,40 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- 管理區塊 - 2x2 Grid（無外層包裝） -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-          <!-- 成員管理 -->
+        <!-- 管理區塊組 1: 權限管理 | 專案角色 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+          <!-- 權限管理 -->
           <div class="settings-card">
             <MembersList :project-id="projectId" />
           </div>
 
+          <!-- 專案角色 -->
+          <div class="settings-card">
+            <ProjectRolesList :project-id="projectId" />
+          </div>
+        </div>
+
+        <!-- 管理區塊組 2: 類別管理 | 標籤管理 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
           <!-- 類別管理 -->
           <div class="settings-card">
             <CategoriesList :project-id="projectId" />
           </div>
 
-          <!-- 欄位管理 -->
+          <!-- 標籤管理 -->
+          <div class="settings-card">
+            <TagsList :project-id="projectId" />
+          </div>
+        </div>
+
+        <!-- 管理區塊組 3: 清單管理 | 分組管理 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+          <!-- 清單管理 -->
           <div class="settings-card">
             <ColumnsList :project-id="projectId" />
           </div>
 
-          <!-- 泳道管理 -->
+          <!-- 分組管理 -->
           <div class="settings-card">
             <SwimlanesList :project-id="projectId" />
           </div>
