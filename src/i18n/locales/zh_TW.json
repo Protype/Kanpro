@@ -415,5 +415,12 @@
     "collapse": "折疊側邊欄",
     "expand": "展開側邊欄",
     "noDescription": "無描述"
+  },
+  "admin": {
+    "administration": "系統管理",
+    "systemStatus": "系統狀態",
+    "systemSettings": "系統設定",
+    "userManagement": "使用者管理",
+    "groupManagement": "群組管理"
   }
 }

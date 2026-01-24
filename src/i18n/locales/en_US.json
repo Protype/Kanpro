@@ -415,5 +415,12 @@
     "collapse": "Collapse sidebar",
     "expand": "Expand sidebar",
     "noDescription": "No description"
+  },
+  "admin": {
+    "administration": "Administration",
+    "systemStatus": "System status",
+    "systemSettings": "System settings",
+    "userManagement": "User management",
+    "groupManagement": "Group management"
   }
 }
