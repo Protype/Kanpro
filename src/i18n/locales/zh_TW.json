@@ -311,13 +311,25 @@
   "member": {
     "member": "成員",
     "members": "成員",
+    "projectMembers": "專案成員",
     "projectManager": "專案管理員",
     "projectMember": "專案成員",
     "projectViewer": "專案檢視者",
     "addMember": "新增成員",
     "removeMember": "移除成員",
     "changeRole": "變更角色",
-    "noMembers": "沒有成員"
+    "noMembers": "沒有成員",
+    "addingMember": "新增成員中...",
+    "memberAdded": "成員已新增",
+    "addMemberFailed": "新增成員失敗",
+    "confirmRemoveMember": "確定要從專案中移除「{name}」嗎？",
+    "removingMember": "移除成員中...",
+    "memberRemoved": "成員已移除",
+    "removeMemberFailed": "移除成員失敗",
+    "changingRole": "變更角色中...",
+    "roleChanged": "角色已變更",
+    "changeRoleFailed": "變更角色失敗",
+    "selectUser": "選擇使用者..."
   },
   "role": {
     "role": "角色",

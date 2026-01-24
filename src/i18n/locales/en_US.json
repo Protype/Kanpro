@@ -311,13 +311,25 @@
   "member": {
     "member": "Member",
     "members": "Members",
+    "projectMembers": "Project members",
     "projectManager": "Project Manager",
     "projectMember": "Project Member",
     "projectViewer": "Project Viewer",
     "addMember": "Add member",
     "removeMember": "Remove member",
     "changeRole": "Change role",
-    "noMembers": "No members"
+    "noMembers": "No members",
+    "addingMember": "Adding member...",
+    "memberAdded": "Member has been added",
+    "addMemberFailed": "Failed to add member",
+    "confirmRemoveMember": "Are you sure you want to remove \"{name}\" from this project?",
+    "removingMember": "Removing member...",
+    "memberRemoved": "Member has been removed",
+    "removeMemberFailed": "Failed to remove member",
+    "changingRole": "Changing role...",
+    "roleChanged": "Role has been changed",
+    "changeRoleFailed": "Failed to change role",
+    "selectUser": "Select user..."
   },
   "role": {
     "role": "Role",
