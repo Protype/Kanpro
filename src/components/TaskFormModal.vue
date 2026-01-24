@@ -349,27 +349,25 @@ defineExpose({
                   {{ isEditMode ? '編輯任務' : '新增任務' }}
                 </h3>
                 <!-- Button Group: Advanced + Expand -->
-                <div class="flex items-center rounded-md border border-edge overflow-hidden">
+                <div class="flex items-center gap-0.5 rounded-md bg-surface-secondary px-1 py-0.5">
                   <!-- Advanced Settings Toggle -->
                   <button
                     type="button"
                     @click="toggleAdvanced"
-                    class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium leading-none transition-colors"
+                    class="flex items-center gap-1 px-2 py-1 text-xs font-medium leading-none rounded transition-colors"
                     :class="showAdvanced
                       ? 'bg-surface-tertiary text-content-secondary'
-                      : 'bg-surface-secondary text-content-tertiary hover:text-content-secondary hover:bg-surface-tertiary'"
+                      : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-tertiary'"
                   >
                     <span>進階設定</span>
                     <ph-icon :icon="showAdvanced ? 'chevron-left' : 'chevron-right'" class="w-3.5 h-3.5" />
                   </button>
-                  <!-- Divider -->
-                  <div class="w-px h-4 bg-edge"></div>
                   <!-- Expand to full page button -->
                   <button
                     type="button"
                     data-testid="expand-button"
                     @click="goToFullPage"
-                    class="flex items-center justify-center px-2 py-1 transition-colors bg-surface-secondary text-content-tertiary hover:text-content-secondary hover:bg-surface-tertiary"
+                    class="flex items-center justify-center p-1 rounded transition-colors text-content-tertiary hover:text-content-secondary hover:bg-surface-tertiary"
                     title="展開為完整頁面"
                   >
                     <ph-icon icon="arrows-out" class="w-3.5 h-3.5" />
