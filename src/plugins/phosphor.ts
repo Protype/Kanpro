@@ -109,7 +109,9 @@ import {
   PhSmileyXEyes,
   PhCircle,
   PhShield,
-  PhShieldCheck
+  PhShieldCheck,
+  PhPuzzlePiece,
+  PhFrameCorners
 } from '@phosphor-icons/vue'
 
 // 圖示名稱對應表（用於動態載入）
@@ -256,7 +258,9 @@ export const iconComponents = {
   'face-frown': PhSmileyXEyes,
   'circle': PhCircle,
   'shield': PhShield,
-  'shield-check': PhShieldCheck
+  'shield-check': PhShieldCheck,
+  'puzzle-piece': PhPuzzlePiece,
+  'frame-corners': PhFrameCorners
 } as const
 
 export type IconName = keyof typeof iconComponents
