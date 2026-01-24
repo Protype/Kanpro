@@ -440,7 +440,7 @@ defineExpose({
                   <!-- Column -->
                   <div>
                     <label for="task-column" class="block text-sm font-medium text-content mb-1">
-                      欄位
+                      狀態
                     </label>
                     <select
                       id="task-column"

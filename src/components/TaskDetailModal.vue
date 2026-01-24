@@ -475,7 +475,7 @@ const updateCategory = async (categoryId: number | null) => {
 
                 <!-- Column -->
                 <div>
-                  <h3 class="text-sm font-medium text-content-secondary mb-2">欄位</h3>
+                  <h3 class="text-sm font-medium text-content-secondary mb-2">狀態</h3>
                   <select
                     :value="task.column_id"
                     @change="updateColumn(Number(($event.target as HTMLSelectElement).value))"

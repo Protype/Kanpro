@@ -202,7 +202,7 @@ const handleSearchSelect = (task: Task) => {
                 @click="toggleSort('column_id')"
                 class="table-header-cell cursor-pointer hover:bg-surface-hover uppercase"
               >
-                欄位 {{ getSortIcon('column_id') }}
+                狀態 {{ getSortIcon('column_id') }}
               </th>
               <th
                 @click="toggleSort('priority')"

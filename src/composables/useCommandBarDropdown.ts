@@ -24,7 +24,7 @@ const SYMBOL_CONFIGS: Record<string, SymbolConfig> = {
   '^': { symbol: '^', canCreate: false, emptyMessage: '無符合的專案' },
   '@': { symbol: '@', canCreate: false, emptyMessage: '無符合的使用者' },
   '#': { symbol: '#', canCreate: true, emptyMessage: '' },
-  ':': { symbol: ':', canCreate: false, emptyMessage: '無符合的欄位' },
+  ':': { symbol: ':', canCreate: false, emptyMessage: '無符合的狀態' },
   '!': { symbol: '!', canCreate: false, emptyMessage: '無符合的優先級' },
   '>': { symbol: '>', canCreate: false, emptyMessage: '無符合的到期日' }
 }

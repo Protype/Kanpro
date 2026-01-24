@@ -27,7 +27,7 @@ const eventLabels: Record<string, string> = {
   'task.update': '更新任務',
   'task.close': '關閉任務',
   'task.open': '開啟任務',
-  'task.move.column': '移動任務欄位',
+  'task.move.column': '移動任務狀態',
   'task.move.swimlane': '移動任務泳道',
   'task.move.position': '調整任務位置',
   'task.assignee_change': '變更指派人',

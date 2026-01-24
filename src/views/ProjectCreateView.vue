@@ -724,19 +724,19 @@ onUnmounted(() => {
           </div>
         </div>
 
-        <!-- 欄位管理 -->
+        <!-- 狀態管理 -->
         <div class="settings-card">
           <div class="px-4 py-3 border-b border-edge">
-            <h3 class="text-base font-semibold text-content">欄位</h3>
-            <p class="text-xs text-content-tertiary mt-0.5">專案建立後將自動建立這些欄位</p>
+            <h3 class="text-base font-semibold text-content">狀態</h3>
+            <p class="text-xs text-content-tertiary mt-0.5">專案建立後將自動建立這些狀態</p>
           </div>
           <div class="p-4 space-y-3">
-            <!-- 新增欄位表單 -->
+            <!-- 新增狀態表單 -->
             <div class="flex gap-2">
               <input
                 v-model="newColumnTitle"
                 type="text"
-                placeholder="欄位名稱"
+                placeholder="狀態名稱"
                 class="input text-sm flex-1"
               />
               <input
@@ -755,7 +755,7 @@ onUnmounted(() => {
                 <ph-icon icon="plus" class="w-4 h-4" />
               </button>
             </div>
-            <!-- 欄位列表 -->
+            <!-- 狀態列表 -->
             <div v-if="draftStore.cachedColumns.length > 0" class="space-y-2">
               <div
                 v-for="(column, index) in draftStore.cachedColumns"
@@ -778,7 +778,7 @@ onUnmounted(() => {
               </div>
             </div>
             <div v-else class="text-sm text-content-tertiary text-center py-4">
-              尚未新增欄位（將使用預設欄位）
+              尚未新增狀態（將使用預設狀態）
             </div>
           </div>
         </div>

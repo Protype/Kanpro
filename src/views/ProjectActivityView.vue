@@ -292,7 +292,7 @@ const groupedActivities = computed(() => {
                       <!-- Column info for move events -->
                       <p v-if="activity.event_name === 'task.move.column' && getColumnName(activity)">
                         <ph-icon icon="arrow-right" class="w-3.5 h-3.5 inline mr-1" />
-                        欄位：{{ getColumnName(activity) }}
+                        狀態：{{ getColumnName(activity) }}
                       </p>
 
                       <!-- Assignee info -->

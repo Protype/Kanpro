@@ -72,7 +72,7 @@ const handleAddColumn = async () => {
   if (!newColumnTitle.value.trim() || isSubmitting.value) return
 
   isSubmitting.value = true
-  const loadingToast = toast.loading('新增欄位中...')
+  const loadingToast = toast.loading('新增狀態中...')
   try {
     await columnsStore.addColumn(
       props.projectId,
@@ -82,12 +82,12 @@ const handleAddColumn = async () => {
     )
     await columnsStore.fetchColumns(props.projectId)
     syncLocalColumns()
-    toast.update(loadingToast, 'success', '欄位已新增')
+    toast.update(loadingToast, 'success', '狀態已新增')
     cancelAdding()
     emit('updated')
   } catch (error) {
     console.error('Failed to add column:', error)
-    toast.update(loadingToast, 'error', '新增欄位失敗')
+    toast.update(loadingToast, 'error', '新增狀態失敗')
   } finally {
     isSubmitting.value = false
   }
@@ -108,7 +108,7 @@ const handleSaveColumn = async () => {
   if (!editingColumnId.value || !editTitle.value.trim() || isSubmitting.value) return
 
   isSubmitting.value = true
-  const loadingToast = toast.loading('更新欄位中...')
+  const loadingToast = toast.loading('更新狀態中...')
   try {
     await columnsStore.updateColumn(
       editingColumnId.value,
@@ -118,31 +118,31 @@ const handleSaveColumn = async () => {
     )
     await columnsStore.fetchColumns(props.projectId)
     syncLocalColumns()
-    toast.update(loadingToast, 'success', '欄位已更新')
+    toast.update(loadingToast, 'success', '狀態已更新')
     cancelEditing()
     emit('updated')
   } catch (error) {
     console.error('Failed to update column:', error)
-    toast.update(loadingToast, 'error', '更新欄位失敗')
+    toast.update(loadingToast, 'error', '更新狀態失敗')
   } finally {
     isSubmitting.value = false
   }
 }
 
 const handleRemoveColumn = async (column: Column) => {
-  if (!confirm(`確定要刪除欄位「${column.title}」嗎？此操作無法復原。`)) return
+  if (!confirm(`確定要刪除狀態「${column.title}」嗎？此操作無法復原。`)) return
 
   savingColumnIds.value.add(column.id)
-  const loadingToast = toast.loading('刪除欄位中...')
+  const loadingToast = toast.loading('刪除狀態中...')
   try {
     await columnsStore.removeColumn(column.id)
     await columnsStore.fetchColumns(props.projectId)
     syncLocalColumns()
-    toast.update(loadingToast, 'success', '欄位已刪除')
+    toast.update(loadingToast, 'success', '狀態已刪除')
     emit('updated')
   } catch (error) {
     console.error('Failed to remove column:', error)
-    toast.update(loadingToast, 'error', '刪除欄位失敗')
+    toast.update(loadingToast, 'error', '刪除狀態失敗')
   } finally {
     savingColumnIds.value.delete(column.id)
   }
@@ -168,7 +168,7 @@ const handleDragEnd = async (event: any) => {
     emit('updated')
   } catch (error) {
     console.error('Failed to reorder column:', error)
-    toast.error('移動欄位失敗')
+    toast.error('移動狀態失敗')
     // Revert on error
     syncLocalColumns()
   } finally {
@@ -186,7 +186,7 @@ const isColumnSaving = (columnId: number) => savingColumnIds.value.has(columnId)
       <div class="flex items-center gap-2">
         <ph-icon icon="columns" class="w-5 h-5 text-content-tertiary" />
         <h3 class="text-base font-semibold text-content">
-          欄位管理
+          狀態管理
         </h3>
         <span v-if="columnsStore.columnsCount > 0" class="text-xs text-content-tertiary bg-surface-secondary px-1.5 py-0.5 rounded">
           {{ columnsStore.columnsCount }}
@@ -196,7 +196,7 @@ const isColumnSaving = (columnId: number) => savingColumnIds.value.has(columnId)
         v-if="!isAdding"
         @click="startAdding"
         class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
-        title="新增欄位"
+        title="新增狀態"
       >
         <ph-icon icon="columns-plus-right" weight="fill" class="w-5 h-5" />
       </button>
@@ -211,7 +211,7 @@ const isColumnSaving = (columnId: number) => savingColumnIds.value.has(columnId)
             type="text"
             :disabled="isSubmitting"
             class="w-full px-3 py-2 text-sm bg-surface border border-edge rounded-lg text-content focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed"
-            placeholder="輸入欄位名稱"
+            placeholder="輸入狀態名稱"
           />
         </div>
         <div>
@@ -325,7 +325,7 @@ const isColumnSaving = (columnId: number) => savingColumnIds.value.has(columnId)
                   type="text"
                   :disabled="isSubmitting"
                   class="w-full px-3 py-2 text-sm bg-surface border border-edge rounded-lg text-content focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed"
-                  placeholder="輸入欄位名稱"
+                  placeholder="輸入狀態名稱"
                 />
               </div>
               <div>
@@ -375,7 +375,7 @@ const isColumnSaving = (columnId: number) => savingColumnIds.value.has(columnId)
         class="py-8 text-center text-content-tertiary text-sm"
       >
         <ph-icon icon="columns" class="w-8 h-8 mx-auto mb-2 opacity-30" />
-        <p>尚無欄位</p>
+        <p>尚無狀態</p>
       </div>
     </div>
   </div>

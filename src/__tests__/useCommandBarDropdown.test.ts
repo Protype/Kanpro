@@ -306,7 +306,7 @@ describe('useCommandBarDropdown', () => {
         expect(emptyMessage.value).toBe('') // Tags can be created
 
         loadOptions(':', 1)
-        expect(emptyMessage.value).toBe('無符合的欄位')
+        expect(emptyMessage.value).toBe('無符合的狀態')
 
         loadOptions('!', 1)
         expect(emptyMessage.value).toBe('無符合的優先級')
