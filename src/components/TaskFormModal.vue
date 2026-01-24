@@ -357,8 +357,8 @@ defineExpose({
                     ? 'bg-surface-tertiary text-content-secondary'
                     : 'bg-surface-secondary text-content-tertiary hover:text-content-secondary'"
                 >
-                  <ph-icon icon="puzzle-piece" class="w-3.5 h-3.5" />
-                  <span>進階</span>
+                  <span>進階設定</span>
+                  <ph-icon :icon="showAdvanced ? 'chevron-left' : 'chevron-right'" class="w-3.5 h-3.5" />
                 </button>
                 <!-- Expand to full page button -->
                 <button
@@ -368,8 +368,7 @@ defineExpose({
                   class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium leading-none rounded transition-colors bg-surface-secondary text-content-tertiary hover:text-content-secondary"
                   title="展開為完整頁面"
                 >
-                  <ph-icon icon="frame-corners" class="w-3.5 h-3.5" />
-                  <span>展開</span>
+                  <ph-icon icon="arrows-out" class="w-3.5 h-3.5" />
                 </button>
               </div>
               <button
