@@ -150,7 +150,7 @@ function openCreateTask(): void {
             :key="item.name"
             @click="navigateTo(item.route)"
             :class="[
-              'flex items-center gap-1.5 px-2.5 py-1.5 text-sm rounded-md transition-colors',
+              'flex items-center gap-1.5 px-2 py-1.5 text-sm rounded-md transition-colors',
               isActiveRoute(item.name)
                 ? 'bg-accent text-content-inverse'
                 : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-hover'
@@ -169,7 +169,7 @@ function openCreateTask(): void {
             :key="item.name"
             @click="navigateTo(item.route)"
             :class="[
-              'p-2 rounded-md transition-colors',
+              'p-1.5 rounded-md transition-colors',
               isActiveRoute(item.name)
                 ? 'bg-accent text-content-inverse'
                 : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-hover'
@@ -201,7 +201,7 @@ function openCreateTask(): void {
             :key="item.name"
             @click="navigateTo(item.route)"
             :class="[
-              'flex items-center gap-1.5 px-2.5 py-1.5 text-sm rounded-md transition-colors',
+              'flex items-center gap-1.5 px-2 py-1.5 text-sm rounded-md transition-colors',
               isActiveRoute(item.name)
                 ? 'bg-accent text-content-inverse'
                 : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-hover'
@@ -220,7 +220,7 @@ function openCreateTask(): void {
             :key="item.name"
             @click="navigateTo(item.route)"
             :class="[
-              'p-2 rounded-md transition-colors',
+              'p-1.5 rounded-md transition-colors',
               isActiveRoute(item.name)
                 ? 'bg-accent text-content-inverse'
                 : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-hover'
