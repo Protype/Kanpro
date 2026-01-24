@@ -23,6 +23,9 @@ const currentProjectName = computed(() => boardStore.project?.name || '')
 // Check if we're in admin context
 const isAdminContext = computed(() => route.path.startsWith('/admin'))
 
+// Check if we're on project create page
+const isProjectCreatePage = computed(() => route.name === 'project-create')
+
 const projectNavItems = computed(() => {
   const id = currentProjectId.value
   if (!id) return []
@@ -82,8 +85,20 @@ function openCreateTask(): void {
 
     <!-- Left side content -->
     <div class="hidden lg:flex items-center gap-1">
-      <!-- Quick Actions (Left side - only when NOT in project or admin context) -->
-      <template v-if="!currentProjectId && !isAdminContext">
+      <!-- Project Create Page Title -->
+      <template v-if="isProjectCreatePage">
+        <div class="flex items-center gap-2 min-w-0">
+          <div class="w-7 h-7 bg-accent/10 rounded-md flex items-center justify-center flex-shrink-0">
+            <ph-icon icon="folder-plus" class="w-4 h-4 text-accent" />
+          </div>
+          <span class="text-base font-semibold text-content">
+            建立新專案
+          </span>
+        </div>
+      </template>
+
+      <!-- Quick Actions (Left side - only when NOT in project, admin context, or project create page) -->
+      <template v-else-if="!currentProjectId && !isAdminContext">
         <!-- Create Project Button -->
         <button
           @click="openCreateProject"
@@ -223,8 +238,8 @@ function openCreateTask(): void {
 
     <!-- Right side content -->
     <div class="hidden lg:flex items-center gap-1">
-      <!-- Quick Actions (Right side - only when IN project context) -->
-      <template v-if="currentProjectId">
+      <!-- Quick Actions (Right side - when IN project context or on project create page) -->
+      <template v-if="currentProjectId || isProjectCreatePage">
         <!-- Create Project Button -->
         <button
           @click="openCreateProject"

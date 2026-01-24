@@ -56,6 +56,12 @@ const router = createRouter({
           meta: { sidebarMode: 'global' }
         },
         {
+          path: 'projects/new',
+          name: 'project-create',
+          component: () => import('@/views/ProjectCreateView.vue'),
+          meta: { sidebarMode: 'global' }
+        },
+        {
           path: 'settings',
           name: 'user-settings',
           component: () => import('@/views/UserSettingsView.vue'),
