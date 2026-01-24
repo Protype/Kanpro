@@ -419,46 +419,49 @@ defineExpose({
                   ></textarea>
                 </div>
 
-                <!-- Column -->
-                <div>
-                  <label for="task-column" class="block text-sm font-medium text-content mb-1">
-                    欄位
-                  </label>
-                  <select
-                    id="task-column"
-                    v-model="columnId"
-                    :disabled="isSubmitting"
-                    class="w-full px-3 py-2 bg-surface-secondary border border-edge rounded-md text-content focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent disabled:opacity-50"
-                  >
-                    <option
-                      v-for="column in columns"
-                      :key="column.id"
-                      :value="column.id"
-                    >
-                      {{ column.title }}
-                    </option>
-                  </select>
-                </div>
-
-                <!-- Color -->
-                <div>
-                  <label class="block text-sm font-medium text-content mb-1">
-                    顏色
-                  </label>
-                  <div class="flex flex-wrap gap-1.5">
-                    <button
-                      v-for="color in colors"
-                      :key="color.id"
-                      type="button"
-                      @click="colorId = color.id"
+                <!-- Column & Color Row -->
+                <div class="flex gap-4">
+                  <!-- Column -->
+                  <div class="flex-1">
+                    <label for="task-column" class="block text-sm font-medium text-content mb-1">
+                      欄位
+                    </label>
+                    <select
+                      id="task-column"
+                      v-model="columnId"
                       :disabled="isSubmitting"
-                      :class="[
-                        'w-5 h-5 rounded-full transition-all',
-                        color.class,
-                        colorId === color.id ? 'ring-2 ring-offset-1 ring-content-tertiary scale-110' : 'hover:scale-110'
-                      ]"
-                      :title="color.name"
-                    ></button>
+                      class="w-full px-3 py-2 bg-surface-secondary border border-edge rounded-md text-content focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent disabled:opacity-50"
+                    >
+                      <option
+                        v-for="column in columns"
+                        :key="column.id"
+                        :value="column.id"
+                      >
+                        {{ column.title }}
+                      </option>
+                    </select>
+                  </div>
+
+                  <!-- Color -->
+                  <div class="shrink-0">
+                    <label class="block text-sm font-medium text-content mb-1">
+                      顏色
+                    </label>
+                    <div class="flex gap-1.5 h-[38px] items-center">
+                      <button
+                        v-for="color in colors"
+                        :key="color.id"
+                        type="button"
+                        @click="colorId = color.id"
+                        :disabled="isSubmitting"
+                        :class="[
+                          'w-5 h-5 rounded-full transition-all',
+                          color.class,
+                          colorId === color.id ? 'ring-2 ring-offset-1 ring-content-tertiary scale-110' : 'hover:scale-110'
+                        ]"
+                        :title="color.name"
+                      ></button>
+                    </div>
                   </div>
                 </div>
               </div>
