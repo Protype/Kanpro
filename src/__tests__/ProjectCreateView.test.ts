@@ -69,11 +69,6 @@ describe('ProjectCreateView', () => {
   }
 
   describe('rendering', () => {
-    it('should render page title', () => {
-      const wrapper = mountView()
-      expect(wrapper.find('h1').text()).toBe('建立新專案')
-    })
-
     it('should render create button', () => {
       const wrapper = mountView()
       const createBtn = wrapper.find('button.btn-primary')

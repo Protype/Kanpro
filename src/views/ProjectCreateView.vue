@@ -311,28 +311,6 @@ onUnmounted(() => {
 <template>
   <div class="h-full overflow-auto bg-surface-secondary">
     <main class="w-full px-6 py-6">
-      <!-- Header -->
-      <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold text-content">建立新專案</h1>
-        <div class="flex items-center gap-3">
-          <button
-            @click="handleCancel"
-            :disabled="isCreating"
-            class="btn-secondary"
-          >
-            取消
-          </button>
-          <button
-            @click="handleCreate"
-            :disabled="!isValid || isCreating"
-            class="btn-primary"
-          >
-            <ph-icon v-if="isCreating" icon="spinner" class="animate-spin -ml-1 mr-2 h-4 w-4" />
-            {{ isCreating ? '建立中...' : '建立專案' }}
-          </button>
-        </div>
-      </div>
-
       <!-- Error Alert -->
       <div v-if="error" class="alert-error mb-6">
         <div class="flex items-center gap-2">
@@ -571,6 +549,27 @@ onUnmounted(() => {
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- Form Footer with Action Buttons -->
+        <div class="flex justify-end gap-3 px-6 py-4 border-t border-edge bg-surface-secondary/30">
+          <button
+            type="button"
+            @click="handleCancel"
+            :disabled="isCreating"
+            class="btn-secondary"
+          >
+            取消
+          </button>
+          <button
+            type="button"
+            @click="handleCreate"
+            :disabled="!isValid || isCreating"
+            class="btn-primary"
+          >
+            <ph-icon v-if="isCreating" icon="spinner" class="animate-spin -ml-1 mr-2 h-4 w-4" />
+            {{ isCreating ? '建立中...' : '建立專案' }}
+          </button>
         </div>
       </div>
 
