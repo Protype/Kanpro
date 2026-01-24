@@ -77,7 +77,15 @@ const colors = [
   { id: 'red', name: '紅色', class: 'bg-red-500' },
   { id: 'orange', name: '橘色', class: 'bg-orange-500' },
   { id: 'grey', name: '灰色', class: 'bg-gray-500' },
-  { id: 'cyan', name: '青色', class: 'bg-cyan-500' }
+  { id: 'cyan', name: '青色', class: 'bg-cyan-500' },
+  { id: 'lime', name: '萊姆綠', class: 'bg-lime-500' },
+  { id: 'pink', name: '粉紅', class: 'bg-pink-500' },
+  { id: 'teal', name: '藍綠', class: 'bg-teal-500' },
+  { id: 'amber', name: '琥珀', class: 'bg-amber-500' },
+  { id: 'brown', name: '棕色', class: 'bg-amber-800' },
+  { id: 'deep_orange', name: '深橘', class: 'bg-orange-700' },
+  { id: 'dark_grey', name: '深灰', class: 'bg-gray-700' },
+  { id: 'white', name: '白色', class: 'bg-white border border-edge' }
 ]
 
 // === Computed ===
