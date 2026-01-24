@@ -430,5 +430,12 @@
     "viewAll": "查看全部",
     "statistics": "統計",
     "activeProjects": "啟用專案"
+  },
+  "projects": {
+    "allAccessible": "所有可存取的專案",
+    "retry": "重試",
+    "noMatchingProjects": "找不到符合的專案",
+    "public": "公開",
+    "private": "私人"
   }
 }
