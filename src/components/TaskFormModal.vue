@@ -337,7 +337,7 @@ defineExpose({
             class="relative bg-surface rounded-lg shadow-xl border border-edge flex flex-col modal-transition overflow-hidden"
             :style="{
               width: showAdvanced ? '720px' : '448px',
-              height: showAdvanced ? '580px' : '520px',
+              height: showAdvanced ? '560px' : '500px',
               maxWidth: '90vw'
             }"
             @click.stop
@@ -360,14 +360,15 @@ defineExpose({
                   <span>進階設定</span>
                   <ph-icon :icon="showAdvanced ? 'chevron-left' : 'chevron-right'" class="w-3.5 h-3.5" />
                 </button>
-                <!-- Fullscreen Button -->
+                <!-- Expand to full page button -->
                 <button
                   type="button"
+                  data-testid="expand-button"
                   @click="goToFullPage"
-                  class="flex items-center justify-center w-7 h-7 rounded transition-colors bg-surface-secondary text-content-tertiary hover:text-content-secondary hover:bg-surface-tertiary"
-                  title="在新頁面編輯"
+                  class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium leading-none rounded transition-colors bg-surface-secondary text-content-tertiary hover:text-content-secondary"
+                  title="展開為完整頁面"
                 >
-                  <ph-icon icon="arrows-out" class="w-4 h-4" />
+                  <ph-icon icon="arrows-out" class="w-3.5 h-3.5" />
                 </button>
               </div>
               <button
@@ -466,7 +467,7 @@ defineExpose({
                   class="w-80 border-l border-edge bg-surface-secondary/50 overflow-y-auto"
                 >
                   <div class="p-4 grid grid-cols-2 gap-x-3 gap-y-4">
-                    <!-- Owner (full width) -->
+                    <!-- Owner / Assignee (full width) -->
                     <div class="col-span-2 owner-dropdown-container">
                       <label class="block text-sm font-medium text-content mb-1">
                         指派人
@@ -538,6 +539,9 @@ defineExpose({
                           </div>
                         </Transition>
                       </div>
+                      <p class="mt-1 text-xs text-content-tertiary">
+                        選擇負責此任務的成員
+                      </p>
                     </div>
 
                     <!-- Swimlane -->
