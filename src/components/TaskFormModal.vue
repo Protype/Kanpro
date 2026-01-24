@@ -404,52 +404,6 @@ defineExpose({
             <div class="flex flex-1 min-h-0">
               <!-- Main Content (A 層) -->
               <div class="flex-1 p-4 space-y-4 overflow-y-auto">
-                <!-- Color & Column Row -->
-                <div class="grid grid-cols-2 gap-4">
-                  <!-- Color -->
-                  <div>
-                    <label class="block text-sm font-medium text-content mb-1">
-                      顏色
-                    </label>
-                    <div class="grid grid-cols-8 gap-1.5">
-                      <button
-                        v-for="color in colors"
-                        :key="color.id"
-                        type="button"
-                        @click="colorId = color.id"
-                        :disabled="isSubmitting"
-                        :class="[
-                          'w-4 h-4 rounded-full transition-all',
-                          color.class,
-                          colorId === color.id ? 'ring-2 ring-offset-1 ring-content-tertiary scale-110' : 'hover:scale-110'
-                        ]"
-                        :title="color.name"
-                      ></button>
-                    </div>
-                  </div>
-
-                  <!-- Column -->
-                  <div>
-                    <label for="task-column" class="block text-sm font-medium text-content mb-1">
-                      欄位
-                    </label>
-                    <select
-                      id="task-column"
-                      v-model="columnId"
-                      :disabled="isSubmitting"
-                      class="w-full px-3 py-2 bg-surface-secondary border border-edge rounded-md text-content focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent disabled:opacity-50"
-                    >
-                      <option
-                        v-for="column in columns"
-                        :key="column.id"
-                        :value="column.id"
-                      >
-                        {{ column.title }}
-                      </option>
-                    </select>
-                  </div>
-                </div>
-
                 <!-- Title -->
                 <div>
                   <label for="task-title" class="block text-sm font-medium text-content mb-1">
@@ -479,6 +433,52 @@ defineExpose({
                     class="w-full px-3 py-2 bg-surface-secondary border border-edge rounded-md text-content placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent disabled:opacity-50 resize-none"
                     placeholder="輸入任務描述（選填）"
                   ></textarea>
+                </div>
+
+                <!-- Column & Color Row -->
+                <div class="grid grid-cols-2 gap-4">
+                  <!-- Column -->
+                  <div>
+                    <label for="task-column" class="block text-sm font-medium text-content mb-1">
+                      欄位
+                    </label>
+                    <select
+                      id="task-column"
+                      v-model="columnId"
+                      :disabled="isSubmitting"
+                      class="w-full px-3 py-2 bg-surface-secondary border border-edge rounded-md text-content focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent disabled:opacity-50"
+                    >
+                      <option
+                        v-for="column in columns"
+                        :key="column.id"
+                        :value="column.id"
+                      >
+                        {{ column.title }}
+                      </option>
+                    </select>
+                  </div>
+
+                  <!-- Color -->
+                  <div>
+                    <label class="block text-sm font-medium text-content mb-1">
+                      顏色
+                    </label>
+                    <div class="grid grid-cols-8 gap-1.5">
+                      <button
+                        v-for="color in colors"
+                        :key="color.id"
+                        type="button"
+                        @click="colorId = color.id"
+                        :disabled="isSubmitting"
+                        :class="[
+                          'w-4 h-4 rounded-full transition-all',
+                          color.class,
+                          colorId === color.id ? 'ring-2 ring-offset-1 ring-content-tertiary scale-110' : 'hover:scale-110'
+                        ]"
+                        :title="color.name"
+                      ></button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
