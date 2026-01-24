@@ -349,7 +349,7 @@ defineExpose({
                   {{ isEditMode ? '編輯任務' : '新增任務' }}
                 </h3>
                 <!-- Button Group: Advanced + Expand -->
-                <div class="flex items-center gap-0.5 rounded-md bg-surface-secondary px-1 py-0.5">
+                <div class="flex items-center gap-0 rounded-md bg-surface-secondary px-1 py-0.5">
                   <!-- Advanced Settings Toggle -->
                   <button
                     type="button"
