@@ -49,7 +49,8 @@
     "time": "時間",
     "color": "顏色",
     "position": "位置",
-    "default": "預設"
+    "default": "預設",
+    "descriptionOptional": "描述（選填）"
   },
   "nav": {
     "dashboard": "儀表板",
@@ -230,6 +231,47 @@
     "collapseSwimlane": "收合",
     "expandSwimlane": "展開"
   },
+  "column": {
+    "columnManagement": "欄位管理",
+    "addColumn": "新增欄位",
+    "addingColumn": "新增欄位中...",
+    "columnAdded": "欄位已新增",
+    "addColumnFailed": "新增欄位失敗",
+    "updatingColumn": "更新欄位中...",
+    "columnUpdated": "欄位已更新",
+    "updateColumnFailed": "更新欄位失敗",
+    "confirmRemoveColumn": "確定要刪除欄位「{title}」嗎？此操作無法復原。",
+    "removingColumn": "刪除欄位中...",
+    "columnRemoved": "欄位已刪除",
+    "removeColumnFailed": "刪除欄位失敗",
+    "moveColumnFailed": "移動欄位失敗",
+    "enterColumnTitle": "輸入欄位名稱",
+    "wipLimitHint": "WIP 限制（0 表示不限制）",
+    "noColumns": "尚無欄位"
+  },
+  "swimlane": {
+    "swimlaneManagement": "泳道管理",
+    "addSwimlane": "新增泳道",
+    "addingSwimlane": "新增泳道中...",
+    "swimlaneAdded": "泳道已新增",
+    "addSwimlaneFailed": "新增泳道失敗",
+    "updatingSwimlane": "更新泳道中...",
+    "swimlaneUpdated": "泳道已更新",
+    "updateSwimlaneFailed": "更新泳道失敗",
+    "confirmRemoveSwimlane": "確定要刪除泳道「{name}」嗎？此操作無法復原。",
+    "removingSwimlane": "刪除泳道中...",
+    "swimlaneRemoved": "泳道已刪除",
+    "removeSwimlaneFailed": "刪除泳道失敗",
+    "enablingSwimlane": "啟用泳道中...",
+    "swimlaneEnabled": "泳道已啟用",
+    "enableSwimlaneFailed": "啟用泳道失敗",
+    "disablingSwimlane": "停用泳道中...",
+    "swimlaneDisabled": "泳道已停用",
+    "disableSwimlaneFailed": "停用泳道失敗",
+    "moveSwimlaneFailed": "移動泳道失敗",
+    "enterSwimlaneName": "輸入泳道名稱",
+    "noSwimlanes": "尚無泳道"
+  },
   "category": {
     "category": "類別",
     "categories": "類別",
@@ -238,7 +280,19 @@
     "editCategory": "編輯類別",
     "removeCategory": "刪除類別",
     "noCategory": "無類別",
-    "noCategories": "沒有類別"
+    "noCategories": "沒有類別",
+    "categoryManagement": "類別管理",
+    "addingCategory": "新增類別中...",
+    "categoryAdded": "類別已新增",
+    "addCategoryFailed": "新增類別失敗",
+    "updatingCategory": "更新類別中...",
+    "categoryUpdated": "類別已更新",
+    "updateCategoryFailed": "更新類別失敗",
+    "confirmRemoveCategory": "確定要刪除類別「{name}」嗎？此操作無法復原。",
+    "removingCategory": "刪除類別中...",
+    "categoryRemoved": "類別已刪除",
+    "removeCategoryFailed": "刪除類別失敗",
+    "enterCategoryName": "輸入類別名稱"
   },
   "tag": {
     "tag": "標籤",

@@ -49,7 +49,8 @@
     "time": "Time",
     "color": "Color",
     "position": "Position",
-    "default": "Default"
+    "default": "Default",
+    "descriptionOptional": "Description (optional)"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -230,6 +231,47 @@
     "collapseSwimlane": "Collapse",
     "expandSwimlane": "Expand"
   },
+  "column": {
+    "columnManagement": "Column management",
+    "addColumn": "Add column",
+    "addingColumn": "Adding column...",
+    "columnAdded": "Column has been added",
+    "addColumnFailed": "Failed to add column",
+    "updatingColumn": "Updating column...",
+    "columnUpdated": "Column has been updated",
+    "updateColumnFailed": "Failed to update column",
+    "confirmRemoveColumn": "Are you sure you want to delete column \"{title}\"? This action cannot be undone.",
+    "removingColumn": "Removing column...",
+    "columnRemoved": "Column has been removed",
+    "removeColumnFailed": "Failed to remove column",
+    "moveColumnFailed": "Failed to move column",
+    "enterColumnTitle": "Enter column title",
+    "wipLimitHint": "WIP limit (0 means no limit)",
+    "noColumns": "No columns"
+  },
+  "swimlane": {
+    "swimlaneManagement": "Swimlane management",
+    "addSwimlane": "Add swimlane",
+    "addingSwimlane": "Adding swimlane...",
+    "swimlaneAdded": "Swimlane has been added",
+    "addSwimlaneFailed": "Failed to add swimlane",
+    "updatingSwimlane": "Updating swimlane...",
+    "swimlaneUpdated": "Swimlane has been updated",
+    "updateSwimlaneFailed": "Failed to update swimlane",
+    "confirmRemoveSwimlane": "Are you sure you want to delete swimlane \"{name}\"? This action cannot be undone.",
+    "removingSwimlane": "Removing swimlane...",
+    "swimlaneRemoved": "Swimlane has been removed",
+    "removeSwimlaneFailed": "Failed to remove swimlane",
+    "enablingSwimlane": "Enabling swimlane...",
+    "swimlaneEnabled": "Swimlane has been enabled",
+    "enableSwimlaneFailed": "Failed to enable swimlane",
+    "disablingSwimlane": "Disabling swimlane...",
+    "swimlaneDisabled": "Swimlane has been disabled",
+    "disableSwimlaneFailed": "Failed to disable swimlane",
+    "moveSwimlaneFailed": "Failed to move swimlane",
+    "enterSwimlaneName": "Enter swimlane name",
+    "noSwimlanes": "No swimlanes"
+  },
   "category": {
     "category": "Category",
     "categories": "Categories",
@@ -238,7 +280,19 @@
     "editCategory": "Edit category",
     "removeCategory": "Remove category",
     "noCategory": "No category",
-    "noCategories": "No categories"
+    "noCategories": "No categories",
+    "categoryManagement": "Category management",
+    "addingCategory": "Adding category...",
+    "categoryAdded": "Category has been added",
+    "addCategoryFailed": "Failed to add category",
+    "updatingCategory": "Updating category...",
+    "categoryUpdated": "Category has been updated",
+    "updateCategoryFailed": "Failed to update category",
+    "confirmRemoveCategory": "Are you sure you want to delete category \"{name}\"? This action cannot be undone.",
+    "removingCategory": "Removing category...",
+    "categoryRemoved": "Category has been removed",
+    "removeCategoryFailed": "Failed to remove category",
+    "enterCategoryName": "Enter category name"
   },
   "tag": {
     "tag": "Tag",

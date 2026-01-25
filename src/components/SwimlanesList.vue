@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useSwimlanesStore } from '@/stores/swimlanes'
 import { useToast } from '@/stores/toast'
 import draggable from 'vuedraggable'
@@ -13,6 +14,7 @@ const emit = defineEmits<{
   updated: []
 }>()
 
+const { t } = useI18n()
 const swimlanesStore = useSwimlanesStore()
 const toast = useToast()
 
@@ -69,7 +71,7 @@ const handleAddSwimlane = async () => {
   if (!newSwimlaneName.value.trim() || isSubmitting.value) return
 
   isSubmitting.value = true
-  const loadingToast = toast.loading('新增泳道中...')
+  const loadingToast = toast.loading(t('swimlane.addingSwimlane'))
   try {
     await swimlanesStore.addSwimlane(
       props.projectId,
@@ -78,12 +80,12 @@ const handleAddSwimlane = async () => {
     )
     await swimlanesStore.fetchSwimlanes(props.projectId)
     syncLocalSwimlanes()
-    toast.update(loadingToast, 'success', '泳道已新增')
+    toast.update(loadingToast, 'success', t('swimlane.swimlaneAdded'))
     cancelAdding()
     emit('updated')
   } catch (error) {
     console.error('Failed to add swimlane:', error)
-    toast.update(loadingToast, 'error', '新增泳道失敗')
+    toast.update(loadingToast, 'error', t('swimlane.addSwimlaneFailed'))
   } finally {
     isSubmitting.value = false
   }
@@ -103,7 +105,7 @@ const handleSaveSwimlane = async () => {
   if (!editingSwimlaneId.value || !editName.value.trim() || isSubmitting.value) return
 
   isSubmitting.value = true
-  const loadingToast = toast.loading('更新泳道中...')
+  const loadingToast = toast.loading(t('swimlane.updatingSwimlane'))
   try {
     await swimlanesStore.updateSwimlane(
       editingSwimlaneId.value,
@@ -112,53 +114,53 @@ const handleSaveSwimlane = async () => {
     )
     await swimlanesStore.fetchSwimlanes(props.projectId)
     syncLocalSwimlanes()
-    toast.update(loadingToast, 'success', '泳道已更新')
+    toast.update(loadingToast, 'success', t('swimlane.swimlaneUpdated'))
     cancelEditing()
     emit('updated')
   } catch (error) {
     console.error('Failed to update swimlane:', error)
-    toast.update(loadingToast, 'error', '更新泳道失敗')
+    toast.update(loadingToast, 'error', t('swimlane.updateSwimlaneFailed'))
   } finally {
     isSubmitting.value = false
   }
 }
 
 const handleRemoveSwimlane = async (swimlane: Swimlane) => {
-  if (!confirm(`確定要刪除泳道「${swimlane.name}」嗎？此操作無法復原。`)) return
+  if (!confirm(t('swimlane.confirmRemoveSwimlane', { name: swimlane.name }))) return
 
   savingSwimlaneIds.value.add(swimlane.id)
-  const loadingToast = toast.loading('刪除泳道中...')
+  const loadingToast = toast.loading(t('swimlane.removingSwimlane'))
   try {
     await swimlanesStore.removeSwimlane(props.projectId, swimlane.id)
     await swimlanesStore.fetchSwimlanes(props.projectId)
     syncLocalSwimlanes()
-    toast.update(loadingToast, 'success', '泳道已刪除')
+    toast.update(loadingToast, 'success', t('swimlane.swimlaneRemoved'))
     emit('updated')
   } catch (error) {
     console.error('Failed to remove swimlane:', error)
-    toast.update(loadingToast, 'error', '刪除泳道失敗')
+    toast.update(loadingToast, 'error', t('swimlane.removeSwimlaneFailed'))
   } finally {
     savingSwimlaneIds.value.delete(swimlane.id)
   }
 }
 
 const handleToggleActive = async (swimlane: Swimlane) => {
-  const action = swimlane.is_active ? '停用' : '啟用'
+  const isDisabling = swimlane.is_active
   savingSwimlaneIds.value.add(swimlane.id)
-  const loadingToast = toast.loading(`${action}泳道中...`)
+  const loadingToast = toast.loading(isDisabling ? t('swimlane.disablingSwimlane') : t('swimlane.enablingSwimlane'))
   try {
-    if (swimlane.is_active) {
+    if (isDisabling) {
       await swimlanesStore.disableSwimlane(props.projectId, swimlane.id)
     } else {
       await swimlanesStore.enableSwimlane(props.projectId, swimlane.id)
     }
     await swimlanesStore.fetchSwimlanes(props.projectId)
     syncLocalSwimlanes()
-    toast.update(loadingToast, 'success', `泳道已${action}`)
+    toast.update(loadingToast, 'success', isDisabling ? t('swimlane.swimlaneDisabled') : t('swimlane.swimlaneEnabled'))
     emit('updated')
   } catch (error) {
     console.error('Failed to toggle swimlane status:', error)
-    toast.update(loadingToast, 'error', `${action}泳道失敗`)
+    toast.update(loadingToast, 'error', isDisabling ? t('swimlane.disableSwimlaneFailed') : t('swimlane.enableSwimlaneFailed'))
   } finally {
     savingSwimlaneIds.value.delete(swimlane.id)
   }
@@ -184,7 +186,7 @@ const handleDragEnd = async (event: any) => {
     emit('updated')
   } catch (error) {
     console.error('Failed to reorder swimlane:', error)
-    toast.error('移動泳道失敗')
+    toast.error(t('swimlane.moveSwimlaneFailed'))
     // Revert on error
     syncLocalSwimlanes()
   } finally {
@@ -202,7 +204,7 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
       <div class="flex items-center gap-2">
         <ph-icon icon="rows" class="w-5 h-5 text-content-tertiary" />
         <h3 class="text-base font-semibold text-content">
-          泳道管理
+          {{ t('swimlane.swimlaneManagement') }}
         </h3>
         <span v-if="swimlanesStore.swimlanesCount > 0" class="text-xs text-content-tertiary bg-surface-secondary px-1.5 py-0.5 rounded">
           {{ swimlanesStore.swimlanesCount }}
@@ -212,7 +214,7 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
         v-if="!isAdding"
         @click="startAdding"
         class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
-        title="新增泳道"
+        :title="t('swimlane.addSwimlane')"
       >
         <ph-icon icon="rows-plus-bottom" weight="fill" class="w-5 h-5" />
       </button>
@@ -227,7 +229,7 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
             type="text"
             :disabled="isSubmitting"
             class="w-full px-3 py-2 text-sm bg-surface border border-edge rounded-lg text-content focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed"
-            placeholder="輸入泳道名稱"
+            :placeholder="t('swimlane.enterSwimlaneName')"
           />
         </div>
         <div>
@@ -236,7 +238,7 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
             type="text"
             :disabled="isSubmitting"
             class="w-full px-3 py-2 text-sm bg-surface border border-edge rounded-lg text-content focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed"
-            placeholder="描述（選填）"
+            :placeholder="t('common.descriptionOptional')"
           />
         </div>
         <div class="flex gap-2 justify-end">
@@ -245,7 +247,7 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
             :disabled="isSubmitting"
             class="px-4 py-2 text-sm text-content-secondary hover:text-content transition-colors disabled:opacity-50"
           >
-            取消
+            {{ t('common.cancel') }}
           </button>
           <button
             @click="handleAddSwimlane"
@@ -253,7 +255,7 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
             class="px-4 py-2 text-sm font-medium bg-accent text-white rounded-lg hover:bg-accent/90 disabled:opacity-50 transition-colors flex items-center gap-2"
           >
             <ph-icon v-if="isSubmitting" icon="spinner" class="w-4 h-4 animate-spin" />
-            新增
+            {{ t('common.add') }}
           </button>
         </div>
       </div>
@@ -297,7 +299,7 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
                       v-if="!swimlane.is_active"
                       class="text-xs px-1.5 py-0.5 bg-surface-tertiary text-content-tertiary rounded"
                     >
-                      已停用
+                      {{ t('common.disabled') }}
                     </span>
                   </div>
                   <div v-if="swimlane.description" class="text-xs text-content-tertiary truncate">
@@ -312,7 +314,7 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
                   @click="handleToggleActive(swimlane)"
                   :disabled="isSwimlaneSaving(swimlane.id)"
                   class="p-1.5 text-content-tertiary group-hover:text-content-secondary hover:!text-accent hover:bg-accent/10 rounded-md transition-colors disabled:opacity-50"
-                  :title="swimlane.is_active ? '停用' : '啟用'"
+                  :title="swimlane.is_active ? t('common.disable') : t('common.enable')"
                 >
                   <ph-icon v-if="swimlane.is_active" icon="eye" class="w-4 h-4" />
                   <ph-icon v-else icon="eye-slash" class="w-4 h-4" />
@@ -321,7 +323,7 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
                   @click="startEditing(swimlane)"
                   :disabled="isSwimlaneSaving(swimlane.id)"
                   class="p-1.5 text-content-tertiary group-hover:text-content-secondary hover:!text-accent hover:bg-accent/10 rounded-md transition-colors disabled:opacity-50"
-                  title="編輯"
+                  :title="t('common.edit')"
                 >
                   <ph-icon icon="pen-to-square" class="w-4 h-4" />
                 </button>
@@ -329,7 +331,7 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
                   @click="handleRemoveSwimlane(swimlane)"
                   :disabled="isSwimlaneSaving(swimlane.id)"
                   class="p-1.5 text-content-tertiary group-hover:text-content-secondary hover:!text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md transition-colors disabled:opacity-50"
-                  title="刪除"
+                  :title="t('common.delete')"
                 >
                   <ph-icon icon="trash" class="w-4 h-4" />
                 </button>
@@ -344,7 +346,7 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
                   type="text"
                   :disabled="isSubmitting"
                   class="w-full px-3 py-2 text-sm bg-surface border border-edge rounded-lg text-content focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed"
-                  placeholder="輸入泳道名稱"
+                  :placeholder="t('swimlane.enterSwimlaneName')"
                 />
               </div>
               <div>
@@ -353,7 +355,7 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
                   type="text"
                   :disabled="isSubmitting"
                   class="w-full px-3 py-2 text-sm bg-surface border border-edge rounded-lg text-content focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed"
-                  placeholder="描述（選填）"
+                  :placeholder="t('common.descriptionOptional')"
                 />
               </div>
               <div class="flex gap-2 justify-end">
@@ -362,7 +364,7 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
                   :disabled="isSubmitting"
                   class="px-4 py-2 text-sm text-content-secondary hover:text-content transition-colors disabled:opacity-50"
                 >
-                  取消
+                  {{ t('common.cancel') }}
                 </button>
                 <button
                   @click="handleSaveSwimlane"
@@ -370,7 +372,7 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
                   class="px-4 py-2 text-sm font-medium bg-accent text-white rounded-lg hover:bg-accent/90 disabled:opacity-50 transition-colors flex items-center gap-2"
                 >
                   <ph-icon v-if="isSubmitting" icon="spinner" class="w-4 h-4 animate-spin" />
-                  儲存
+                  {{ t('common.save') }}
                 </button>
               </div>
             </div>
@@ -384,7 +386,7 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
         class="py-8 text-center text-content-tertiary text-sm"
       >
         <ph-icon icon="rows" class="w-8 h-8 mx-auto mb-2 opacity-30" />
-        <p>尚無泳道</p>
+        <p>{{ t('swimlane.noSwimlanes') }}</p>
       </div>
     </div>
   </div>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useCategoriesStore } from '@/stores/categories'
 import { useToast } from '@/stores/toast'
 import type { Category } from '@/types'
@@ -12,6 +13,7 @@ const emit = defineEmits<{
   updated: []
 }>()
 
+const { t } = useI18n()
 const categoriesStore = useCategoriesStore()
 const toast = useToast()
 
@@ -47,19 +49,19 @@ const handleAddCategory = async () => {
   if (!newCategoryName.value.trim() || isSubmitting.value) return
 
   isSubmitting.value = true
-  const loadingToast = toast.loading('新增類別中...')
+  const loadingToast = toast.loading(t('category.addingCategory'))
   try {
     await categoriesStore.addCategory(
       props.projectId,
       newCategoryName.value.trim()
     )
     await categoriesStore.fetchCategories(props.projectId)
-    toast.update(loadingToast, 'success', '類別已新增')
+    toast.update(loadingToast, 'success', t('category.categoryAdded'))
     cancelAdding()
     emit('updated')
   } catch (error) {
     console.error('Failed to add category:', error)
-    toast.update(loadingToast, 'error', '新增類別失敗')
+    toast.update(loadingToast, 'error', t('category.addCategoryFailed'))
   } finally {
     isSubmitting.value = false
   }
@@ -78,36 +80,36 @@ const handleSaveCategory = async () => {
   if (!editingCategoryId.value || !editName.value.trim() || isSubmitting.value) return
 
   isSubmitting.value = true
-  const loadingToast = toast.loading('更新類別中...')
+  const loadingToast = toast.loading(t('category.updatingCategory'))
   try {
     await categoriesStore.updateCategory(
       editingCategoryId.value,
       editName.value.trim()
     )
     await categoriesStore.fetchCategories(props.projectId)
-    toast.update(loadingToast, 'success', '類別已更新')
+    toast.update(loadingToast, 'success', t('category.categoryUpdated'))
     cancelEditing()
     emit('updated')
   } catch (error) {
     console.error('Failed to update category:', error)
-    toast.update(loadingToast, 'error', '更新類別失敗')
+    toast.update(loadingToast, 'error', t('category.updateCategoryFailed'))
   } finally {
     isSubmitting.value = false
   }
 }
 
 const handleRemoveCategory = async (category: Category) => {
-  if (!confirm(`確定要刪除類別「${category.name}」嗎？此操作無法復原。`)) return
+  if (!confirm(t('category.confirmRemoveCategory', { name: category.name }))) return
 
-  const loadingToast = toast.loading('刪除類別中...')
+  const loadingToast = toast.loading(t('category.removingCategory'))
   try {
     await categoriesStore.removeCategory(category.id)
     await categoriesStore.fetchCategories(props.projectId)
-    toast.update(loadingToast, 'success', '類別已刪除')
+    toast.update(loadingToast, 'success', t('category.categoryRemoved'))
     emit('updated')
   } catch (error) {
     console.error('Failed to remove category:', error)
-    toast.update(loadingToast, 'error', '刪除類別失敗')
+    toast.update(loadingToast, 'error', t('category.removeCategoryFailed'))
   }
 }
 </script>
@@ -119,7 +121,7 @@ const handleRemoveCategory = async (category: Category) => {
       <div class="flex items-center gap-2">
         <ph-icon icon="tag" class="w-5 h-5 text-content-tertiary" />
         <h3 class="text-base font-semibold text-content">
-          類別管理
+          {{ t('category.categoryManagement') }}
         </h3>
         <span v-if="categoriesStore.categoriesCount > 0" class="text-xs text-content-tertiary bg-surface-secondary px-1.5 py-0.5 rounded">
           {{ categoriesStore.categoriesCount }}
@@ -129,7 +131,7 @@ const handleRemoveCategory = async (category: Category) => {
         v-if="!isAdding"
         @click="startAdding"
         class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
-        title="新增類別"
+        :title="t('category.addCategory')"
       >
         <ph-icon icon="stack-plus" weight="fill" class="w-5 h-5" />
       </button>
@@ -144,7 +146,7 @@ const handleRemoveCategory = async (category: Category) => {
             type="text"
             :disabled="isSubmitting"
             class="w-full px-3 py-2 text-sm bg-surface border border-edge rounded-lg text-content focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed"
-            placeholder="輸入類別名稱"
+            :placeholder="t('category.enterCategoryName')"
           />
         </div>
         <div class="flex gap-2 justify-end">
@@ -153,7 +155,7 @@ const handleRemoveCategory = async (category: Category) => {
             :disabled="isSubmitting"
             class="px-4 py-2 text-sm text-content-secondary hover:text-content transition-colors disabled:opacity-50"
           >
-            取消
+            {{ t('common.cancel') }}
           </button>
           <button
             @click="handleAddCategory"
@@ -161,7 +163,7 @@ const handleRemoveCategory = async (category: Category) => {
             class="px-4 py-2 text-sm font-medium bg-accent text-white rounded-lg hover:bg-accent/90 disabled:opacity-50 transition-colors flex items-center gap-2"
           >
             <ph-icon v-if="isSubmitting" icon="spinner" class="w-4 h-4 animate-spin" />
-            新增
+            {{ t('common.add') }}
           </button>
         </div>
       </div>
@@ -194,14 +196,14 @@ const handleRemoveCategory = async (category: Category) => {
               <button
                 @click="startEditing(category)"
                 class="p-1.5 text-content-tertiary group-hover:text-content-secondary hover:!text-accent hover:bg-accent/10 rounded-md transition-colors"
-                title="編輯"
+                :title="t('common.edit')"
               >
                 <ph-icon icon="pen-to-square" class="w-4 h-4" />
               </button>
               <button
                 @click="handleRemoveCategory(category)"
                 class="p-1.5 text-content-tertiary group-hover:text-content-secondary hover:!text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md transition-colors"
-                title="刪除"
+                :title="t('common.delete')"
               >
                 <ph-icon icon="trash" class="w-4 h-4" />
               </button>
@@ -216,7 +218,7 @@ const handleRemoveCategory = async (category: Category) => {
                 type="text"
                 :disabled="isSubmitting"
                 class="w-full px-3 py-2 text-sm bg-surface border border-edge rounded-lg text-content focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed"
-                placeholder="輸入類別名稱"
+                :placeholder="t('category.enterCategoryName')"
               />
             </div>
             <div class="flex gap-2 justify-end">
@@ -225,7 +227,7 @@ const handleRemoveCategory = async (category: Category) => {
                 :disabled="isSubmitting"
                 class="px-4 py-2 text-sm text-content-secondary hover:text-content transition-colors disabled:opacity-50"
               >
-                取消
+                {{ t('common.cancel') }}
               </button>
               <button
                 @click="handleSaveCategory"
@@ -233,7 +235,7 @@ const handleRemoveCategory = async (category: Category) => {
                 class="px-4 py-2 text-sm font-medium bg-accent text-white rounded-lg hover:bg-accent/90 disabled:opacity-50 transition-colors flex items-center gap-2"
               >
                 <ph-icon v-if="isSubmitting" icon="spinner" class="w-4 h-4 animate-spin" />
-                儲存
+                {{ t('common.save') }}
               </button>
             </div>
           </div>
@@ -245,7 +247,7 @@ const handleRemoveCategory = async (category: Category) => {
           class="py-8 text-center text-content-tertiary text-sm"
         >
           <ph-icon icon="tag" class="w-8 h-8 mx-auto mb-2 opacity-30" />
-          <p>尚無類別</p>
+          <p>{{ t('category.noCategories') }}</p>
         </div>
       </div>
     </div>
