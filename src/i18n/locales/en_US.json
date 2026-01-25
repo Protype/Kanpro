@@ -371,11 +371,16 @@
   "tag": {
     "tag": "Tag",
     "tags": "Tags",
+    "title": "Tags",
     "newTag": "New tag",
     "addTag": "Add tag",
+    "edit": "Edit",
     "editTag": "Edit tag",
     "removeTag": "Remove tag",
-    "noTags": "No tags"
+    "noTags": "No tags",
+    "availableTags": "Available tags:",
+    "enterNewTag": "Enter new tag...",
+    "saveFailed": "Failed to save tags"
   },
   "link": {
     "link": "Link",

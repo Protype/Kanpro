@@ -371,11 +371,16 @@
   "tag": {
     "tag": "標籤",
     "tags": "標籤",
+    "title": "標籤",
     "newTag": "新增標籤",
     "addTag": "新增標籤",
+    "edit": "編輯",
     "editTag": "編輯標籤",
     "removeTag": "刪除標籤",
-    "noTags": "沒有標籤"
+    "noTags": "無標籤",
+    "availableTags": "可用標籤：",
+    "enterNewTag": "新增標籤...",
+    "saveFailed": "儲存標籤失敗"
   },
   "link": {
     "link": "連結",
