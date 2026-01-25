@@ -691,6 +691,25 @@
     "public": "Public",
     "private": "Private"
   },
+  "shortcuts": {
+    "title": "Keyboard Shortcuts",
+    "global": "Global",
+    "boardView": "Board View",
+    "taskDetail": "Task Detail",
+    "openSearch": "Open quick search",
+    "showShortcuts": "Show keyboard shortcuts",
+    "openProjectSwitcher": "Open project switcher",
+    "closeDialog": "Close dialog",
+    "newTask": "New task",
+    "switchToBoard": "Switch to board",
+    "switchToList": "Switch to list",
+    "switchToCalendar": "Switch to calendar",
+    "switchToAnalytics": "Switch to analytics",
+    "editTask": "Edit task",
+    "addSubtask": "Add sub-task",
+    "addComment": "Add comment",
+    "pressToClose": "Press {key1} or {key2} to close"
+  },
   "commandBar": {
     "searchPlaceholder": "Search tasks... (e.g. status:open)",
     "addPlaceholder": "Enter task title... (use ^ @ # for quick setup)",

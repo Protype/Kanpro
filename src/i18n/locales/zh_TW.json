@@ -691,6 +691,25 @@
     "public": "公開",
     "private": "私人"
   },
+  "shortcuts": {
+    "title": "鍵盤快捷鍵",
+    "global": "全域",
+    "boardView": "看板檢視",
+    "taskDetail": "任務詳情",
+    "openSearch": "開啟快速搜尋",
+    "showShortcuts": "顯示快捷鍵說明",
+    "openProjectSwitcher": "開啟專案切換器",
+    "closeDialog": "關閉對話框",
+    "newTask": "新增任務",
+    "switchToBoard": "切換至看板",
+    "switchToList": "切換至清單",
+    "switchToCalendar": "切換至日曆",
+    "switchToAnalytics": "切換至分析",
+    "editTask": "編輯任務",
+    "addSubtask": "新增子任務",
+    "addComment": "新增評論",
+    "pressToClose": "按下 {key1} 或 {key2} 關閉"
+  },
   "commandBar": {
     "searchPlaceholder": "搜尋任務... (例如: status:open)",
     "addPlaceholder": "輸入任務標題... (使用 ^ @ # 快速設定)",
