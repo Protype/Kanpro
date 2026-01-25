@@ -233,7 +233,18 @@
     "colorBrown": "棕色",
     "colorDeepOrange": "深橘",
     "colorDarkGrey": "深灰",
-    "colorWhite": "白色"
+    "colorWhite": "白色",
+    "tasksOverview": "任務總覽",
+    "allOpenTasks": "所有專案的開啟中任務",
+    "assignedToMe": "指派給我的開啟中任務",
+    "totalTasks": "總任務數",
+    "overdueTasks": "逾期任務",
+    "dueSoon": "即將到期",
+    "noOpenTasks": "沒有開啟中的任務",
+    "noAssignedTasks": "沒有指派給你的任務",
+    "allTasksCompleted": "太棒了！你已完成所有任務",
+    "projectNumber": "專案 #{id}",
+    "loadTasksFailed": "載入任務失敗"
   },
   "subtask": {
     "subtask": "子任務",

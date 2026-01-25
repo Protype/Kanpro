@@ -233,7 +233,18 @@
     "colorBrown": "Brown",
     "colorDeepOrange": "Deep orange",
     "colorDarkGrey": "Dark grey",
-    "colorWhite": "White"
+    "colorWhite": "White",
+    "tasksOverview": "Tasks Overview",
+    "allOpenTasks": "Open tasks from all projects",
+    "assignedToMe": "Open tasks assigned to me",
+    "totalTasks": "Total tasks",
+    "overdueTasks": "Overdue tasks",
+    "dueSoon": "Due soon",
+    "noOpenTasks": "No open tasks",
+    "noAssignedTasks": "No tasks assigned to you",
+    "allTasksCompleted": "Great! You've completed all tasks",
+    "projectNumber": "Project #{id}",
+    "loadTasksFailed": "Failed to load tasks"
   },
   "subtask": {
     "subtask": "Sub-task",
