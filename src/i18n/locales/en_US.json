@@ -268,7 +268,19 @@
     "noAssignedTasks": "No tasks assigned to you",
     "allTasksCompleted": "Great! You've completed all tasks",
     "projectNumber": "Project #{id}",
-    "loadTasksFailed": "Failed to load tasks"
+    "loadTasksFailed": "Failed to load tasks",
+    "basicInfo": "Basic Info",
+    "advancedSettings": "Advanced Settings",
+    "enterDescriptionMarkdown": "Enter task description (supports Markdown)",
+    "noCategory": "No Category",
+    "swimlane": "Swimlane",
+    "enterTagName": "Enter tag name...",
+    "timeTracking": "Time Tracking",
+    "estimatedTime": "Estimated Time (hours)",
+    "spentTime": "Time Spent (hours)",
+    "externalLinks": "External Links",
+    "referencePlaceholder": "e.g., JIRA-123 or GitHub Issue URL",
+    "referenceHint": "Enter external system ID or link"
   },
   "subtask": {
     "subtask": "Sub-task",

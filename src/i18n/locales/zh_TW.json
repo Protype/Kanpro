@@ -268,7 +268,19 @@
     "noAssignedTasks": "沒有指派給你的任務",
     "allTasksCompleted": "太棒了！你已完成所有任務",
     "projectNumber": "專案 #{id}",
-    "loadTasksFailed": "載入任務失敗"
+    "loadTasksFailed": "載入任務失敗",
+    "basicInfo": "基本資訊",
+    "advancedSettings": "進階設定",
+    "enterDescriptionMarkdown": "輸入任務描述（支援 Markdown）",
+    "noCategory": "無類別",
+    "swimlane": "泳道",
+    "enterTagName": "輸入標籤名稱...",
+    "timeTracking": "時間追蹤",
+    "estimatedTime": "預估時間（小時）",
+    "spentTime": "已花費時間（小時）",
+    "externalLinks": "外部連結",
+    "referencePlaceholder": "例如：JIRA-123 或 GitHub Issue URL",
+    "referenceHint": "可填入外部系統的 ID 或連結"
   },
   "subtask": {
     "subtask": "子任務",

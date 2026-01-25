@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useTasksStore, type CreateTaskParams } from '@/stores/tasks'
 import { useBoardStore } from '@/stores/board'
 import { useMembersStore } from '@/stores/members'
@@ -20,6 +21,7 @@ const categoriesStore = useCategoriesStore()
 const swimlanesStore = useSwimlanesStore()
 const tagsStore = useTagsStore()
 const toast = useToast()
+const { t } = useI18n()
 
 const projectId = computed(() => Number(route.params.id))
 
@@ -52,16 +54,22 @@ const newTagInput = ref('')
 const showTagDropdown = ref(false)
 
 // === 顏色選項 ===
-const colors = [
-  { id: 'yellow', name: '黃色', class: 'bg-yellow-500' },
-  { id: 'blue', name: '藍色', class: 'bg-blue-500' },
-  { id: 'green', name: '綠色', class: 'bg-green-500' },
-  { id: 'purple', name: '紫色', class: 'bg-purple-500' },
-  { id: 'red', name: '紅色', class: 'bg-red-500' },
-  { id: 'orange', name: '橘色', class: 'bg-orange-500' },
-  { id: 'grey', name: '灰色', class: 'bg-gray-500' },
-  { id: 'cyan', name: '青色', class: 'bg-cyan-500' }
+const colorDefs = [
+  { id: 'yellow', key: 'colorYellow', class: 'bg-yellow-500' },
+  { id: 'blue', key: 'colorBlue', class: 'bg-blue-500' },
+  { id: 'green', key: 'colorGreen', class: 'bg-green-500' },
+  { id: 'purple', key: 'colorPurple', class: 'bg-purple-500' },
+  { id: 'red', key: 'colorRed', class: 'bg-red-500' },
+  { id: 'orange', key: 'colorOrange', class: 'bg-orange-500' },
+  { id: 'grey', key: 'colorGrey', class: 'bg-gray-500' },
+  { id: 'cyan', key: 'colorCyan', class: 'bg-cyan-500' }
 ]
+
+const colors = computed(() => colorDefs.map(c => ({
+  id: c.id,
+  name: t(`task.${c.key}`),
+  class: c.class
+})))
 
 // === Computed ===
 const isValid = computed(() => title.value.trim().length > 0)
@@ -226,7 +234,7 @@ async function handleSubmit() {
 
   try {
     const taskId = await tasksStore.createTask(params)
-    toast.success('任務建立成功')
+    toast.success(t('task.createTask'), t('message.createSuccess'))
     // 跳轉到看板頁面並開啟任務詳情
     router.push({
       name: 'project-board',
@@ -234,7 +242,7 @@ async function handleSubmit() {
       query: { task: taskId }
     })
   } catch (error) {
-    toast.error('建立任務失敗', error instanceof Error ? error.message : '未知錯誤')
+    toast.error(t('board.createTaskFailed'), error instanceof Error ? error.message : t('message.error'))
     isSubmitting.value = false
   }
 }
@@ -257,7 +265,7 @@ function handleCancel() {
             >
               <ph-icon icon="arrow-left" class="w-5 h-5" />
             </button>
-            <h1 class="text-xl font-semibold text-content">新增任務</h1>
+            <h1 class="text-xl font-semibold text-content">{{ t('task.newTask') }}</h1>
           </div>
           <div class="flex items-center gap-3">
             <button
@@ -266,7 +274,7 @@ function handleCancel() {
               :disabled="isSubmitting"
               class="px-4 py-2 text-sm font-medium text-content bg-surface-secondary hover:bg-surface-hover rounded-md transition-colors disabled:opacity-50"
             >
-              取消
+              {{ t('common.cancel') }}
             </button>
             <button
               type="button"
@@ -275,7 +283,7 @@ function handleCancel() {
               class="px-4 py-2 text-sm font-medium text-white bg-accent hover:bg-accent/90 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
             >
               <ph-icon v-if="isSubmitting" icon="spinner" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
-              {{ isSubmitting ? '建立中...' : '建立任務' }}
+              {{ isSubmitting ? t('task.creating') : t('task.createTask') }}
             </button>
           </div>
         </div>
@@ -289,12 +297,12 @@ function handleCancel() {
         <div class="col-span-2 space-y-6">
           <!-- A 層：基本資訊 -->
           <div class="card p-6 space-y-4">
-            <h2 class="text-sm font-semibold text-content-secondary uppercase tracking-wider">基本資訊</h2>
+            <h2 class="text-sm font-semibold text-content-secondary uppercase tracking-wider">{{ t('task.basicInfo') }}</h2>
 
             <!-- Title -->
             <div>
               <label for="task-title" class="block text-sm font-medium text-content mb-1">
-                標題 <span class="text-red-500">*</span>
+                {{ t('task.title') }} <span class="text-red-500">*</span>
               </label>
               <input
                 id="task-title"
@@ -303,14 +311,14 @@ function handleCancel() {
                 required
                 :disabled="isSubmitting"
                 class="w-full px-3 py-2 bg-surface-secondary border border-edge rounded-md text-content placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent disabled:opacity-50"
-                placeholder="輸入任務標題"
+                :placeholder="t('task.enterTitle')"
               />
             </div>
 
             <!-- Description -->
             <div>
               <label for="task-description" class="block text-sm font-medium text-content mb-1">
-                描述
+                {{ t('task.description') }}
               </label>
               <textarea
                 id="task-description"
@@ -318,7 +326,7 @@ function handleCancel() {
                 rows="6"
                 :disabled="isSubmitting"
                 class="w-full px-3 py-2 bg-surface-secondary border border-edge rounded-md text-content placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent disabled:opacity-50 resize-none"
-                placeholder="輸入任務描述（支援 Markdown）"
+                :placeholder="t('task.enterDescriptionMarkdown')"
               ></textarea>
             </div>
 
@@ -327,7 +335,7 @@ function handleCancel() {
               <!-- Column -->
               <div>
                 <label for="task-column" class="block text-sm font-medium text-content mb-1">
-                  欄位
+                  {{ t('task.column') }}
                 </label>
                 <select
                   id="task-column"
@@ -348,7 +356,7 @@ function handleCancel() {
               <!-- Color -->
               <div>
                 <label class="block text-sm font-medium text-content mb-1">
-                  顏色
+                  {{ t('task.color') }}
                 </label>
                 <div class="flex flex-wrap gap-2 py-1">
                   <button
@@ -371,13 +379,13 @@ function handleCancel() {
 
           <!-- B 層：進階設定 -->
           <div class="card p-6 space-y-4">
-            <h2 class="text-sm font-semibold text-content-secondary uppercase tracking-wider">進階設定</h2>
+            <h2 class="text-sm font-semibold text-content-secondary uppercase tracking-wider">{{ t('task.advancedSettings') }}</h2>
 
             <div class="grid grid-cols-2 gap-4">
               <!-- Owner -->
               <div class="owner-dropdown-container">
                 <label class="block text-sm font-medium text-content mb-1">
-                  指派人
+                  {{ t('task.assignee') }}
                 </label>
                 <div class="relative">
                   <button
@@ -403,7 +411,7 @@ function handleCancel() {
                       <div class="w-6 h-6 rounded-full bg-surface-tertiary flex items-center justify-center">
                         <ph-icon icon="user" class="w-3.5 h-3.5 text-content-tertiary" />
                       </div>
-                      <span class="flex-1 text-sm text-content-tertiary">未指派</span>
+                      <span class="flex-1 text-sm text-content-tertiary">{{ t('task.unassigned') }}</span>
                       <ph-icon icon="chevron-down" class="w-4 h-4 text-content-tertiary" />
                     </template>
                   </button>
@@ -417,7 +425,7 @@ function handleCancel() {
                         <input
                           v-model="ownerSearchQuery"
                           type="text"
-                          placeholder="搜尋成員..."
+                          :placeholder="t('task.searchMembers')"
                           class="w-full px-2 py-1 text-sm bg-surface-secondary border border-edge rounded text-content placeholder:text-content-tertiary focus:outline-none focus:ring-1 focus:ring-accent"
                         />
                       </div>
@@ -437,7 +445,7 @@ function handleCancel() {
                           </div>
                         </button>
                         <div v-if="filteredMembers.length === 0" class="px-3 py-2 text-sm text-content-tertiary">
-                          找不到成員
+                          {{ t('task.noMemberFound') }}
                         </div>
                       </div>
                     </div>
@@ -448,7 +456,7 @@ function handleCancel() {
               <!-- Category -->
               <div>
                 <label for="task-category" class="block text-sm font-medium text-content mb-1">
-                  類別
+                  {{ t('task.category') }}
                 </label>
                 <select
                   id="task-category"
@@ -456,7 +464,7 @@ function handleCancel() {
                   :disabled="isSubmitting"
                   class="w-full px-3 py-2 bg-surface-secondary border border-edge rounded-md text-content focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent disabled:opacity-50"
                 >
-                  <option :value="undefined">無類別</option>
+                  <option :value="undefined">{{ t('task.noCategory') }}</option>
                   <option
                     v-for="cat in categories"
                     :key="cat.id"
@@ -470,7 +478,7 @@ function handleCancel() {
               <!-- Swimlane -->
               <div>
                 <label for="task-swimlane" class="block text-sm font-medium text-content mb-1">
-                  泳道
+                  {{ t('task.swimlane') }}
                 </label>
                 <select
                   id="task-swimlane"
@@ -478,7 +486,7 @@ function handleCancel() {
                   :disabled="isSubmitting"
                   class="w-full px-3 py-2 bg-surface-secondary border border-edge rounded-md text-content focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent disabled:opacity-50"
                 >
-                  <option :value="undefined">預設泳道</option>
+                  <option :value="undefined">{{ t('task.defaultSwimlane') }}</option>
                   <option
                     v-for="sl in swimlanes"
                     :key="sl.id"
@@ -492,7 +500,7 @@ function handleCancel() {
               <!-- Due Date -->
               <div>
                 <label for="task-due" class="block text-sm font-medium text-content mb-1">
-                  到期日
+                  {{ t('task.dueDate') }}
                 </label>
                 <input
                   id="task-due"
@@ -506,7 +514,7 @@ function handleCancel() {
               <!-- Priority -->
               <div>
                 <label for="task-priority" class="block text-sm font-medium text-content mb-1">
-                  優先級
+                  {{ t('task.priority') }}
                 </label>
                 <input
                   id="task-priority"
@@ -539,7 +547,7 @@ function handleCancel() {
             <!-- Tags -->
             <div class="tag-dropdown-container">
               <label class="block text-sm font-medium text-content mb-1">
-                標籤
+                {{ t('task.tags') }}
               </label>
               <div v-if="selectedTags.length > 0" class="flex flex-wrap gap-1 mb-2">
                 <span
@@ -563,7 +571,7 @@ function handleCancel() {
                   type="text"
                   :disabled="isSubmitting"
                   class="w-full px-3 py-2 bg-surface-secondary border border-edge rounded-md text-content placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent disabled:opacity-50"
-                  placeholder="輸入標籤名稱..."
+                  :placeholder="t('task.enterTagName')"
                   @focus="showTagDropdown = true"
                   @keydown="handleTagInputKeydown"
                 />
@@ -592,12 +600,12 @@ function handleCancel() {
         <div class="space-y-6">
           <!-- C 層：時間與追蹤 -->
           <div class="card p-6 space-y-4">
-            <h2 class="text-sm font-semibold text-content-secondary uppercase tracking-wider">時間追蹤</h2>
+            <h2 class="text-sm font-semibold text-content-secondary uppercase tracking-wider">{{ t('task.timeTracking') }}</h2>
 
             <!-- Start Date -->
             <div>
               <label for="task-start" class="block text-sm font-medium text-content mb-1">
-                開始日期
+                {{ t('task.startDate') }}
               </label>
               <input
                 id="task-start"
@@ -611,7 +619,7 @@ function handleCancel() {
             <!-- Time Estimated -->
             <div>
               <label for="task-estimated" class="block text-sm font-medium text-content mb-1">
-                預估時間（小時）
+                {{ t('task.estimatedTime') }}
               </label>
               <input
                 id="task-estimated"
@@ -628,7 +636,7 @@ function handleCancel() {
             <!-- Time Spent -->
             <div>
               <label for="task-spent" class="block text-sm font-medium text-content mb-1">
-                已花費時間（小時）
+                {{ t('task.spentTime') }}
               </label>
               <input
                 id="task-spent"
@@ -645,22 +653,22 @@ function handleCancel() {
 
           <!-- Reference -->
           <div class="card p-6 space-y-4">
-            <h2 class="text-sm font-semibold text-content-secondary uppercase tracking-wider">外部連結</h2>
+            <h2 class="text-sm font-semibold text-content-secondary uppercase tracking-wider">{{ t('task.externalLinks') }}</h2>
 
             <div>
               <label for="task-reference" class="block text-sm font-medium text-content mb-1">
-                外部參考
+                {{ t('task.reference') }}
               </label>
               <input
                 id="task-reference"
                 v-model="reference"
                 type="text"
                 :disabled="isSubmitting"
-                placeholder="例如：JIRA-123 或 GitHub Issue URL"
+                :placeholder="t('task.referencePlaceholder')"
                 class="w-full px-3 py-2 bg-surface-secondary border border-edge rounded-md text-content placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent disabled:opacity-50"
               />
               <p class="mt-1 text-xs text-content-tertiary">
-                可填入外部系統的 ID 或連結
+                {{ t('task.referenceHint') }}
               </p>
             </div>
           </div>
