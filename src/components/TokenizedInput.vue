@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { ref, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 export interface InputToken {
   type: 'text' | 'symbol'
@@ -161,7 +164,7 @@ defineExpose({ focus, inputRef })
         :data-testid="token.locked ? 'token-unlock' : 'token-remove'"
         type="button"
         class="ml-0.5 w-4 h-4 flex items-center justify-center rounded-full hover:bg-black/10 transition-colors"
-        :title="token.locked ? '解除鎖定' : '移除'"
+        :title="token.locked ? t('common.unlock') : t('common.remove')"
         @click="handleTokenAction(index, $event)"
       >
         <!-- Lock icon for locked tokens -->
