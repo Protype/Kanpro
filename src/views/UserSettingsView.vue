@@ -276,7 +276,7 @@ onMounted(() => {
                   <img
                     v-if="avatarData"
                     :src="`data:image/png;base64,${avatarData}`"
-                    alt="頭像"
+                    :alt="t('user.avatar')"
                     class="w-full h-full object-cover"
                   />
                   <span v-else class="text-4xl font-semibold text-white">
