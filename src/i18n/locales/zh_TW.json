@@ -735,7 +735,17 @@
     "burndown": "燃盡圖",
     "leadTime": "交付時間",
     "cycleTime": "週期時間",
-    "averageTime": "平均欄位停留時間"
+    "averageTime": "平均欄位停留時間",
+    "totalActivities": "總活動數",
+    "tasksCreated": "建立任務",
+    "tasksMoved": "移動任務",
+    "tasksClosed": "關閉任務",
+    "dailyActivity": "每日活動",
+    "noTaskData": "沒有任務資料",
+    "noMemberData": "沒有成員資料",
+    "noActivityData": "沒有活動資料",
+    "activitiesCount": "個活動",
+    "loadFailed": "載入分析資料失敗"
   },
   "search": {
     "search": "搜尋",

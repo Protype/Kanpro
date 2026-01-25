@@ -735,7 +735,17 @@
     "burndown": "Burndown chart",
     "leadTime": "Lead time",
     "cycleTime": "Cycle time",
-    "averageTime": "Average time in column"
+    "averageTime": "Average time in column",
+    "totalActivities": "Total activities",
+    "tasksCreated": "Tasks created",
+    "tasksMoved": "Tasks moved",
+    "tasksClosed": "Tasks closed",
+    "dailyActivity": "Daily activity",
+    "noTaskData": "No task data",
+    "noMemberData": "No member data",
+    "noActivityData": "No activity data",
+    "activitiesCount": "activities",
+    "loadFailed": "Failed to load analytics data"
   },
   "search": {
     "search": "Search",
