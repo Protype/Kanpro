@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useSidebarStore } from '@/stores/sidebar'
@@ -28,18 +28,115 @@ const isAdminContext = computed(() => route.path.startsWith('/admin'))
 // Check if we're on project create page
 const isProjectCreatePage = computed(() => route.name === 'project-create')
 
-const projectNavItems = computed(() => {
+// Responsive navigation state
+const navContainerRef = ref<HTMLElement | null>(null)
+const isNavCollapsed = ref(false)
+const showMoreMenu = ref(false)
+
+// Primary nav items (always visible)
+const primaryNavItems = computed(() => {
   const id = currentProjectId.value
   if (!id) return []
   return [
     { name: 'project-overview', label: t('project.overview'), icon: 'squares-four', route: `/projects/${id}/overview` },
     { name: 'project-list', label: t('project.list'), icon: 'list', route: `/projects/${id}` },
     { name: 'project-board', label: t('project.board'), icon: 'table-columns', route: `/projects/${id}/board` },
-    { name: 'project-calendar', label: t('project.calendar'), icon: 'calendar', route: `/projects/${id}/calendar` },
+    { name: 'project-calendar', label: t('project.calendar'), icon: 'calendar', route: `/projects/${id}/calendar` }
+  ]
+})
+
+// Secondary nav items (collapse into dropdown when space is limited)
+const secondaryNavItems = computed(() => {
+  const id = currentProjectId.value
+  if (!id) return []
+  return [
     { name: 'project-activity', label: t('project.activity'), icon: 'lightning', route: `/projects/${id}/activity` },
     { name: 'project-analytics', label: t('project.analytics'), icon: 'chart-bar', route: `/projects/${id}/analytics` },
     { name: 'project-settings', label: t('nav.settings'), icon: 'gear', route: `/projects/${id}/settings` }
   ]
+})
+
+// All project nav items (for icon-only compact view)
+const projectNavItems = computed(() => [...primaryNavItems.value, ...secondaryNavItems.value])
+
+// Check if any secondary item is active
+const isSecondaryActive = computed(() => {
+  return secondaryNavItems.value.some(item => isActiveRoute(item.name))
+})
+
+// ResizeObserver to detect when nav needs to collapse
+let resizeObserver: ResizeObserver | null = null
+
+const checkNavOverflow = () => {
+  if (!navContainerRef.value) return
+
+  // Check if nav container is overflowing or close to it
+  const container = navContainerRef.value
+  const containerWidth = container.offsetWidth
+  const scrollWidth = container.scrollWidth
+
+  // Also check window width as a simpler heuristic
+  const windowWidth = window.innerWidth
+
+  // Collapse when window is less than 1400px or content overflows
+  isNavCollapsed.value = windowWidth < 1400 || scrollWidth > containerWidth + 10
+}
+
+const setupResizeObserver = () => {
+  if (typeof ResizeObserver === 'undefined') return
+
+  resizeObserver = new ResizeObserver(() => {
+    checkNavOverflow()
+  })
+
+  if (navContainerRef.value) {
+    resizeObserver.observe(navContainerRef.value)
+  }
+
+  // Also observe window resize
+  window.addEventListener('resize', checkNavOverflow)
+}
+
+const cleanupResizeObserver = () => {
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+    resizeObserver = null
+  }
+  window.removeEventListener('resize', checkNavOverflow)
+}
+
+// Watch for project changes to re-check overflow
+watch(currentProjectId, () => {
+  nextTick(() => {
+    checkNavOverflow()
+  })
+})
+
+onMounted(() => {
+  setupResizeObserver()
+  nextTick(() => {
+    checkNavOverflow()
+  })
+})
+
+onUnmounted(() => {
+  cleanupResizeObserver()
+})
+
+// Close more menu when clicking outside
+const handleClickOutsideMoreMenu = (event: MouseEvent) => {
+  const target = event.target as HTMLElement
+  if (!target.closest('[data-more-menu]')) {
+    showMoreMenu.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutsideMoreMenu)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutsideMoreMenu)
 })
 
 // Admin navigation items
@@ -146,13 +243,14 @@ function openCreateTask(): void {
         <ph-icon icon="caret-right" class="w-4 h-4 text-content-tertiary ml-1 flex-shrink-0" />
 
         <!-- Full Navigation (xl and above) -->
-        <div class="hidden xl:flex items-center gap-1">
+        <div ref="navContainerRef" class="hidden xl:flex items-center gap-1">
+          <!-- Primary Nav Items (always visible) -->
           <button
-            v-for="item in projectNavItems"
+            v-for="item in primaryNavItems"
             :key="item.name"
             @click="navigateTo(item.route)"
             :class="[
-              'flex items-center gap-1.5 px-2.5 py-1.5 text-sm rounded-md transition-colors',
+              'flex items-center gap-1.5 px-2.5 py-1.5 text-sm rounded-md transition-colors whitespace-nowrap',
               isActiveRoute(item.name)
                 ? 'bg-accent text-content-inverse'
                 : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-hover'
@@ -162,6 +260,79 @@ function openCreateTask(): void {
             <ph-icon :icon="item.icon" class="w-4 h-4" />
             <span>{{ item.label }}</span>
           </button>
+
+          <!-- Secondary Nav Items (visible when not collapsed) -->
+          <template v-if="!isNavCollapsed">
+            <button
+              v-for="item in secondaryNavItems"
+              :key="item.name"
+              @click="navigateTo(item.route)"
+              :class="[
+                'flex items-center gap-1.5 px-2.5 py-1.5 text-sm rounded-md transition-colors whitespace-nowrap',
+                isActiveRoute(item.name)
+                  ? 'bg-accent text-content-inverse'
+                  : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-hover'
+              ]"
+              :title="item.label"
+            >
+              <ph-icon :icon="item.icon" class="w-4 h-4" />
+              <span>{{ item.label }}</span>
+            </button>
+          </template>
+
+          <!-- More Dropdown (visible when collapsed) -->
+          <div v-if="isNavCollapsed" class="relative" data-more-menu>
+            <button
+              @click.stop="showMoreMenu = !showMoreMenu"
+              :class="[
+                'flex items-center gap-1.5 px-2.5 py-1.5 text-sm rounded-md transition-colors whitespace-nowrap',
+                isSecondaryActive
+                  ? 'bg-accent text-content-inverse'
+                  : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-hover'
+              ]"
+            >
+              <ph-icon icon="dots-three" class="w-4 h-4" />
+              <span>{{ t('common.more') }}</span>
+              <ph-icon icon="caret-down" class="w-3 h-3" />
+            </button>
+
+            <!-- Dropdown Menu -->
+            <Transition
+              enter-active-class="transition ease-out duration-100"
+              enter-from-class="transform opacity-0 scale-95"
+              enter-to-class="transform opacity-100 scale-100"
+              leave-active-class="transition ease-in duration-75"
+              leave-from-class="transform opacity-100 scale-100"
+              leave-to-class="transform opacity-0 scale-95"
+            >
+              <div
+                v-if="showMoreMenu"
+                class="absolute left-0 mt-2 w-48 bg-surface rounded-lg shadow-lg ring-1 ring-edge overflow-hidden z-50"
+              >
+                <div class="py-1">
+                  <button
+                    v-for="item in secondaryNavItems"
+                    :key="item.name"
+                    @click="navigateTo(item.route); showMoreMenu = false"
+                    :class="[
+                      'w-full px-4 py-2 text-left text-sm flex items-center gap-3 transition-colors',
+                      isActiveRoute(item.name)
+                        ? 'bg-accent/10 text-accent'
+                        : 'text-content hover:bg-surface-hover'
+                    ]"
+                  >
+                    <ph-icon :icon="item.icon" class="w-4 h-4" />
+                    <span>{{ item.label }}</span>
+                    <ph-icon
+                      v-if="isActiveRoute(item.name)"
+                      icon="check"
+                      class="w-4 h-4 ml-auto"
+                    />
+                  </button>
+                </div>
+              </div>
+            </Transition>
+          </div>
         </div>
 
         <!-- Compact Navigation (lg to xl) - icons only with tooltips -->

@@ -199,7 +199,7 @@ onUnmounted(() => {
                     icon="moon"
                     class="w-4 h-4"
                   />
-                  <span class="flex-1">{{ theme.name }}</span>
+                  <span class="flex-1">{{ t(theme.nameKey) }}</span>
                   <ph-icon
                     v-if="currentTheme === theme.id"
                     icon="check"
