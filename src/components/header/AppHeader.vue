@@ -64,63 +64,34 @@ const isSecondaryActive = computed(() => {
   return secondaryNavItems.value.some(item => isActiveRoute(item.name))
 })
 
-// ResizeObserver to detect when nav needs to collapse
-let resizeObserver: ResizeObserver | null = null
-
 const checkNavOverflow = () => {
-  if (!navContainerRef.value) return
-
-  // Check if nav container is overflowing or close to it
-  const container = navContainerRef.value
-  const containerWidth = container.offsetWidth
-  const scrollWidth = container.scrollWidth
-
-  // Also check window width as a simpler heuristic
   const windowWidth = window.innerWidth
-
-  // Collapse when window is less than 1400px or content overflows
-  isNavCollapsed.value = windowWidth < 1400 || scrollWidth > containerWidth + 10
+  // Always collapse when window width is less than 1600px
+  // This ensures the nav doesn't overflow on most screens
+  isNavCollapsed.value = windowWidth < 1600
 }
 
-const setupResizeObserver = () => {
-  if (typeof ResizeObserver === 'undefined') return
-
-  resizeObserver = new ResizeObserver(() => {
-    checkNavOverflow()
-  })
-
-  if (navContainerRef.value) {
-    resizeObserver.observe(navContainerRef.value)
-  }
-
-  // Also observe window resize
+const setupResizeListener = () => {
   window.addEventListener('resize', checkNavOverflow)
+  // Run immediately
+  checkNavOverflow()
 }
 
-const cleanupResizeObserver = () => {
-  if (resizeObserver) {
-    resizeObserver.disconnect()
-    resizeObserver = null
-  }
+const cleanupResizeListener = () => {
   window.removeEventListener('resize', checkNavOverflow)
 }
 
-// Watch for project changes to re-check overflow
+// Watch for project changes to re-check
 watch(currentProjectId, () => {
-  nextTick(() => {
-    checkNavOverflow()
-  })
-})
+  checkNavOverflow()
+}, { immediate: true })
 
 onMounted(() => {
-  setupResizeObserver()
-  nextTick(() => {
-    checkNavOverflow()
-  })
+  setupResizeListener()
 })
 
 onUnmounted(() => {
-  cleanupResizeObserver()
+  cleanupResizeListener()
 })
 
 // Close more menu when clicking outside
