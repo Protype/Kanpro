@@ -741,5 +741,13 @@
     "selectDueDate": "到期日",
     "selectProjectFirst": "請先選擇專案或在專案頁面中新增任務",
     "createTaskFailed": "建立任務失敗"
+  },
+  "theme": {
+    "twentyCrm": "Twenty CRM",
+    "twentyCrmDesc": "清爽專業風格",
+    "githubDark": "GitHub Dark",
+    "githubDarkDesc": "工程師護眼風格",
+    "dracula": "Dracula",
+    "draculaDesc": "經典暗色主題"
   }
 }

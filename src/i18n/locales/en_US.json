@@ -741,5 +741,13 @@
     "selectDueDate": "Due date",
     "selectProjectFirst": "Please select a project or add task from project page",
     "createTaskFailed": "Failed to create task"
+  },
+  "theme": {
+    "twentyCrm": "Twenty CRM",
+    "twentyCrmDesc": "Clean and professional",
+    "githubDark": "GitHub Dark",
+    "githubDarkDesc": "Eye-friendly for developers",
+    "dracula": "Dracula",
+    "draculaDesc": "Classic dark theme"
   }
 }

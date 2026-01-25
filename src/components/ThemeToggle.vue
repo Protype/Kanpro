@@ -3,7 +3,7 @@
     <button
       @click="showMenu = !showMenu"
       class="p-2 rounded-lg text-content-secondary hover:bg-surface-hover transition-colors"
-      :title="themeInfo.name"
+      :title="t(themeInfo.nameKey)"
     >
       <!-- Sun icon (light theme) -->
       <ph-icon
@@ -50,8 +50,8 @@
 
             <!-- Theme info -->
             <span class="flex-1 min-w-0">
-              <span class="block font-medium truncate">{{ theme.name }}</span>
-              <span class="block text-xs text-content-tertiary truncate">{{ theme.description }}</span>
+              <span class="block font-medium truncate">{{ t(theme.nameKey) }}</span>
+              <span class="block text-xs text-content-tertiary truncate">{{ t(theme.descriptionKey) }}</span>
             </span>
 
             <!-- Check mark -->
@@ -69,7 +69,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useTheme, type ThemeName, THEMES } from '@/composables/useTheme'
+
+const { t } = useI18n()
 
 const theme = useTheme()
 const { currentTheme, themeInfo, isDark, setTheme } = theme
