@@ -380,11 +380,13 @@
   "link": {
     "link": "Link",
     "links": "Links",
+    "title": "Links",
     "taskLinks": "Task links",
     "internalLinks": "Internal links",
     "externalLinks": "External links",
     "addLink": "Add a new link",
     "removeLink": "Remove link",
+    "remove": "Remove link",
     "relatesTo": "relates to",
     "blocks": "blocks",
     "isBlockedBy": "is blocked by",
@@ -395,7 +397,12 @@
     "targets": "targets",
     "isTargetOf": "is a target of",
     "fixes": "fixes",
-    "isFixedBy": "is fixed by"
+    "isFixedBy": "is fixed by",
+    "noLinks": "No links",
+    "selectTask": "Select a task...",
+    "confirmRemove": "Are you sure you want to remove this link?",
+    "createFailed": "Failed to create task link",
+    "removeFailed": "Failed to remove task link"
   },
   "user": {
     "user": "User",

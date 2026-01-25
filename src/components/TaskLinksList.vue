@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useTaskLinksStore } from '@/stores/tasklinks'
 import { useTasksStore } from '@/stores/tasks'
+import { useToast } from '@/stores/toast'
 import type { Task } from '@/types'
 
 const props = defineProps<{
@@ -14,6 +16,8 @@ const emit = defineEmits<{
   selectTask: [taskId: number]
 }>()
 
+const { t } = useI18n()
+const toast = useToast()
 const taskLinksStore = useTaskLinksStore()
 const tasksStore = useTasksStore()
 
@@ -23,16 +27,16 @@ const selectedTaskId = ref<number | null>(null)
 const selectedLinkType = ref(1) // Default link type
 
 // Link types (Kanboard default)
-const linkTypes = [
-  { id: 1, label: '關聯' },
-  { id: 2, label: '阻擋' },
-  { id: 3, label: '被阻擋' },
-  { id: 4, label: '複製' },
-  { id: 5, label: '是子任務' },
-  { id: 6, label: '是父任務' },
-  { id: 7, label: '是里程碑' },
-  { id: 8, label: '里程碑' }
-]
+const linkTypes = computed(() => [
+  { id: 1, label: t('link.relatesTo') },
+  { id: 2, label: t('link.blocks') },
+  { id: 3, label: t('link.isBlockedBy') },
+  { id: 4, label: t('link.duplicates') },
+  { id: 5, label: t('link.isChildOf') },
+  { id: 6, label: t('link.isParentOf') },
+  { id: 7, label: t('link.targets') },
+  { id: 8, label: t('link.isTargetOf') }
+])
 
 // Get available tasks for linking (exclude current task and already linked tasks)
 const availableTasks = ref<Task[]>([])
@@ -46,8 +50,8 @@ const fetchAvailableTasks = async () => {
 }
 
 const getLinkTypeLabel = (linkId: number): string => {
-  const linkType = linkTypes.find(lt => lt.id === linkId)
-  return linkType?.label || '關聯'
+  const linkType = linkTypes.value.find(lt => lt.id === linkId)
+  return linkType?.label || t('link.relatesTo')
 }
 
 const getLinkedTask = (oppositeTaskId: number): Task | undefined => {
@@ -89,14 +93,14 @@ const handleAddLink = async () => {
     emit('updated')
   } catch (error) {
     console.error('Failed to create task link:', error)
-    alert('建立任務連結失敗')
+    toast.error(t('link.createFailed'))
   } finally {
     isSubmitting.value = false
   }
 }
 
 const handleRemoveLink = async (taskLinkId: number) => {
-  if (!confirm('確定要刪除此連結嗎？')) return
+  if (!confirm(t('link.confirmRemove'))) return
 
   try {
     await taskLinksStore.removeTaskLink(taskLinkId)
@@ -105,7 +109,7 @@ const handleRemoveLink = async (taskLinkId: number) => {
     emit('updated')
   } catch (error) {
     console.error('Failed to remove task link:', error)
-    alert('刪除任務連結失敗')
+    toast.error(t('link.removeFailed'))
   }
 }
 
@@ -119,7 +123,7 @@ const handleClickTask = (taskId: number) => {
     <!-- Header -->
     <div class="flex items-center justify-between">
       <h3 class="text-sm font-medium text-gray-700">
-        連結
+        {{ t('link.title') }}
         <span v-if="taskLinksStore.linksCount > 0" class="text-gray-400">
           ({{ taskLinksStore.linksCount }})
         </span>
@@ -129,7 +133,7 @@ const handleClickTask = (taskId: number) => {
         @click="startAdding"
         class="text-sm text-blue-600 hover:text-blue-800"
       >
-        + 新增
+        + {{ t('common.add') }}
       </button>
     </div>
 
@@ -154,7 +158,7 @@ const handleClickTask = (taskId: number) => {
             v-model="selectedTaskId"
             class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
-            <option :value="null" disabled>選擇任務...</option>
+            <option :value="null" disabled>{{ t('link.selectTask') }}</option>
             <option v-for="task in availableTasks" :key="task.id" :value="task.id">
               #{{ task.id }} - {{ task.title }}
             </option>
@@ -166,14 +170,14 @@ const handleClickTask = (taskId: number) => {
             :disabled="isSubmitting"
             class="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
           >
-            取消
+            {{ t('common.cancel') }}
           </button>
           <button
             @click="handleAddLink"
             :disabled="!selectedTaskId || isSubmitting"
             class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
           >
-            新增
+            {{ t('common.add') }}
           </button>
         </div>
       </div>
@@ -208,7 +212,7 @@ const handleClickTask = (taskId: number) => {
         <button
           @click="handleRemoveLink(link.id)"
           class="p-1 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-          title="刪除連結"
+          :title="t('link.remove')"
         >
           <ph-icon icon="xmark" class="w-4 h-4" />
         </button>
@@ -219,7 +223,7 @@ const handleClickTask = (taskId: number) => {
         v-if="taskLinksStore.taskLinks.length === 0 && !isAdding"
         class="text-center py-4 text-gray-400 text-sm"
       >
-        沒有連結
+        {{ t('link.noLinks') }}
       </div>
     </div>
   </div>
