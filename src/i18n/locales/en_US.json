@@ -138,7 +138,15 @@
     "deleteWarning": "This action cannot be undone. All tasks and data in this project will be permanently deleted.",
     "confirmDelete": "Confirm delete project",
     "confirmDeleteMessage": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
-    "confirmDeleteButton": "Confirm delete"
+    "confirmDeleteButton": "Confirm delete",
+    "advancedSettings": "Advanced settings",
+    "expandToFullPage": "Expand to full page",
+    "createFailed": "Failed to create project",
+    "creating": "Creating...",
+    "defaultIsCurrentUser": "Defaults to current user",
+    "noUserFound": "No user found",
+    "disablePublicAccess": "Restrict public access",
+    "disablePublicAccessDescription": "Public access will be disabled after creation"
   },
   "task": {
     "task": "Task",

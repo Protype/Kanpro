@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useProjectsStore, type CreateProjectOptions } from '@/stores/projects'
 import { useUsersStore } from '@/stores/users'
 import { useAuthStore } from '@/stores/auth'
@@ -18,6 +19,7 @@ const emit = defineEmits<{
 }>()
 
 const router = useRouter()
+const { t } = useI18n()
 const projectsStore = useProjectsStore()
 const usersStore = useUsersStore()
 const authStore = useAuthStore()
@@ -152,10 +154,10 @@ async function handleSubmit() {
       emit('created', result)
       emit('close')
     } else {
-      errorMessage.value = projectsStore.error || '建立專案失敗'
+      errorMessage.value = projectsStore.error || t('project.createFailed')
     }
   } catch (err) {
-    errorMessage.value = err instanceof Error ? err.message : '建立專案失敗'
+    errorMessage.value = err instanceof Error ? err.message : t('project.createFailed')
   } finally {
     isSubmitting.value = false
   }
@@ -213,7 +215,7 @@ onMounted(() => {
             <!-- Header -->
             <div class="flex items-center justify-between p-4 h-14 border-b border-edge">
               <div class="flex items-center gap-3">
-                <h3 class="text-lg font-semibold text-content">新增專案</h3>
+                <h3 class="text-lg font-semibold text-content">{{ t('project.newProject') }}</h3>
                 <!-- Advanced Settings Toggle (styled like search bar) -->
                 <button
                   type="button"
@@ -223,7 +225,7 @@ onMounted(() => {
                     ? 'bg-surface-tertiary text-content-secondary'
                     : 'bg-surface-secondary text-content-tertiary hover:text-content-secondary'"
                 >
-                  <span>進階設定</span>
+                  <span>{{ t('project.advancedSettings') }}</span>
                   <!-- Chevron: > when collapsed, < when expanded -->
                   <ph-icon :icon="showAdvanced ? 'chevron-left' : 'chevron-right'" class="w-3.5 h-3.5" />
                 </button>
@@ -233,7 +235,7 @@ onMounted(() => {
                   data-testid="expand-button"
                   @click="handleExpand"
                   class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium leading-none rounded transition-colors bg-surface-secondary text-content-tertiary hover:text-content-secondary"
-                  title="展開為完整頁面"
+                  :title="t('project.expandToFullPage')"
                 >
                   <ph-icon icon="arrows-out" class="w-3.5 h-3.5" />
                 </button>
@@ -260,7 +262,7 @@ onMounted(() => {
                   <!-- Name -->
                   <div>
                     <label for="project-name" class="block text-sm font-medium text-content mb-1">
-                      專案名稱 <span class="text-red-500">*</span>
+                      {{ t('project.projectName') }} <span class="text-red-500">*</span>
                     </label>
                     <input
                       id="project-name"
@@ -269,14 +271,14 @@ onMounted(() => {
                       required
                       :disabled="isSubmitting"
                       class="w-full px-3 py-2 bg-surface-secondary border border-edge rounded-md text-content placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent disabled:opacity-50"
-                      placeholder="輸入專案名稱"
+                      :placeholder="t('project.enterProjectName')"
                     />
                   </div>
 
                   <!-- Description -->
                   <div>
                     <label for="project-description" class="block text-sm font-medium text-content mb-1">
-                      描述
+                      {{ t('common.description') }}
                     </label>
                     <textarea
                       id="project-description"
@@ -284,14 +286,14 @@ onMounted(() => {
                       rows="3"
                       :disabled="isSubmitting"
                       class="w-full px-3 py-2 bg-surface-secondary border border-edge rounded-md text-content placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent disabled:opacity-50 resize-none"
-                      placeholder="輸入專案描述（選填）"
+                      :placeholder="t('project.enterDescription')"
                     ></textarea>
                   </div>
 
                   <!-- Identifier -->
                   <div>
                     <label for="project-identifier" class="block text-sm font-medium text-content mb-1">
-                      專案識別碼
+                      {{ t('project.identifier') }}
                     </label>
                     <input
                       id="project-identifier"
@@ -299,10 +301,10 @@ onMounted(() => {
                       type="text"
                       :disabled="isSubmitting"
                       class="w-full px-3 py-2 bg-surface-secondary border border-edge rounded-md text-content placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent disabled:opacity-50"
-                      placeholder="例如：PROJ（選填）"
+                      :placeholder="t('project.identifierPlaceholder')"
                     />
                     <p class="mt-1 text-xs text-content-tertiary">
-                      用於任務編號前綴，如：PROJ-123
+                      {{ t('project.identifierHint') }}
                     </p>
                   </div>
                 </div>
@@ -318,7 +320,7 @@ onMounted(() => {
                       <!-- Owner (full width) -->
                       <div class="col-span-2 owner-dropdown-container">
                         <label class="block text-sm font-medium text-content mb-1">
-                          擁有者
+                          {{ t('project.owner') }}
                         </label>
                         <div class="relative">
                           <button
@@ -329,7 +331,7 @@ onMounted(() => {
                           >
                             <UserAvatar :user="selectedOwner" size="sm" />
                             <span class="flex-1 truncate text-sm text-content">
-                              {{ selectedOwner?.name || selectedOwner?.username || '選擇擁有者' }}
+                              {{ selectedOwner?.name || selectedOwner?.username || t('project.selectOwner') }}
                             </span>
                             <ph-icon icon="chevron-down" class="w-4 h-4 text-content-tertiary" />
                           </button>
@@ -345,7 +347,7 @@ onMounted(() => {
                                 <input
                                   v-model="ownerSearchQuery"
                                   type="text"
-                                  placeholder="搜尋使用者..."
+                                  :placeholder="t('user.searchUsers')"
                                   class="w-full px-2 py-1 text-sm bg-surface-secondary border border-edge rounded text-content placeholder:text-content-tertiary focus:outline-none focus:ring-1 focus:ring-accent"
                                 />
                               </div>
@@ -366,21 +368,21 @@ onMounted(() => {
                                   </div>
                                 </button>
                                 <div v-if="filteredUsers.length === 0" class="px-3 py-2 text-sm text-content-tertiary">
-                                  找不到使用者
+                                  {{ t('project.noUserFound') }}
                                 </div>
                               </div>
                             </div>
                           </Transition>
                         </div>
                         <p class="mt-1 text-xs text-content-tertiary">
-                          預設為當前使用者
+                          {{ t('project.defaultIsCurrentUser') }}
                         </p>
                       </div>
 
                       <!-- Start Date -->
                       <div>
                         <label for="project-start-date" class="block text-sm font-medium text-content mb-1">
-                          開始日期
+                          {{ t('project.startDate') }}
                         </label>
                         <input
                           id="project-start-date"
@@ -394,7 +396,7 @@ onMounted(() => {
                       <!-- End Date -->
                       <div>
                         <label for="project-end-date" class="block text-sm font-medium text-content mb-1">
-                          結束日期
+                          {{ t('project.endDate') }}
                         </label>
                         <input
                           id="project-end-date"
@@ -408,7 +410,7 @@ onMounted(() => {
 
                       <!-- Priority Default -->
                       <div>
-                        <label class="block text-sm font-medium text-content mb-1">預設優先級</label>
+                        <label class="block text-sm font-medium text-content mb-1">{{ t('project.defaultPriority') }}</label>
                         <input
                           v-model.number="priorityDefault"
                           type="number"
@@ -421,7 +423,7 @@ onMounted(() => {
 
                       <!-- Priority Range -->
                       <div>
-                        <label class="block text-sm font-medium text-content mb-1">優先級範圍</label>
+                        <label class="block text-sm font-medium text-content mb-1">{{ t('project.priorityRange') }}</label>
                         <div class="flex items-center gap-1">
                           <input
                             v-model.number="priorityStart"
@@ -446,7 +448,7 @@ onMounted(() => {
                       <!-- Project Email (full width) -->
                       <div class="col-span-2">
                         <label for="project-email" class="block text-sm font-medium text-content mb-1">
-                          專案通知 Email
+                          {{ t('project.projectEmail') }}
                         </label>
                         <input
                           id="project-email"
@@ -469,10 +471,10 @@ onMounted(() => {
                         />
                         <div>
                           <label for="disable-public-access" class="text-sm text-content font-medium cursor-pointer">
-                            限制公開存取
+                            {{ t('project.disablePublicAccess') }}
                           </label>
                           <p class="text-xs text-content-tertiary mt-0.5">
-                            建立後將自動關閉公開存取功能
+                            {{ t('project.disablePublicAccessDescription') }}
                           </p>
                         </div>
                       </div>
@@ -489,7 +491,7 @@ onMounted(() => {
                   :disabled="isSubmitting"
                   class="px-4 py-2 text-sm font-medium text-content bg-surface-secondary hover:bg-surface-hover rounded-md transition-colors disabled:opacity-50"
                 >
-                  取消
+                  {{ t('common.cancel') }}
                 </button>
                 <button
                   type="submit"
@@ -497,7 +499,7 @@ onMounted(() => {
                   class="px-4 py-2 text-sm font-medium text-white bg-accent hover:bg-accent/90 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                 >
                   <ph-icon v-if="isSubmitting" icon="spinner" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
-                  {{ isSubmitting ? '建立中...' : '建立專案' }}
+                  {{ isSubmitting ? t('project.creating') : t('project.createProject') }}
                 </button>
               </div>
             </form>

@@ -138,7 +138,15 @@
     "deleteWarning": "刪除後無法恢復，專案中的所有任務和資料將被永久刪除。",
     "confirmDelete": "確認刪除專案",
     "confirmDeleteMessage": "您確定要刪除「{name}」嗎？此操作無法復原。",
-    "confirmDeleteButton": "確認刪除"
+    "confirmDeleteButton": "確認刪除",
+    "advancedSettings": "進階設定",
+    "expandToFullPage": "展開為完整頁面",
+    "createFailed": "建立專案失敗",
+    "creating": "建立中...",
+    "defaultIsCurrentUser": "預設為當前使用者",
+    "noUserFound": "找不到使用者",
+    "disablePublicAccess": "限制公開存取",
+    "disablePublicAccessDescription": "建立後將自動關閉公開存取功能"
   },
   "task": {
     "task": "任務",
