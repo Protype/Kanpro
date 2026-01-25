@@ -556,8 +556,26 @@
     "notification": "通知",
     "notifications": "通知",
     "markAsRead": "標記為已讀",
-    "markAllAsRead": "全部標記為已讀",
-    "noNotifications": "沒有通知"
+    "markAllAsRead": "全部標為已讀",
+    "noNotifications": "沒有通知",
+    "newNotification": "您有新的通知",
+    "eventTaskCreate": "建立任務",
+    "eventTaskUpdate": "更新任務",
+    "eventTaskClose": "關閉任務",
+    "eventTaskOpen": "開啟任務",
+    "eventTaskMoveColumn": "移動任務欄位",
+    "eventTaskMoveSwimlane": "移動任務泳道",
+    "eventTaskMovePosition": "調整任務位置",
+    "eventTaskAssigneeChange": "變更指派人",
+    "eventCommentCreate": "新增評論",
+    "eventCommentUpdate": "更新評論",
+    "eventCommentDelete": "刪除評論",
+    "eventSubtaskCreate": "新增子任務",
+    "eventSubtaskUpdate": "更新子任務",
+    "eventSubtaskDelete": "刪除子任務",
+    "eventFileCreate": "上傳附件",
+    "eventLinkCreate": "建立任務連結",
+    "eventLinkDelete": "刪除任務連結"
   },
   "time": {
     "today": "今天",
@@ -571,7 +589,11 @@
     "hours": "小時",
     "minutes": "分鐘",
     "ago": "前",
-    "in": "後"
+    "in": "後",
+    "justNow": "剛剛",
+    "minutesAgo": "{n} 分鐘前",
+    "hoursAgo": "{n} 小時前",
+    "daysAgo": "{n} 天前"
   },
   "message": {
     "confirmDelete": "確定要刪除此項目嗎？",

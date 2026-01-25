@@ -557,7 +557,25 @@
     "notifications": "Notifications",
     "markAsRead": "Mark as read",
     "markAllAsRead": "Mark all as read",
-    "noNotifications": "No notifications"
+    "noNotifications": "No notifications",
+    "newNotification": "You have a new notification",
+    "eventTaskCreate": "Task created",
+    "eventTaskUpdate": "Task updated",
+    "eventTaskClose": "Task closed",
+    "eventTaskOpen": "Task opened",
+    "eventTaskMoveColumn": "Task moved to column",
+    "eventTaskMoveSwimlane": "Task moved to swimlane",
+    "eventTaskMovePosition": "Task position changed",
+    "eventTaskAssigneeChange": "Assignee changed",
+    "eventCommentCreate": "Comment added",
+    "eventCommentUpdate": "Comment updated",
+    "eventCommentDelete": "Comment deleted",
+    "eventSubtaskCreate": "Sub-task created",
+    "eventSubtaskUpdate": "Sub-task updated",
+    "eventSubtaskDelete": "Sub-task deleted",
+    "eventFileCreate": "File uploaded",
+    "eventLinkCreate": "Task link created",
+    "eventLinkDelete": "Task link deleted"
   },
   "time": {
     "today": "Today",
@@ -571,7 +589,11 @@
     "hours": "hours",
     "minutes": "minutes",
     "ago": "ago",
-    "in": "in"
+    "in": "in",
+    "justNow": "Just now",
+    "minutesAgo": "{n} minutes ago",
+    "hoursAgo": "{n} hours ago",
+    "daysAgo": "{n} days ago"
   },
   "message": {
     "confirmDelete": "Do you really want to remove this item?",
