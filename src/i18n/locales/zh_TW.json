@@ -161,6 +161,11 @@
   "task": {
     "task": "任務",
     "tasks": "任務",
+    "totalCount": "共 {count} 個任務",
+    "showClosedTasks": "顯示已關閉任務",
+    "searchPlaceholder": "搜尋任務...",
+    "noMatchingTasks": "沒有符合條件的任務",
+    "column": "欄位",
     "newTask": "新增任務",
     "createTask": "建立任務",
     "editTask": "編輯任務",

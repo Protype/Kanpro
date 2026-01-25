@@ -161,6 +161,11 @@
   "task": {
     "task": "Task",
     "tasks": "Tasks",
+    "totalCount": "{count} tasks",
+    "showClosedTasks": "Show closed tasks",
+    "searchPlaceholder": "Search tasks...",
+    "noMatchingTasks": "No matching tasks",
+    "column": "Column",
     "newTask": "New task",
     "createTask": "Create task",
     "editTask": "Edit task",
