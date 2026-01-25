@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useProjectsStore } from '@/stores/projects'
 import { useUsersStore } from '@/stores/users'
 import { useProjectDraftStore } from '@/stores/projectDraft'
@@ -13,6 +14,7 @@ import UserAvatar from '@/components/UserAvatar.vue'
 import type { User } from '@/types'
 
 const router = useRouter()
+const { t } = useI18n()
 const projectsStore = useProjectsStore()
 const usersStore = useUsersStore()
 const draftStore = useProjectDraftStore()
@@ -227,7 +229,7 @@ async function handleCreate() {
     })
 
     if (projectId === false) {
-      throw new Error(projectsStore.error || '建立專案失敗')
+      throw new Error(projectsStore.error || t('project.createFailed'))
     }
 
     // Step 2: 建立緩存的成員
@@ -269,11 +271,11 @@ async function handleCreate() {
     // 清除草稿資料
     draftStore.resetDraft()
 
-    toast.success('建立成功', '專案已建立')
+    toast.success(t('message.createSuccess'), t('project.projectCreated'))
     router.push(`/projects/${projectId}/board`)
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '建立專案失敗'
-    toast.error('建立失敗', error.value)
+    error.value = err instanceof Error ? err.message : t('project.createFailed')
+    toast.error(t('message.createFailed'), error.value)
   } finally {
     isCreating.value = false
   }
@@ -327,14 +329,14 @@ onUnmounted(() => {
             <!-- 專案名稱 -->
             <div>
               <label for="projectName" class="block text-sm font-medium text-content-secondary mb-1.5">
-                專案名稱 <span class="text-red-500">*</span>
+                {{ t('project.projectName') }} <span class="text-red-500">*</span>
               </label>
               <input
                 id="projectName"
                 v-model="projectName"
                 type="text"
                 class="input"
-                placeholder="輸入專案名稱"
+                :placeholder="t('project.enterProjectName')"
                 :disabled="isCreating"
               />
             </div>
@@ -342,14 +344,14 @@ onUnmounted(() => {
             <!-- 專案描述 -->
             <div>
               <label for="projectDescription" class="block text-sm font-medium text-content-secondary mb-1.5">
-                描述
+                {{ t('common.description') }}
               </label>
               <textarea
                 id="projectDescription"
                 v-model="projectDescription"
                 rows="4"
                 class="input resize-none"
-                placeholder="輸入專案描述（選填）"
+                :placeholder="t('project.enterDescription')"
                 :disabled="isCreating"
               ></textarea>
             </div>
@@ -357,18 +359,18 @@ onUnmounted(() => {
             <!-- 專案識別碼 -->
             <div>
               <label for="projectIdentifier" class="block text-sm font-medium text-content-secondary mb-1.5">
-                專案識別碼
+                {{ t('project.identifier') }}
               </label>
               <input
                 id="projectIdentifier"
                 v-model="projectIdentifier"
                 type="text"
                 class="input"
-                placeholder="例如：PROJ"
+                :placeholder="t('project.identifierPlaceholder')"
                 :disabled="isCreating"
               />
               <p class="mt-1.5 text-xs text-content-tertiary">
-                用於任務編號前綴，如：PROJ-123
+                {{ t('project.identifierHint') }}
               </p>
             </div>
           </div>
@@ -378,7 +380,7 @@ onUnmounted(() => {
             <!-- 擁有者 -->
             <div class="owner-dropdown-container">
               <label class="block text-sm font-medium text-content-secondary mb-1.5">
-                擁有者
+                {{ t('project.owner') }}
               </label>
               <div class="relative">
                 <button
@@ -401,7 +403,7 @@ onUnmounted(() => {
                     </button>
                   </template>
                   <template v-else>
-                    <span class="flex-1 text-sm text-content-tertiary">選擇擁有者（選填）</span>
+                    <span class="flex-1 text-sm text-content-tertiary">{{ t('project.selectOwnerOptional') }}</span>
                   </template>
                   <ph-icon icon="chevron-down" class="w-4 h-4 text-content-tertiary" />
                 </button>
@@ -416,7 +418,7 @@ onUnmounted(() => {
                       <input
                         v-model="ownerSearchQuery"
                         type="text"
-                        placeholder="搜尋使用者..."
+                        :placeholder="t('user.searchUsers')"
                         class="w-full px-2 py-1 text-sm bg-surface-secondary border border-edge rounded text-content placeholder:text-content-tertiary focus:outline-none focus:ring-1 focus:ring-accent"
                       />
                     </div>
@@ -436,7 +438,7 @@ onUnmounted(() => {
                         </div>
                       </button>
                       <div v-if="filteredUsers.length === 0" class="px-3 py-2 text-sm text-content-tertiary">
-                        找不到使用者
+                        {{ t('user.noUsers') }}
                       </div>
                     </div>
                   </div>
@@ -448,7 +450,7 @@ onUnmounted(() => {
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label for="startDate" class="block text-sm font-medium text-content-secondary mb-1.5">
-                  開始日期
+                  {{ t('project.startDate') }}
                 </label>
                 <input
                   id="startDate"
@@ -460,7 +462,7 @@ onUnmounted(() => {
               </div>
               <div>
                 <label for="endDate" class="block text-sm font-medium text-content-secondary mb-1.5">
-                  結束日期
+                  {{ t('project.endDate') }}
                 </label>
                 <input
                   id="endDate"
@@ -477,7 +479,7 @@ onUnmounted(() => {
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label for="priorityDefault" class="block text-sm font-medium text-content-secondary mb-1.5">
-                  預設優先級
+                  {{ t('project.defaultPriority') }}
                 </label>
                 <input
                   id="priorityDefault"
@@ -491,7 +493,7 @@ onUnmounted(() => {
               </div>
               <div>
                 <label class="block text-sm font-medium text-content-secondary mb-1.5">
-                  優先級範圍
+                  {{ t('project.priorityRange') }}
                 </label>
                 <div class="flex items-center gap-1">
                   <input
@@ -518,7 +520,7 @@ onUnmounted(() => {
             <!-- 專案 Email -->
             <div>
               <label for="projectEmail" class="block text-sm font-medium text-content-secondary mb-1.5">
-                專案通知 Email
+                {{ t('project.projectEmail') }}
               </label>
               <input
                 id="projectEmail"
@@ -541,10 +543,10 @@ onUnmounted(() => {
               />
               <div>
                 <label for="disablePublicAccess" class="text-sm text-content font-medium cursor-pointer">
-                  限制公開存取
+                  {{ t('project.disablePublicAccess') }}
                 </label>
                 <p class="text-xs text-content-tertiary mt-0.5">
-                  建立後將自動關閉公開存取功能
+                  {{ t('project.disablePublicAccessDescription') }}
                 </p>
               </div>
             </div>
@@ -559,7 +561,7 @@ onUnmounted(() => {
             :disabled="isCreating"
             class="btn-secondary"
           >
-            取消
+            {{ t('common.cancel') }}
           </button>
           <button
             type="button"
@@ -568,7 +570,7 @@ onUnmounted(() => {
             class="btn-primary"
           >
             <ph-icon v-if="isCreating" icon="spinner" class="animate-spin -ml-1 mr-2 h-4 w-4" />
-            {{ isCreating ? '建立中...' : '建立專案' }}
+            {{ isCreating ? t('project.creating') : t('project.createProject') }}
           </button>
         </div>
       </div>
@@ -578,8 +580,8 @@ onUnmounted(() => {
         <!-- 成員管理 -->
         <div class="settings-card">
           <div class="px-4 py-3 border-b border-edge">
-            <h3 class="text-base font-semibold text-content">成員</h3>
-            <p class="text-xs text-content-tertiary mt-0.5">專案建立後將自動加入這些成員</p>
+            <h3 class="text-base font-semibold text-content">{{ t('member.members') }}</h3>
+            <p class="text-xs text-content-tertiary mt-0.5">{{ t('project.membersWillBeAdded') }}</p>
           </div>
           <div class="p-4 space-y-3">
             <!-- 新增成員表單 -->
@@ -590,7 +592,7 @@ onUnmounted(() => {
                   @click="showMemberDropdown = !showMemberDropdown"
                   class="w-full px-3 py-2 bg-surface-secondary border border-edge rounded-md text-left text-sm text-content-tertiary hover:bg-surface-hover transition-colors"
                 >
-                  {{ newMemberUserId ? getUserById(newMemberUserId)?.name || getUserById(newMemberUserId)?.username : '選擇使用者' }}
+                  {{ newMemberUserId ? getUserById(newMemberUserId)?.name || getUserById(newMemberUserId)?.username : t('member.selectUser') }}
                 </button>
                 <Transition name="dropdown">
                   <div
@@ -601,7 +603,7 @@ onUnmounted(() => {
                       <input
                         v-model="memberSearchQuery"
                         type="text"
-                        placeholder="搜尋使用者..."
+                        :placeholder="t('user.searchUsers')"
                         class="w-full px-2 py-1 text-sm bg-surface-secondary border border-edge rounded text-content placeholder:text-content-tertiary focus:outline-none focus:ring-1 focus:ring-accent"
                       />
                     </div>
@@ -619,7 +621,7 @@ onUnmounted(() => {
                         </div>
                       </button>
                       <div v-if="filteredMemberUsers.length === 0" class="px-3 py-2 text-sm text-content-tertiary">
-                        沒有可新增的使用者
+                        {{ t('member.noUsersToAdd') }}
                       </div>
                     </div>
                   </div>
@@ -629,9 +631,9 @@ onUnmounted(() => {
                 v-model="newMemberRole"
                 class="input text-sm w-32"
               >
-                <option value="project-manager">管理員</option>
-                <option value="project-member">成員</option>
-                <option value="project-viewer">檢視者</option>
+                <option value="project-manager">{{ t('member.roleManager') }}</option>
+                <option value="project-member">{{ t('member.roleMember') }}</option>
+                <option value="project-viewer">{{ t('member.roleViewer') }}</option>
               </select>
               <button
                 type="button"
@@ -653,7 +655,7 @@ onUnmounted(() => {
                   <UserAvatar :user="getUserById(member.userId)" size="sm" />
                   <span class="text-sm text-content">{{ getUserById(member.userId)?.name || getUserById(member.userId)?.username }}</span>
                   <span class="text-xs text-content-tertiary px-1.5 py-0.5 bg-surface rounded">
-                    {{ member.role === 'project-manager' ? '管理員' : member.role === 'project-member' ? '成員' : '檢視者' }}
+                    {{ member.role === 'project-manager' ? t('member.roleManager') : member.role === 'project-member' ? t('member.roleMember') : t('member.roleViewer') }}
                   </span>
                 </div>
                 <button
@@ -666,7 +668,7 @@ onUnmounted(() => {
               </div>
             </div>
             <div v-else class="text-sm text-content-tertiary text-center py-4">
-              尚未新增成員
+              {{ t('member.noMembersAdded') }}
             </div>
           </div>
         </div>
@@ -674,8 +676,8 @@ onUnmounted(() => {
         <!-- 類別管理 -->
         <div class="settings-card">
           <div class="px-4 py-3 border-b border-edge">
-            <h3 class="text-base font-semibold text-content">類別</h3>
-            <p class="text-xs text-content-tertiary mt-0.5">專案建立後將自動建立這些類別</p>
+            <h3 class="text-base font-semibold text-content">{{ t('category.categories') }}</h3>
+            <p class="text-xs text-content-tertiary mt-0.5">{{ t('project.categoriesWillBeCreated') }}</p>
           </div>
           <div class="p-4 space-y-3">
             <!-- 新增類別表單 -->
@@ -683,13 +685,13 @@ onUnmounted(() => {
               <input
                 v-model="newCategoryName"
                 type="text"
-                placeholder="類別名稱"
+                :placeholder="t('category.categoryName')"
                 class="input text-sm flex-1"
               />
               <input
                 v-model="newCategoryColor"
                 type="text"
-                placeholder="顏色（選填）"
+                :placeholder="t('category.colorOptional')"
                 class="input text-sm w-24"
               />
               <button
@@ -719,7 +721,7 @@ onUnmounted(() => {
               </div>
             </div>
             <div v-else class="text-sm text-content-tertiary text-center py-4">
-              尚未新增類別
+              {{ t('category.noCategoriesAdded') }}
             </div>
           </div>
         </div>
@@ -727,8 +729,8 @@ onUnmounted(() => {
         <!-- 欄位管理 -->
         <div class="settings-card">
           <div class="px-4 py-3 border-b border-edge">
-            <h3 class="text-base font-semibold text-content">欄位</h3>
-            <p class="text-xs text-content-tertiary mt-0.5">專案建立後將自動建立這些欄位</p>
+            <h3 class="text-base font-semibold text-content">{{ t('column.columns') }}</h3>
+            <p class="text-xs text-content-tertiary mt-0.5">{{ t('project.columnsWillBeCreated') }}</p>
           </div>
           <div class="p-4 space-y-3">
             <!-- 新增欄位表單 -->
@@ -736,14 +738,14 @@ onUnmounted(() => {
               <input
                 v-model="newColumnTitle"
                 type="text"
-                placeholder="欄位名稱"
+                :placeholder="t('column.columnName')"
                 class="input text-sm flex-1"
               />
               <input
                 v-model.number="newColumnLimit"
                 type="number"
                 min="0"
-                placeholder="WIP 限制"
+                :placeholder="t('column.wipLimit')"
                 class="input text-sm w-24"
               />
               <button
@@ -778,7 +780,7 @@ onUnmounted(() => {
               </div>
             </div>
             <div v-else class="text-sm text-content-tertiary text-center py-4">
-              尚未新增欄位（將使用預設欄位）
+              {{ t('column.noColumnsAddedDefault') }}
             </div>
           </div>
         </div>
@@ -786,8 +788,8 @@ onUnmounted(() => {
         <!-- 泳道管理 -->
         <div class="settings-card">
           <div class="px-4 py-3 border-b border-edge">
-            <h3 class="text-base font-semibold text-content">泳道</h3>
-            <p class="text-xs text-content-tertiary mt-0.5">專案建立後將自動建立這些泳道</p>
+            <h3 class="text-base font-semibold text-content">{{ t('swimlane.swimlanes') }}</h3>
+            <p class="text-xs text-content-tertiary mt-0.5">{{ t('project.swimlanesWillBeCreated') }}</p>
           </div>
           <div class="p-4 space-y-3">
             <!-- 新增泳道表單 -->
@@ -795,7 +797,7 @@ onUnmounted(() => {
               <input
                 v-model="newSwimlaneName"
                 type="text"
-                placeholder="泳道名稱"
+                :placeholder="t('swimlane.swimlaneName')"
                 class="input text-sm flex-1"
               />
               <button
@@ -825,7 +827,7 @@ onUnmounted(() => {
               </div>
             </div>
             <div v-else class="text-sm text-content-tertiary text-center py-4">
-              尚未新增泳道（將使用預設泳道）
+              {{ t('swimlane.noSwimlanesAddedDefault') }}
             </div>
           </div>
         </div>

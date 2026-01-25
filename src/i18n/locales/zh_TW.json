@@ -168,7 +168,13 @@
     "defaultIsCurrentUser": "預設為當前使用者",
     "noUserFound": "找不到使用者",
     "disablePublicAccess": "限制公開存取",
-    "disablePublicAccessDescription": "建立後將自動關閉公開存取功能"
+    "disablePublicAccessDescription": "建立後將自動關閉公開存取功能",
+    "selectOwnerOptional": "選擇擁有者（選填）",
+    "projectCreated": "專案已建立",
+    "membersWillBeAdded": "專案建立後將自動加入這些成員",
+    "categoriesWillBeCreated": "專案建立後將自動建立這些類別",
+    "columnsWillBeCreated": "專案建立後將自動建立這些欄位",
+    "swimlanesWillBeCreated": "專案建立後將自動建立這些泳道"
   },
   "task": {
     "task": "任務",
@@ -365,7 +371,11 @@
     "moveColumnFailed": "移動欄位失敗",
     "enterColumnTitle": "輸入欄位名稱",
     "wipLimitHint": "WIP 限制（0 表示不限制）",
-    "noColumns": "尚無欄位"
+    "noColumns": "尚無欄位",
+    "columns": "欄位",
+    "columnName": "欄位名稱",
+    "wipLimit": "WIP 限制",
+    "noColumnsAddedDefault": "尚未新增欄位（將使用預設欄位）"
   },
   "swimlane": {
     "swimlaneManagement": "泳道管理",
@@ -388,7 +398,10 @@
     "disableSwimlaneFailed": "停用泳道失敗",
     "moveSwimlaneFailed": "移動泳道失敗",
     "enterSwimlaneName": "輸入泳道名稱",
-    "noSwimlanes": "尚無泳道"
+    "noSwimlanes": "尚無泳道",
+    "swimlanes": "泳道",
+    "swimlaneName": "泳道名稱",
+    "noSwimlanesAddedDefault": "尚未新增泳道（將使用預設泳道）"
   },
   "category": {
     "category": "類別",
@@ -410,7 +423,10 @@
     "removingCategory": "刪除類別中...",
     "categoryRemoved": "類別已刪除",
     "removeCategoryFailed": "刪除類別失敗",
-    "enterCategoryName": "輸入類別名稱"
+    "enterCategoryName": "輸入類別名稱",
+    "categoryName": "類別名稱",
+    "colorOptional": "顏色（選填）",
+    "noCategoriesAdded": "尚未新增類別"
   },
   "tag": {
     "tag": "標籤",
@@ -513,7 +529,12 @@
     "changingRole": "變更角色中...",
     "roleChanged": "角色已變更",
     "changeRoleFailed": "變更角色失敗",
-    "selectUser": "選擇使用者..."
+    "selectUser": "選擇使用者...",
+    "noMembersAdded": "尚未新增成員",
+    "noUsersToAdd": "沒有可新增的使用者",
+    "roleManager": "管理員",
+    "roleMember": "成員",
+    "roleViewer": "檢視者"
   },
   "role": {
     "role": "角色",
@@ -701,7 +722,9 @@
     "operationFailed": "操作失敗",
     "insufficientPermissions": "權限不足",
     "deleting": "刪除中...",
-    "deleteFailed": "刪除失敗"
+    "deleteFailed": "刪除失敗",
+    "createSuccess": "建立成功",
+    "createFailed": "建立失敗"
   },
   "analytics": {
     "analytics": "分析",

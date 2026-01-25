@@ -168,7 +168,13 @@
     "defaultIsCurrentUser": "Defaults to current user",
     "noUserFound": "No user found",
     "disablePublicAccess": "Restrict public access",
-    "disablePublicAccessDescription": "Public access will be disabled after creation"
+    "disablePublicAccessDescription": "Public access will be disabled after creation",
+    "selectOwnerOptional": "Select owner (optional)",
+    "projectCreated": "Project created",
+    "membersWillBeAdded": "Members will be automatically added after project creation",
+    "categoriesWillBeCreated": "Categories will be automatically created after project creation",
+    "columnsWillBeCreated": "Columns will be automatically created after project creation",
+    "swimlanesWillBeCreated": "Swimlanes will be automatically created after project creation"
   },
   "task": {
     "task": "Task",
@@ -365,7 +371,11 @@
     "moveColumnFailed": "Failed to move column",
     "enterColumnTitle": "Enter column title",
     "wipLimitHint": "WIP limit (0 means no limit)",
-    "noColumns": "No columns"
+    "noColumns": "No columns",
+    "columns": "Columns",
+    "columnName": "Column name",
+    "wipLimit": "WIP limit",
+    "noColumnsAddedDefault": "No columns added (default columns will be used)"
   },
   "swimlane": {
     "swimlaneManagement": "Swimlane management",
@@ -388,7 +398,10 @@
     "disableSwimlaneFailed": "Failed to disable swimlane",
     "moveSwimlaneFailed": "Failed to move swimlane",
     "enterSwimlaneName": "Enter swimlane name",
-    "noSwimlanes": "No swimlanes"
+    "noSwimlanes": "No swimlanes",
+    "swimlanes": "Swimlanes",
+    "swimlaneName": "Swimlane name",
+    "noSwimlanesAddedDefault": "No swimlanes added (default swimlane will be used)"
   },
   "category": {
     "category": "Category",
@@ -410,7 +423,10 @@
     "removingCategory": "Removing category...",
     "categoryRemoved": "Category has been removed",
     "removeCategoryFailed": "Failed to remove category",
-    "enterCategoryName": "Enter category name"
+    "enterCategoryName": "Enter category name",
+    "categoryName": "Category name",
+    "colorOptional": "Color (optional)",
+    "noCategoriesAdded": "No categories added"
   },
   "tag": {
     "tag": "Tag",
@@ -513,7 +529,12 @@
     "changingRole": "Changing role...",
     "roleChanged": "Role has been changed",
     "changeRoleFailed": "Failed to change role",
-    "selectUser": "Select user..."
+    "selectUser": "Select user...",
+    "noMembersAdded": "No members added",
+    "noUsersToAdd": "No users to add",
+    "roleManager": "Manager",
+    "roleMember": "Member",
+    "roleViewer": "Viewer"
   },
   "role": {
     "role": "Role",
@@ -701,7 +722,9 @@
     "operationFailed": "Operation failed",
     "insufficientPermissions": "Insufficient permissions",
     "deleting": "Deleting...",
-    "deleteFailed": "Delete failed"
+    "deleteFailed": "Delete failed",
+    "createSuccess": "Created successfully",
+    "createFailed": "Create failed"
   },
   "analytics": {
     "analytics": "Analytics",

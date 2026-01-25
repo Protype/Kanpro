@@ -40,7 +40,7 @@ const getColorClass = (colorId: string) => {
 }
 
 const formatDate = (timestamp: number) => {
-  return new Date(timestamp * 1000).toLocaleDateString('zh-TW')
+  return new Date(timestamp * 1000).toLocaleDateString()
 }
 
 const isOverdue = (task: Task) => {
