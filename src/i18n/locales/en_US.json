@@ -690,5 +690,28 @@
     "noMatchingProjects": "No matching projects found",
     "public": "Public",
     "private": "Private"
+  },
+  "commandBar": {
+    "searchPlaceholder": "Search tasks... (e.g. status:open)",
+    "addPlaceholder": "Enter task title... (use ^ @ # for quick setup)",
+    "showHelp": "Show help",
+    "searchSyntaxTips": "Search syntax tips:",
+    "statusOpen": "Open",
+    "statusClosed": "Closed",
+    "assigneeMe": "Assigned to me",
+    "dueToday": "Due today",
+    "taskId": "Task ID",
+    "colorTask": "Blue tasks",
+    "noResults": "No matching tasks found",
+    "tryOtherTerms": "Try other search terms or syntax",
+    "quickInputTips": "Quick input tips:",
+    "selectProject": "Select project",
+    "selectAssignee": "Assignee",
+    "selectTag": "Tag (can create new)",
+    "selectColumn": "Column",
+    "selectPriority": "Priority",
+    "selectDueDate": "Due date",
+    "selectProjectFirst": "Please select a project or add task from project page",
+    "createTaskFailed": "Failed to create task"
   }
 }

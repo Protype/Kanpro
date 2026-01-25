@@ -690,5 +690,28 @@
     "noMatchingProjects": "找不到符合的專案",
     "public": "公開",
     "private": "私人"
+  },
+  "commandBar": {
+    "searchPlaceholder": "搜尋任務... (例如: status:open)",
+    "addPlaceholder": "輸入任務標題... (使用 ^ @ # 快速設定)",
+    "showHelp": "顯示說明",
+    "searchSyntaxTips": "搜尋語法提示：",
+    "statusOpen": "開啟中",
+    "statusClosed": "已關閉",
+    "assigneeMe": "指派給我",
+    "dueToday": "今天到期",
+    "taskId": "任務編號",
+    "colorTask": "藍色任務",
+    "noResults": "找不到符合的任務",
+    "tryOtherTerms": "嘗試其他搜尋詞或搜尋語法",
+    "quickInputTips": "快速輸入提示：",
+    "selectProject": "選擇專案",
+    "selectAssignee": "指派人員",
+    "selectTag": "標籤（可新增）",
+    "selectColumn": "欄位",
+    "selectPriority": "優先級",
+    "selectDueDate": "到期日",
+    "selectProjectFirst": "請先選擇專案或在專案頁面中新增任務",
+    "createTaskFailed": "建立任務失敗"
   }
 }
