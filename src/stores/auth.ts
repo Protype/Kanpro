@@ -162,6 +162,11 @@ export const useAuthStore = defineStore('auth', () => {
     const systemStore = useSystemStore()
     // 不等待完成，背景載入即可
     systemStore.fetchBridgeStatus()
+
+    // 根據使用者語言設定初始化 i18n
+    const { detectLocale, setLocale } = await import('@/i18n')
+    const locale = detectLocale(result.language)
+    setLocale(locale)
   }
 
   /**
@@ -285,6 +290,11 @@ export const useAuthStore = defineStore('auth', () => {
       const systemStore = useSystemStore()
       // 不等待完成，背景載入即可
       systemStore.fetchBridgeStatus()
+
+      // 根據使用者語言設定初始化 i18n
+      const { detectLocale, setLocale } = await import('@/i18n')
+      const locale = detectLocale(result.language)
+      setLocale(locale)
 
       return true
     } catch {

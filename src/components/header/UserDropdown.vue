@@ -1,17 +1,22 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useTheme, type ThemeName, THEMES } from '@/composables/useTheme'
+import { useLocale, type LocaleOption, LOCALES } from '@/composables/useLocale'
 import { getUserDisplayName } from '@/utils/avatar'
 import UserAvatar from '@/components/UserAvatar.vue'
 
 const router = useRouter()
+const { t } = useI18n()
 const authStore = useAuthStore()
 const { currentTheme, setTheme } = useTheme()
+const { currentLocaleOption, selectLocale } = useLocale()
 
 const isOpen = ref(false)
 const showThemeMenu = ref(false)
+const showLanguageMenu = ref(false)
 
 const displayName = computed(() => getUserDisplayName(authStore.user))
 
@@ -38,12 +43,14 @@ const toggleDropdown = () => {
   isOpen.value = !isOpen.value
   if (!isOpen.value) {
     showThemeMenu.value = false
+    showLanguageMenu.value = false
   }
 }
 
 const closeDropdown = () => {
   isOpen.value = false
   showThemeMenu.value = false
+  showLanguageMenu.value = false
 }
 
 const handleLogout = async () => {
@@ -64,11 +71,22 @@ const goToAdmin = () => {
 
 const toggleThemeMenu = () => {
   showThemeMenu.value = !showThemeMenu.value
+  showLanguageMenu.value = false
 }
 
 const selectTheme = (themeId: ThemeName) => {
   setTheme(themeId)
   showThemeMenu.value = false
+}
+
+const toggleLanguageMenu = () => {
+  showLanguageMenu.value = !showLanguageMenu.value
+  showThemeMenu.value = false
+}
+
+const handleSelectLocale = (localeId: LocaleOption) => {
+  selectLocale(localeId, authStore.user?.language)
+  showLanguageMenu.value = false
 }
 
 const handleClickOutside = (event: MouseEvent) => {
@@ -138,7 +156,7 @@ onUnmounted(() => {
             class="w-full px-4 py-2 text-left text-sm text-content hover:bg-surface-hover transition-colors flex items-center gap-3"
           >
             <ph-icon icon="user" class="w-4 h-4 text-content-secondary" />
-            個人設定
+            {{ t('settings.profile') }}
           </button>
 
           <!-- System Management (Admin Only) -->
@@ -148,7 +166,7 @@ onUnmounted(() => {
             class="w-full px-4 py-2 text-left text-sm text-content hover:bg-surface-hover transition-colors flex items-center gap-3"
           >
             <ph-icon icon="gear-six" class="w-4 h-4 text-content-secondary" />
-            系統管理
+            {{ t('admin.administration') }}
           </button>
 
           <!-- Theme Selector -->
@@ -158,7 +176,7 @@ onUnmounted(() => {
               class="w-full px-4 py-2 text-left text-sm text-content hover:bg-surface-hover transition-colors flex items-center gap-3"
             >
               <ph-icon icon="palette" class="w-4 h-4 text-content-secondary" />
-              <span class="flex-1">樣板風格</span>
+              <span class="flex-1">{{ t('settings.theme') }}</span>
               <ph-icon
                 icon="chevron-right"
                 class="w-4 h-4 text-content-tertiary transition-transform"
@@ -197,9 +215,56 @@ onUnmounted(() => {
                     icon="moon"
                     class="w-4 h-4"
                   />
-                  <span class="flex-1">{{ theme.name }}</span>
+                  <span class="flex-1">{{ t(theme.nameKey) }}</span>
                   <ph-icon
                     v-if="currentTheme === theme.id"
+                    icon="check"
+                    class="w-4 h-4"
+                  />
+                </button>
+              </div>
+            </Transition>
+          </div>
+
+          <!-- Language Selector -->
+          <div class="relative">
+            <button
+              @click.stop="toggleLanguageMenu"
+              class="w-full px-4 py-2 text-left text-sm text-content hover:bg-surface-hover transition-colors flex items-center gap-3"
+            >
+              <ph-icon icon="translate" class="w-4 h-4 text-content-secondary" />
+              <span class="flex-1">{{ t('settings.language') }}</span>
+              <ph-icon
+                icon="chevron-right"
+                class="w-4 h-4 text-content-tertiary transition-transform"
+                :class="{ 'rotate-90': showLanguageMenu }"
+              />
+            </button>
+
+            <!-- Language Submenu -->
+            <Transition
+              enter-active-class="transition ease-out duration-100"
+              enter-from-class="opacity-0"
+              enter-to-class="opacity-100"
+              leave-active-class="transition ease-in duration-75"
+              leave-from-class="opacity-100"
+              leave-to-class="opacity-0"
+            >
+              <div
+                v-if="showLanguageMenu"
+                class="bg-surface-secondary border-t border-edge"
+              >
+                <button
+                  v-for="loc in LOCALES"
+                  :key="loc.id"
+                  @click="handleSelectLocale(loc.id)"
+                  class="w-full px-4 py-2 pl-11 text-left text-sm hover:bg-surface-hover transition-colors flex items-center gap-2"
+                  :class="currentLocaleOption === loc.id ? 'text-accent' : 'text-content'"
+                >
+                  <ph-icon :icon="loc.icon" class="w-4 h-4" />
+                  <span class="flex-1">{{ t(loc.nameKey) }}</span>
+                  <ph-icon
+                    v-if="currentLocaleOption === loc.id"
                     icon="check"
                     class="w-4 h-4"
                   />
@@ -216,7 +281,7 @@ onUnmounted(() => {
             class="w-full px-4 py-2 text-left text-sm text-error hover:bg-surface-hover transition-colors flex items-center gap-3"
           >
             <ph-icon icon="right-from-bracket" class="w-4 h-4" />
-            登出
+            {{ t('auth.logout') }}
           </button>
         </div>
       </div>

@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useSystemStore } from '@/stores/system'
 import { useAppConfig } from '@/composables/useAppConfig'
 import { useToast } from '@/stores/toast'
 
+const { t } = useI18n()
 const systemStore = useSystemStore()
 const { configFileApiUrl, getStoredApiUrl } = useAppConfig()
 const toast = useToast()
@@ -21,23 +23,23 @@ const isTesting = ref(false)
 const testResult = ref<{ success: boolean; latency?: number; error?: string } | null>(null)
 
 // Available refresh intervals
-const boardRefreshOptions = [
-  { value: 0, label: '停用' },
-  { value: 30, label: '30 秒' },
-  { value: 60, label: '1 分鐘' },
-  { value: 120, label: '2 分鐘' },
-  { value: 300, label: '5 分鐘' }
-]
+const boardRefreshOptions = computed(() => [
+  { value: 0, label: t('settings.disabled') },
+  { value: 30, label: t('settings.seconds', { n: 30 }) },
+  { value: 60, label: t('settings.minute', { n: 1 }) },
+  { value: 120, label: t('settings.minutes', { n: 2 }) },
+  { value: 300, label: t('settings.minutes', { n: 5 }) }
+])
 
-const notificationCheckOptions = [
-  { value: 0, label: '停用' },
-  { value: 5, label: '5 秒' },
-  { value: 10, label: '10 秒' },
-  { value: 30, label: '30 秒' },
-  { value: 60, label: '1 分鐘' },
-  { value: 300, label: '5 分鐘' },
-  { value: 600, label: '10 分鐘' }
-]
+const notificationCheckOptions = computed(() => [
+  { value: 0, label: t('settings.disabled') },
+  { value: 5, label: t('settings.seconds', { n: 5 }) },
+  { value: 10, label: t('settings.seconds', { n: 10 }) },
+  { value: 30, label: t('settings.seconds', { n: 30 }) },
+  { value: 60, label: t('settings.minute', { n: 1 }) },
+  { value: 300, label: t('settings.minutes', { n: 5 }) },
+  { value: 600, label: t('settings.minutes', { n: 10 }) }
+])
 
 // 取得原始配置的 API URL
 function getOriginalApiUrl(): string {
@@ -70,7 +72,7 @@ function saveSettings(): void {
     enableDesktopNotifications: enableDesktopNotifications.value
   }
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings))
-  toast.success('設定已儲存')
+  toast.success(t('settings.saved'))
 }
 
 // Test API connection
@@ -83,22 +85,22 @@ async function testConnection(): Promise<void> {
   isTesting.value = false
 
   if (result.success) {
-    toast.success('連線成功', `延遲：${result.latency}ms`)
+    toast.success(t('settings.connectionSuccess'), t('settings.latency', { ms: result.latency }))
   } else {
-    toast.error('連線失敗', result.error || '無法連線到伺服器')
+    toast.error(t('settings.connectionFailed'), result.error || t('settings.cannotConnect'))
   }
 }
 
 // Request notification permission
 async function requestNotificationPermission(): Promise<void> {
   if (!('Notification' in window)) {
-    toast.error('不支援', '此瀏覽器不支援桌面通知')
+    toast.error(t('settings.notSupported'), t('settings.browserNotSupport'))
     enableDesktopNotifications.value = false
     return
   }
 
   if (Notification.permission === 'denied') {
-    toast.error('權限被拒', '請在瀏覽器設定中允許通知')
+    toast.error(t('settings.permissionDenied'), t('settings.allowInBrowserSettings'))
     enableDesktopNotifications.value = false
     return
   }
@@ -137,14 +139,14 @@ onMounted(() => {
         <div class="card overflow-hidden">
           <div class="px-4 py-3 bg-surface-secondary border-b border-edge">
             <h2 class="text-sm font-semibold text-content-secondary uppercase tracking-wide">
-              連線設定
+              {{ t('settings.connectionSettings') }}
             </h2>
           </div>
           <div class="p-4 space-y-4">
             <!-- API URL -->
             <div>
               <label class="block text-sm font-medium text-content-secondary mb-2">
-                API 位址
+                {{ t('settings.apiUrl') }}
               </label>
               <div class="flex gap-2">
                 <input
@@ -152,7 +154,7 @@ onMounted(() => {
                   :value="getOriginalApiUrl()"
                   readonly
                   class="input flex-1 bg-surface-secondary cursor-not-allowed font-mono text-sm"
-                  title="API 位址由登入時設定"
+                  :title="t('settings.apiUrlSetOnLogin')"
                 />
                 <button
                   @click="testConnection"
@@ -163,11 +165,11 @@ onMounted(() => {
                     :icon="isTesting ? 'spinner' : 'plugs-connected'"
                     :class="['w-4 h-4 mr-1.5', isTesting && 'animate-spin']"
                   />
-                  測試
+                  {{ t('settings.test') }}
                 </button>
               </div>
               <p class="mt-1.5 text-xs text-content-tertiary">
-                API 位址在登入時設定，如需變更請重新登入
+                {{ t('settings.apiUrlHint') }}
               </p>
             </div>
 
@@ -186,7 +188,7 @@ onMounted(() => {
                   :class="['w-5 h-5', testResult.success ? 'text-success' : 'text-error']"
                 />
                 <span :class="['text-sm font-medium', testResult.success ? 'text-success' : 'text-error']">
-                  {{ testResult.success ? `連線成功 (${testResult.latency}ms)` : '連線失敗' }}
+                  {{ testResult.success ? t('settings.connectionSuccessWithLatency', { ms: testResult.latency }) : t('settings.connectionFailed') }}
                 </span>
                 <span v-if="testResult.error" class="text-sm text-error ml-2">
                   {{ testResult.error }}
@@ -200,15 +202,15 @@ onMounted(() => {
         <div class="card overflow-hidden">
           <div class="px-4 py-3 bg-surface-secondary border-b border-edge">
             <h2 class="text-sm font-semibold text-content-secondary uppercase tracking-wide">
-              桌面通知
+              {{ t('settings.desktopNotifications') }}
             </h2>
           </div>
           <div class="p-4">
             <div class="flex items-center justify-between">
               <div>
-                <p class="font-medium text-content">啟用桌面通知</p>
+                <p class="font-medium text-content">{{ t('settings.enableDesktopNotifications') }}</p>
                 <p class="text-xs text-content-tertiary mt-0.5">
-                  接收任務指派、評論、到期提醒的桌面推播
+                  {{ t('settings.desktopNotificationsDesc') }}
                 </p>
               </div>
               <button
@@ -232,7 +234,7 @@ onMounted(() => {
           <div class="px-4 py-3 bg-surface-secondary border-t border-edge">
             <p class="text-xs text-content-tertiary">
               <ph-icon icon="info" class="w-3.5 h-3.5 inline mr-1" />
-              桌面通知需要瀏覽器權限，首次啟用時會要求授權
+              {{ t('settings.notificationPermissionHint') }}
             </p>
           </div>
         </div>
@@ -242,7 +244,7 @@ onMounted(() => {
       <div class="card overflow-hidden mt-4">
         <div class="px-4 py-3 bg-surface-secondary border-b border-edge">
           <h2 class="text-sm font-semibold text-content-secondary uppercase tracking-wide">
-            自動更新
+            {{ t('settings.autoRefresh') }}
           </h2>
         </div>
         <table class="table">
@@ -250,9 +252,9 @@ onMounted(() => {
             <tr class="table-row">
               <td class="table-cell">
                 <div>
-                  <p class="font-medium text-content">看板與任務列表</p>
+                  <p class="font-medium text-content">{{ t('settings.boardAndTaskList') }}</p>
                   <p class="text-xs text-content-tertiary mt-0.5">
-                    自動刷新看板和任務列表的資料
+                    {{ t('settings.boardRefreshDesc') }}
                   </p>
                 </div>
               </td>
@@ -275,9 +277,9 @@ onMounted(() => {
             <tr class="table-row">
               <td class="table-cell">
                 <div>
-                  <p class="font-medium text-content">系統通知檢查</p>
+                  <p class="font-medium text-content">{{ t('settings.notificationCheck') }}</p>
                   <p class="text-xs text-content-tertiary mt-0.5">
-                    檢查新通知的頻率（任務指派、評論、到期提醒等）
+                    {{ t('settings.notificationCheckDesc') }}
                   </p>
                 </div>
               </td>
@@ -302,11 +304,11 @@ onMounted(() => {
         <div class="px-4 py-3 bg-surface-secondary border-t border-edge space-y-1">
           <p class="text-xs text-content-tertiary">
             <ph-icon icon="info" class="w-3.5 h-3.5 inline mr-1" />
-            看板更新僅在頁面可見時運作，切換分頁時會暫停以節省資源
+            {{ t('settings.boardRefreshHint') }}
           </p>
           <p class="text-xs text-content-tertiary">
             <ph-icon icon="bell" class="w-3.5 h-3.5 inline mr-1" />
-            通知檢查即使在背景分頁也會持續運作，確保桌面通知正常發送
+            {{ t('settings.notificationCheckHint') }}
           </p>
         </div>
       </div>

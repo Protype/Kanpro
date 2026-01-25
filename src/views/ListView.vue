@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useBoardStore } from '@/stores/board'
 import { useTasksStore } from '@/stores/tasks'
 import { isTaskOverdue, formatTaskDate, getTaskColorDotClass } from '@/utils/task'
@@ -18,6 +19,7 @@ const emit = defineEmits<{
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 const boardStore = useBoardStore()
 const tasksStore = useTasksStore()
 
@@ -162,7 +164,7 @@ const handleSearchSelect = (task: Task) => {
       <!-- Toolbar -->
       <div class="mb-4 flex items-center gap-4">
         <span class="text-sm text-content-tertiary whitespace-nowrap">
-          共 {{ filteredTasks.length }} 個任務
+          {{ t('task.totalCount', { count: filteredTasks.length }) }}
         </span>
         <div class="flex-1" />
         <label class="flex items-center gap-2 text-sm text-content-secondary">
@@ -171,12 +173,12 @@ const handleSearchSelect = (task: Task) => {
             type="checkbox"
             class="checkbox"
           />
-          顯示已關閉任務
+          {{ t('task.showClosedTasks') }}
         </label>
         <input
           v-model="filterQuery"
           type="text"
-          :placeholder="`搜尋任務...`"
+          :placeholder="t('task.searchPlaceholder')"
           class="input w-64"
         />
       </div>
@@ -196,34 +198,34 @@ const handleSearchSelect = (task: Task) => {
                 @click="toggleSort('title')"
                 class="table-header-cell cursor-pointer hover:bg-surface-hover uppercase"
               >
-                標題 {{ getSortIcon('title') }}
+                {{ t('task.title') }} {{ getSortIcon('title') }}
               </th>
               <th
                 @click="toggleSort('column_id')"
                 class="table-header-cell cursor-pointer hover:bg-surface-hover uppercase"
               >
-                清單 {{ getSortIcon('column_id') }}
+                {{ t('task.column') }} {{ getSortIcon('column_id') }}
               </th>
               <th
                 @click="toggleSort('priority')"
                 class="table-header-cell cursor-pointer hover:bg-surface-hover uppercase"
               >
-                優先級 {{ getSortIcon('priority') }}
+                {{ t('task.priority') }} {{ getSortIcon('priority') }}
               </th>
               <th
                 @click="toggleSort('date_due')"
                 class="table-header-cell cursor-pointer hover:bg-surface-hover uppercase"
               >
-                到期日 {{ getSortIcon('date_due') }}
+                {{ t('task.dueDate') }} {{ getSortIcon('date_due') }}
               </th>
               <th
                 @click="toggleSort('date_creation')"
                 class="table-header-cell cursor-pointer hover:bg-surface-hover uppercase"
               >
-                建立日期 {{ getSortIcon('date_creation') }}
+                {{ t('task.createdAt') }} {{ getSortIcon('date_creation') }}
               </th>
               <th class="table-header-cell uppercase">
-                狀態
+                {{ t('task.status') }}
               </th>
             </tr>
           </thead>
@@ -266,13 +268,13 @@ const handleSearchSelect = (task: Task) => {
                     task.is_active ? 'badge-success' : 'badge-neutral'
                   ]"
                 >
-                  {{ task.is_active ? '開啟' : '已關閉' }}
+                  {{ task.is_active ? t('task.open') : t('task.closed') }}
                 </span>
               </td>
             </tr>
             <tr v-if="filteredTasks.length === 0">
               <td colspan="7" class="px-4 py-8 text-center text-content-tertiary">
-                沒有符合條件的任務
+                {{ t('task.noMatchingTasks') }}
               </td>
             </tr>
           </tbody>

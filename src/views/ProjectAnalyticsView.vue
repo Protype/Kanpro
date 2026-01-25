@@ -17,28 +17,28 @@
         <!-- Stats Overview -->
         <section class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div class="card p-6">
-            <h3 class="text-sm font-medium text-content-tertiary">總活動數</h3>
+            <h3 class="text-sm font-medium text-content-tertiary">{{ t('analytics.totalActivities') }}</h3>
             <p class="mt-2 text-3xl font-bold text-content">{{ activityStats.total }}</p>
           </div>
           <div class="card p-6">
-            <h3 class="text-sm font-medium text-content-tertiary">建立任務</h3>
+            <h3 class="text-sm font-medium text-content-tertiary">{{ t('analytics.tasksCreated') }}</h3>
             <p class="mt-2 text-3xl font-bold text-success">{{ activityStats.taskCreated }}</p>
           </div>
           <div class="card p-6">
-            <h3 class="text-sm font-medium text-content-tertiary">移動任務</h3>
+            <h3 class="text-sm font-medium text-content-tertiary">{{ t('analytics.tasksMoved') }}</h3>
             <p class="mt-2 text-3xl font-bold text-accent">{{ activityStats.taskMoved }}</p>
           </div>
           <div class="card p-6">
-            <h3 class="text-sm font-medium text-content-tertiary">關閉任務</h3>
+            <h3 class="text-sm font-medium text-content-tertiary">{{ t('analytics.tasksClosed') }}</h3>
             <p class="mt-2 text-3xl font-bold text-info">{{ activityStats.taskClosed }}</p>
           </div>
         </section>
 
         <!-- Task Distribution -->
         <section class="card p-6">
-          <h2 class="text-lg font-semibold text-content mb-4">任務分佈</h2>
+          <h2 class="text-lg font-semibold text-content mb-4">{{ t('analytics.taskDistribution') }}</h2>
           <div v-if="taskDistribution.length === 0" class="text-content-tertiary text-center py-8">
-            沒有任務資料
+            {{ t('analytics.noTaskData') }}
           </div>
           <div v-else class="space-y-3">
             <div
@@ -60,9 +60,9 @@
 
         <!-- User Workload -->
         <section class="card p-6">
-          <h2 class="text-lg font-semibold text-content mb-4">成員工作量</h2>
+          <h2 class="text-lg font-semibold text-content mb-4">{{ t('analytics.userWorkload') }}</h2>
           <div v-if="userWorkload.length === 0" class="text-content-tertiary text-center py-8">
-            沒有成員資料
+            {{ t('analytics.noMemberData') }}
           </div>
           <div v-else class="space-y-3">
             <div
@@ -86,9 +86,9 @@
 
         <!-- Activity Timeline -->
         <section class="card p-6">
-          <h2 class="text-lg font-semibold text-content mb-4">每日活動</h2>
+          <h2 class="text-lg font-semibold text-content mb-4">{{ t('analytics.dailyActivity') }}</h2>
           <div v-if="activityByDay.length === 0" class="text-content-tertiary text-center py-8">
-            沒有活動資料
+            {{ t('analytics.noActivityData') }}
           </div>
           <div v-else class="overflow-x-auto">
             <div class="flex items-end gap-1 h-40 min-w-max">
@@ -100,7 +100,7 @@
                 <div
                   class="w-8 bg-accent rounded-t transition-all duration-500"
                   :style="{ height: `${getActivityBarHeight(day.count)}px` }"
-                  :title="`${day.date}: ${day.count} 活動`"
+                  :title="`${day.date}: ${day.count} ${t('analytics.activitiesCount')}`"
                 ></div>
                 <span class="text-xs text-content-tertiary transform -rotate-45 origin-top-left whitespace-nowrap">
                   {{ formatDate(day.date) }}
@@ -112,9 +112,9 @@
 
         <!-- Recent Activity -->
         <section class="card p-6">
-          <h2 class="text-lg font-semibold text-content mb-4">最近活動</h2>
+          <h2 class="text-lg font-semibold text-content mb-4">{{ t('activity.recentActivity') }}</h2>
           <div v-if="recentActivities.length === 0" class="text-content-tertiary text-center py-8">
-            沒有活動紀錄
+            {{ t('activity.noRecentActivity') }}
           </div>
           <div v-else class="space-y-3">
             <div
@@ -134,7 +134,7 @@
               <div class="flex-1">
                 <p class="text-sm text-content">{{ formatEventName(activity.event_name) }}</p>
                 <p class="text-xs text-content-tertiary">
-                  任務 #{{ activity.task_id }} · {{ formatDateTime(activity.date_creation) }}
+                  {{ t('task.task') }} #{{ activity.task_id }} · {{ formatDateTime(activity.date_creation) }}
                 </p>
               </div>
             </div>
@@ -156,6 +156,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAnalyticsStore } from '@/stores/analytics'
 import { useBoardStore } from '@/stores/board'
 import { useMembersStore } from '@/stores/members'
@@ -172,6 +173,7 @@ const emit = defineEmits<{
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 const analyticsStore = useAnalyticsStore()
 const boardStore = useBoardStore()
 const membersStore = useMembersStore()
@@ -233,7 +235,7 @@ function formatDate(dateStr: string): string {
 
 function formatDateTime(timestamp: number): string {
   const date = new Date(timestamp * 1000)
-  return date.toLocaleString('zh-TW', {
+  return date.toLocaleString(undefined, {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
@@ -241,21 +243,23 @@ function formatDateTime(timestamp: number): string {
   })
 }
 
+const eventLabelKeys: Record<string, string> = {
+  'task.create': 'activity.eventTaskCreate',
+  'task.update': 'activity.eventTaskUpdate',
+  'task.close': 'activity.eventTaskClose',
+  'task.open': 'activity.eventTaskOpen',
+  'task.move.column': 'activity.eventTaskMoveColumn',
+  'task.move.swimlane': 'activity.eventTaskMoveSwimlane',
+  'task.move.position': 'activity.eventTaskMovePosition',
+  'comment.create': 'activity.eventCommentCreate',
+  'subtask.create': 'activity.eventSubtaskCreate',
+  'subtask.update': 'activity.eventSubtaskUpdate',
+  'task_file.create': 'activity.eventFileCreate'
+}
+
 function formatEventName(eventName: string): string {
-  const eventMap: Record<string, string> = {
-    'task.create': '建立任務',
-    'task.update': '更新任務',
-    'task.close': '關閉任務',
-    'task.open': '開啟任務',
-    'task.move.column': '移動任務清單',
-    'task.move.swimlane': '移動任務至其他泳道',
-    'task.move.position': '調整任務位置',
-    'comment.create': '新增評論',
-    'subtask.create': '新增子任務',
-    'subtask.update': '更新子任務',
-    'file.create': '上傳附件'
-  }
-  return eventMap[eventName] || eventName
+  const key = eventLabelKeys[eventName]
+  return key ? t(key) : eventName.replace(/\./g, ' ')
 }
 
 function getActivityColor(eventName: string): string {
@@ -277,7 +281,7 @@ async function loadAnalytics() {
       membersStore.fetchProjectMembers(projectId.value)
     ])
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '載入分析資料失敗'
+    error.value = err instanceof Error ? err.message : t('analytics.loadFailed')
   } finally {
     isLoading.value = false
   }

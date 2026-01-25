@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useTasksStore } from '@/stores/tasks'
 import { useProjectsStore } from '@/stores/projects'
 import TaskDetailModal from '@/components/TaskDetailModal.vue'
@@ -16,6 +17,7 @@ const emit = defineEmits<{
 }>()
 
 const router = useRouter()
+const { t } = useI18n()
 const tasksStore = useTasksStore()
 const projectsStore = useProjectsStore()
 
@@ -57,7 +59,7 @@ const loadTasks = async () => {
     }
     tasks.value = allProjectTasks
   } catch (e) {
-    error.value = e instanceof Error ? e.message : '載入任務失敗'
+    error.value = e instanceof Error ? e.message : t('task.loadTasksFailed')
   } finally {
     isLoading.value = false
   }
@@ -81,7 +83,7 @@ const sortedTasks = computed(() => {
 
 const getProjectName = (projectId: number) => {
   const project = projectsStore.projects.find(p => p.id === projectId)
-  return project?.name || `專案 #${projectId}`
+  return project?.name || t('task.projectNumber', { id: projectId })
 }
 
 const formatDate = (timestamp: number | null | undefined) => {
@@ -156,8 +158,8 @@ const getColorValue = (colorId: string): string => {
     <div class="max-w-6xl mx-auto">
       <!-- Header -->
       <div class="mb-6">
-        <h1 class="text-2xl font-bold text-content">任務總覽</h1>
-        <p class="text-content-secondary mt-1">所有專案的開啟中任務</p>
+        <h1 class="text-2xl font-bold text-content">{{ t('task.tasksOverview') }}</h1>
+        <p class="text-content-secondary mt-1">{{ t('task.allOpenTasks') }}</p>
       </div>
 
       <!-- Loading -->
@@ -168,7 +170,7 @@ const getColorValue = (colorId: string): string => {
       <!-- Error -->
       <div v-else-if="error" class="bg-error/10 border border-error/20 rounded-lg p-4 text-error">
         {{ error }}
-        <button @click="loadTasks" class="ml-4 underline">重試</button>
+        <button @click="loadTasks" class="ml-4 underline">{{ t('common.retry') }}</button>
       </div>
 
       <!-- Tasks Table -->
@@ -177,28 +179,28 @@ const getColorValue = (colorId: string): string => {
           <thead class="bg-surface-secondary">
             <tr>
               <th class="px-4 py-3 text-left text-xs font-medium text-content-secondary uppercase tracking-wider">
-                任務
+                {{ t('task.task') }}
               </th>
               <th class="px-4 py-3 text-left text-xs font-medium text-content-secondary uppercase tracking-wider">
-                專案
+                {{ t('project.project') }}
               </th>
               <th
                 @click="toggleSort('date_due')"
                 class="px-4 py-3 text-left text-xs font-medium text-content-secondary uppercase tracking-wider cursor-pointer hover:text-content"
               >
-                到期日 {{ getSortIcon('date_due') }}
+                {{ t('task.dueDate') }} {{ getSortIcon('date_due') }}
               </th>
               <th
                 @click="toggleSort('priority')"
                 class="px-4 py-3 text-left text-xs font-medium text-content-secondary uppercase tracking-wider cursor-pointer hover:text-content"
               >
-                優先級 {{ getSortIcon('priority') }}
+                {{ t('task.priority') }} {{ getSortIcon('priority') }}
               </th>
               <th
                 @click="toggleSort('date_creation')"
                 class="px-4 py-3 text-left text-xs font-medium text-content-secondary uppercase tracking-wider cursor-pointer hover:text-content"
               >
-                建立日期 {{ getSortIcon('date_creation') }}
+                {{ t('task.createdAt') }} {{ getSortIcon('date_creation') }}
               </th>
             </tr>
           </thead>
@@ -259,7 +261,7 @@ const getColorValue = (colorId: string): string => {
         <!-- Empty State -->
         <div v-if="sortedTasks.length === 0" class="p-12 text-center text-content-secondary">
           <ph-icon icon="clipboard-list" class="w-16 h-16 mx-auto mb-4 text-content-tertiary" />
-          <p>沒有開啟中的任務</p>
+          <p>{{ t('task.noOpenTasks') }}</p>
         </div>
       </div>
     </div>

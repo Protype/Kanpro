@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useUsersStore } from '@/stores/users'
 import { useToast } from '@/stores/toast'
 import UserAvatar from '@/components/UserAvatar.vue'
 import type { User } from '@/types'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 const usersStore = useUsersStore()
 const toast = useToast()
@@ -32,14 +34,16 @@ const editName = ref('')
 const editEmail = ref('')
 const editRole = ref('')
 
-const roles = [
-  { value: 'app-admin', label: '系統管理員' },
-  { value: 'app-manager', label: '專案經理' },
-  { value: 'app-user', label: '一般使用者' }
-]
+const roleValues = ['app-admin', 'app-manager', 'app-user']
+
+const roles = computed(() => [
+  { value: 'app-admin', label: t('user.roleAdmin') },
+  { value: 'app-manager', label: t('user.roleManager') },
+  { value: 'app-user', label: t('user.roleUser') }
+])
 
 const getRoleLabel = (role: string) => {
-  return roles.find(r => r.value === role)?.label || role
+  return roles.value.find(r => r.value === role)?.label || role
 }
 
 const getRoleBadgeClass = (role: string) => {
@@ -114,9 +118,9 @@ const handleAddUser = async () => {
     })
     await usersStore.fetchAllUsers()
     cancelAdding()
-    toast.success('使用者新增成功')
+    toast.success(t('user.addSuccess'))
   } catch (err) {
-    toast.error('新增失敗', err instanceof Error ? err.message : '新增使用者失敗')
+    toast.error(t('user.addFailed'), err instanceof Error ? err.message : t('user.addFailed'))
   } finally {
     isSubmitting.value = false
   }
@@ -147,9 +151,9 @@ const handleSaveUser = async () => {
     })
     await usersStore.fetchAllUsers()
     cancelEditing()
-    toast.success('使用者更新成功')
+    toast.success(t('user.updateSuccess'))
   } catch (err) {
-    toast.error('更新失敗', err instanceof Error ? err.message : '更新使用者失敗')
+    toast.error(t('user.updateFailed'), err instanceof Error ? err.message : t('user.updateFailed'))
   } finally {
     isSubmitting.value = false
   }
@@ -159,26 +163,26 @@ const handleToggleActive = async (user: User) => {
   try {
     if (user.is_active) {
       await usersStore.disableUser(user.id)
-      toast.success('使用者已停用')
+      toast.success(t('user.disableSuccess'))
     } else {
       await usersStore.enableUser(user.id)
-      toast.success('使用者已啟用')
+      toast.success(t('user.enableSuccess'))
     }
     await usersStore.fetchAllUsers()
   } catch (err) {
-    toast.error('操作失敗', err instanceof Error ? err.message : '切換狀態失敗')
+    toast.error(t('user.toggleFailed'), err instanceof Error ? err.message : t('user.toggleFailed'))
   }
 }
 
 const handleRemoveUser = async (user: User) => {
-  if (!confirm(`確定要刪除使用者「${user.username}」嗎？此操作無法復原。`)) return
+  if (!confirm(t('user.confirmRemove', { username: user.username }))) return
 
   try {
     await usersStore.removeUser(user.id)
     await usersStore.fetchAllUsers()
-    toast.success('使用者已刪除')
+    toast.success(t('user.removeSuccess'))
   } catch (err) {
-    toast.error('刪除失敗', err instanceof Error ? err.message : '刪除使用者失敗')
+    toast.error(t('user.removeFailed'), err instanceof Error ? err.message : t('user.removeFailed'))
   }
 }
 </script>
@@ -195,24 +199,24 @@ const handleRemoveUser = async (user: User) => {
       <!-- Toolbar -->
       <div class="mb-4 flex items-center gap-4 flex-wrap">
         <span class="text-sm text-content-tertiary whitespace-nowrap">
-          共 {{ filteredUsers.length }} 位使用者
+          {{ t('user.totalCount', { count: filteredUsers.length }) }}
         </span>
         <div class="flex-1" />
         <select v-model="filterRole" class="select w-40">
-          <option value="">所有角色</option>
+          <option value="">{{ t('user.allRoles') }}</option>
           <option v-for="role in roles" :key="role.value" :value="role.value">
             {{ role.label }}
           </option>
         </select>
         <select v-model="filterStatus" class="select w-32">
-          <option value="">所有狀態</option>
-          <option value="active">啟用</option>
-          <option value="inactive">停用</option>
+          <option value="">{{ t('user.allStatus') }}</option>
+          <option value="active">{{ t('common.enabled') }}</option>
+          <option value="inactive">{{ t('common.disabled') }}</option>
         </select>
         <input
           v-model="filterQuery"
           type="text"
-          placeholder="搜尋使用者..."
+          :placeholder="t('user.searchPlaceholder')"
           class="input w-64"
         />
         <button
@@ -221,32 +225,32 @@ const handleRemoveUser = async (user: User) => {
           class="btn-primary"
         >
           <ph-icon icon="plus" class="w-4 h-4 mr-1.5" />
-          新增使用者
+          {{ t('user.addUser') }}
         </button>
       </div>
 
       <!-- Add User Form -->
       <div v-if="isAdding" class="card mb-4 p-4">
-        <h2 class="text-base font-semibold text-content mb-4">新增使用者</h2>
+        <h2 class="text-base font-semibold text-content mb-4">{{ t('user.addUser') }}</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <div>
-            <label class="block text-sm font-medium text-content-secondary mb-1">使用者名稱 *</label>
-            <input v-model="newUsername" type="text" class="input" placeholder="輸入使用者名稱" />
+            <label class="block text-sm font-medium text-content-secondary mb-1">{{ t('user.username') }} *</label>
+            <input v-model="newUsername" type="text" class="input" :placeholder="t('user.enterUsername')" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-content-secondary mb-1">密碼 *</label>
-            <input v-model="newPassword" type="password" class="input" placeholder="輸入密碼" />
+            <label class="block text-sm font-medium text-content-secondary mb-1">{{ t('user.password') }} *</label>
+            <input v-model="newPassword" type="password" class="input" :placeholder="t('user.enterPassword')" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-content-secondary mb-1">顯示名稱</label>
-            <input v-model="newName" type="text" class="input" placeholder="選填" />
+            <label class="block text-sm font-medium text-content-secondary mb-1">{{ t('user.displayName') }}</label>
+            <input v-model="newName" type="text" class="input" :placeholder="t('common.optional')" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-content-secondary mb-1">電子郵件</label>
-            <input v-model="newEmail" type="email" class="input" placeholder="選填" />
+            <label class="block text-sm font-medium text-content-secondary mb-1">{{ t('user.email') }}</label>
+            <input v-model="newEmail" type="email" class="input" :placeholder="t('common.optional')" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-content-secondary mb-1">角色</label>
+            <label class="block text-sm font-medium text-content-secondary mb-1">{{ t('user.role') }}</label>
             <select v-model="newRole" class="select">
               <option v-for="role in roles" :key="role.value" :value="role.value">
                 {{ role.label }}
@@ -256,7 +260,7 @@ const handleRemoveUser = async (user: User) => {
         </div>
         <div class="flex gap-2 justify-end mt-4">
           <button @click="cancelAdding" :disabled="isSubmitting" class="btn-secondary">
-            取消
+            {{ t('common.cancel') }}
           </button>
           <button
             @click="handleAddUser"
@@ -264,7 +268,7 @@ const handleRemoveUser = async (user: User) => {
             class="btn-primary"
           >
             <ph-icon v-if="isSubmitting" icon="spinner" class="w-4 h-4 mr-1.5 animate-spin" />
-            新增
+            {{ t('common.add') }}
           </button>
         </div>
       </div>
@@ -274,11 +278,11 @@ const handleRemoveUser = async (user: User) => {
         <table class="table">
           <thead class="table-header">
             <tr>
-              <th class="table-header-cell">使用者</th>
-              <th class="table-header-cell">電子郵件</th>
-              <th class="table-header-cell">角色</th>
-              <th class="table-header-cell text-center">狀態</th>
-              <th class="table-header-cell w-32 text-right">操作</th>
+              <th class="table-header-cell">{{ t('user.user') }}</th>
+              <th class="table-header-cell">{{ t('user.email') }}</th>
+              <th class="table-header-cell">{{ t('user.role') }}</th>
+              <th class="table-header-cell text-center">{{ t('common.status') }}</th>
+              <th class="table-header-cell w-32 text-right">{{ t('common.actions') }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-edge">
@@ -286,18 +290,18 @@ const handleRemoveUser = async (user: User) => {
             <tr v-if="editingUserId" class="bg-accent/5">
               <td class="table-cell" colspan="5">
                 <div class="py-2">
-                  <h3 class="text-sm font-medium text-content mb-3">編輯使用者</h3>
+                  <h3 class="text-sm font-medium text-content mb-3">{{ t('user.editUser') }}</h3>
                   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label class="block text-sm font-medium text-content-secondary mb-1">顯示名稱</label>
+                      <label class="block text-sm font-medium text-content-secondary mb-1">{{ t('user.displayName') }}</label>
                       <input v-model="editName" type="text" class="input" />
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-content-secondary mb-1">電子郵件</label>
+                      <label class="block text-sm font-medium text-content-secondary mb-1">{{ t('user.email') }}</label>
                       <input v-model="editEmail" type="email" class="input" />
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-content-secondary mb-1">角色</label>
+                      <label class="block text-sm font-medium text-content-secondary mb-1">{{ t('user.role') }}</label>
                       <select v-model="editRole" class="select">
                         <option v-for="role in roles" :key="role.value" :value="role.value">
                           {{ role.label }}
@@ -307,11 +311,11 @@ const handleRemoveUser = async (user: User) => {
                   </div>
                   <div class="flex gap-2 justify-end mt-3">
                     <button @click="cancelEditing" :disabled="isSubmitting" class="btn-secondary btn-sm">
-                      取消
+                      {{ t('common.cancel') }}
                     </button>
                     <button @click="handleSaveUser" :disabled="isSubmitting" class="btn-primary btn-sm">
                       <ph-icon v-if="isSubmitting" icon="spinner" class="w-4 h-4 mr-1 animate-spin" />
-                      儲存
+                      {{ t('common.save') }}
                     </button>
                   </div>
                 </div>
@@ -344,7 +348,7 @@ const handleRemoveUser = async (user: User) => {
               </td>
               <td class="table-cell text-center">
                 <span :class="user.is_active ? 'badge-success' : 'badge-error'">
-                  {{ user.is_active ? '啟用' : '停用' }}
+                  {{ user.is_active ? t('common.enabled') : t('common.disabled') }}
                 </span>
               </td>
               <td class="table-cell text-right">
@@ -353,14 +357,14 @@ const handleRemoveUser = async (user: User) => {
                     @click="handleToggleActive(user)"
                     :disabled="user.id === authStore.user?.id"
                     class="p-1.5 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded disabled:opacity-30"
-                    :title="user.is_active ? '停用' : '啟用'"
+                    :title="user.is_active ? t('common.disable') : t('common.enable')"
                   >
                     <ph-icon :icon="user.is_active ? 'ban' : 'check-circle'" class="w-4 h-4" />
                   </button>
                   <button
                     @click="startEditing(user)"
                     class="p-1.5 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded"
-                    title="編輯"
+                    :title="t('common.edit')"
                   >
                     <ph-icon icon="pencil" class="w-4 h-4" />
                   </button>
@@ -368,7 +372,7 @@ const handleRemoveUser = async (user: User) => {
                     @click="handleRemoveUser(user)"
                     :disabled="user.id === authStore.user?.id"
                     class="p-1.5 text-content-tertiary hover:text-error hover:bg-surface-hover rounded disabled:opacity-30"
-                    title="刪除"
+                    :title="t('common.delete')"
                   >
                     <ph-icon icon="trash" class="w-4 h-4" />
                   </button>
@@ -380,7 +384,7 @@ const handleRemoveUser = async (user: User) => {
             <tr v-if="filteredUsers.length === 0">
               <td colspan="5" class="px-4 py-8 text-center text-content-tertiary">
                 <ph-icon icon="users" class="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>沒有符合條件的使用者</p>
+                <p>{{ t('user.noMatchingUsers') }}</p>
               </td>
             </tr>
           </tbody>

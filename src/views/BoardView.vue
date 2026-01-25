@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useBoardStore } from '@/stores/board'
 import { useTasksStore } from '@/stores/tasks'
 import { useToast } from '@/stores/toast'
@@ -21,6 +22,7 @@ const emit = defineEmits<{
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 const boardStore = useBoardStore()
 const tasksStore = useTasksStore()
 const toast = useToast()
@@ -131,7 +133,7 @@ const handleCreateTask = async (data: {
     await boardStore.fetchBoard(projectId.value)
   } catch (error) {
     console.error('Failed to create task:', error)
-    toast.error('建立任務失敗')
+    toast.error(t('board.createTaskFailed'))
   } finally {
     taskModalRef.value?.setSubmitting(false)
   }
@@ -152,8 +154,7 @@ const handleDragEnd = async (evt: { item: HTMLElement; to: HTMLElement; newIndex
 
   if (!taskId || !columnId || !swimlaneId) return
 
-  // 顯示 loading 通知
-  const loadingId = toast.loading('正在更新...')
+  const loadingId = toast.loading(t('board.updating'))
 
   try {
     await tasksStore.moveTaskPosition(
@@ -163,15 +164,11 @@ const handleDragEnd = async (evt: { item: HTMLElement; to: HTMLElement; newIndex
       position,
       swimlaneId
     )
-    // 將 loading 替換為成功通知（漸變動畫）
-    toast.update(loadingId, 'success', '任務已移動')
-    // 靜默刷新以同步伺服器狀態（不顯示 loading）
+    toast.update(loadingId, 'success', t('board.taskMoved'))
     await boardStore.fetchBoard(projectId.value, true)
   } catch (error) {
     console.error('Failed to move task:', error)
-    // 將 loading 替換為失敗通知（漸變動畫）
-    toast.update(loadingId, 'error', '移動任務失敗')
-    // 靜默刷新以還原 UI 狀態
+    toast.update(loadingId, 'error', t('board.moveTaskFailed'))
     await boardStore.fetchBoard(projectId.value, true)
   }
 }
@@ -231,7 +228,7 @@ const hasMultipleSwimlanes = computed(() => boardStore.swimlanes.length > 1)
           @click="boardStore.fetchBoard(projectId)"
           class="mt-3 text-sm text-error hover:underline"
         >
-          重試
+          {{ t('common.retry') }}
         </button>
       </div>
     </div>
@@ -281,7 +278,7 @@ const hasMultipleSwimlanes = computed(() => boardStore.swimlanes.length > 1)
                   <span
                     v-if="column.task_limit > 0 && column.tasks.length >= column.task_limit"
                     class="text-xs text-error font-medium"
-                    title="已達 WIP 限制"
+                    :title="t('board.wipLimitReached')"
                   >
                     WIP
                   </span>
@@ -289,7 +286,7 @@ const hasMultipleSwimlanes = computed(() => boardStore.swimlanes.length > 1)
                 <button
                   @click.stop="openAddTaskModal(column.id, swimlane.id)"
                   class="text-content-tertiary hover:text-content-secondary"
-                  title="新增任務"
+                  :title="t('task.newTask')"
                 >
                   <ph-icon icon="plus" class="w-5 h-5" />
                 </button>
@@ -323,7 +320,7 @@ const hasMultipleSwimlanes = computed(() => boardStore.swimlanes.length > 1)
                 v-if="column.tasks.length === 0"
                 class="text-center py-8 text-content-tertiary text-sm"
               >
-                無任務
+                {{ t('board.noTasks') }}
               </div>
             </div>
           </div>

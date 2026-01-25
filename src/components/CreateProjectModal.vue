@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useProjectsStore, type CreateProjectOptions } from '@/stores/projects'
 import { useUsersStore } from '@/stores/users'
 import { useAuthStore } from '@/stores/auth'
@@ -18,6 +19,7 @@ const emit = defineEmits<{
 }>()
 
 const router = useRouter()
+const { t } = useI18n()
 const projectsStore = useProjectsStore()
 const usersStore = useUsersStore()
 const authStore = useAuthStore()
@@ -36,7 +38,7 @@ const priorityDefault = ref<number | undefined>(undefined)
 const priorityStart = ref<number | undefined>(undefined)
 const priorityEnd = ref<number | undefined>(undefined)
 const projectEmail = ref('')
-const enablePublicAccess = ref(false)
+const disablePublicAccess = ref(false)
 
 // === UI 狀態 ===
 const isSubmitting = ref(false)
@@ -87,7 +89,7 @@ function resetForm() {
   priorityStart.value = undefined
   priorityEnd.value = undefined
   projectEmail.value = ''
-  enablePublicAccess.value = false
+  disablePublicAccess.value = false
   errorMessage.value = ''
   showAdvanced.value = false
   ownerSearchQuery.value = ''
@@ -111,7 +113,7 @@ function handleExpand() {
     priorityStart: priorityStart.value,
     priorityEnd: priorityEnd.value,
     email: projectEmail.value,
-    enablePublicAccess: enablePublicAccess.value
+    disablePublicAccess: disablePublicAccess.value
   })
 
   // 關閉燈箱並導向專案建立頁
@@ -142,7 +144,7 @@ async function handleSubmit() {
     priority_start: priorityStart.value,
     priority_end: priorityEnd.value,
     email: projectEmail.value.trim() || undefined,
-    enablePublicAccess: enablePublicAccess.value
+    disablePublicAccess: disablePublicAccess.value
   }
 
   try {
@@ -152,10 +154,10 @@ async function handleSubmit() {
       emit('created', result)
       emit('close')
     } else {
-      errorMessage.value = projectsStore.error || '建立專案失敗'
+      errorMessage.value = projectsStore.error || t('project.createFailed')
     }
   } catch (err) {
-    errorMessage.value = err instanceof Error ? err.message : '建立專案失敗'
+    errorMessage.value = err instanceof Error ? err.message : t('project.createFailed')
   } finally {
     isSubmitting.value = false
   }
@@ -179,17 +181,8 @@ function handleClickOutside(event: MouseEvent) {
   }
 }
 
-// 處理表單內部點擊（因為 @click.stop 阻止事件傳播到 document）
-function handleFormClick(event: MouseEvent) {
-  handleClickOutside(event)
-}
-
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
 })
 </script>
 
@@ -217,37 +210,35 @@ onUnmounted(() => {
               height: showAdvanced ? '540px' : '480px',
               maxWidth: '90vw'
             }"
-            @click.stop="handleFormClick"
+            @click.stop
           >
             <!-- Header -->
             <div class="flex items-center justify-between p-4 h-14 border-b border-edge">
               <div class="flex items-center gap-3">
-                <h3 class="text-lg font-semibold text-content">新增專案</h3>
-                <!-- Button Group: Advanced + Expand -->
-                <div class="flex items-center gap-0 rounded-md bg-surface-secondary px-1 py-0.5">
-                  <!-- Advanced Settings Toggle -->
-                  <button
-                    type="button"
-                    @click="toggleAdvanced"
-                    class="flex items-center gap-1 ps-2 pe-1 py-1 text-xs font-medium leading-none rounded transition-colors"
-                    :class="showAdvanced
-                      ? 'bg-surface-tertiary text-content-secondary'
-                      : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-tertiary'"
-                  >
-                    <span>進階設定</span>
-                    <ph-icon :icon="showAdvanced ? 'chevron-left' : 'chevron-right'" class="w-3.5 h-3.5" />
-                  </button>
-                  <!-- Expand to full page button -->
-                  <button
-                    type="button"
-                    data-testid="expand-button"
-                    @click="handleExpand"
-                    class="flex items-center justify-center p-1 rounded transition-colors text-content-tertiary hover:text-content-secondary hover:bg-surface-tertiary"
-                    title="展開為完整頁面"
-                  >
-                    <ph-icon icon="arrows-out" class="w-3.5 h-3.5" />
-                  </button>
-                </div>
+                <h3 class="text-lg font-semibold text-content">{{ t('project.newProject') }}</h3>
+                <!-- Advanced Settings Toggle (styled like search bar) -->
+                <button
+                  type="button"
+                  @click="toggleAdvanced"
+                  class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium leading-none rounded transition-colors"
+                  :class="showAdvanced
+                    ? 'bg-surface-tertiary text-content-secondary'
+                    : 'bg-surface-secondary text-content-tertiary hover:text-content-secondary'"
+                >
+                  <span>{{ t('project.advancedSettings') }}</span>
+                  <!-- Chevron: > when collapsed, < when expanded -->
+                  <ph-icon :icon="showAdvanced ? 'chevron-left' : 'chevron-right'" class="w-3.5 h-3.5" />
+                </button>
+                <!-- Expand to full page button -->
+                <button
+                  type="button"
+                  data-testid="expand-button"
+                  @click="handleExpand"
+                  class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium leading-none rounded transition-colors bg-surface-secondary text-content-tertiary hover:text-content-secondary"
+                  :title="t('project.expandToFullPage')"
+                >
+                  <ph-icon icon="arrows-out" class="w-3.5 h-3.5" />
+                </button>
               </div>
               <button
                 type="button"
@@ -271,7 +262,7 @@ onUnmounted(() => {
                   <!-- Name -->
                   <div>
                     <label for="project-name" class="block text-sm font-medium text-content mb-1">
-                      專案名稱 <span class="text-red-500">*</span>
+                      {{ t('project.projectName') }} <span class="text-red-500">*</span>
                     </label>
                     <input
                       id="project-name"
@@ -280,14 +271,14 @@ onUnmounted(() => {
                       required
                       :disabled="isSubmitting"
                       class="w-full px-3 py-2 bg-surface-secondary border border-edge rounded-md text-content placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent disabled:opacity-50"
-                      placeholder="輸入專案名稱"
+                      :placeholder="t('project.enterProjectName')"
                     />
                   </div>
 
                   <!-- Description -->
                   <div>
                     <label for="project-description" class="block text-sm font-medium text-content mb-1">
-                      描述
+                      {{ t('common.description') }}
                     </label>
                     <textarea
                       id="project-description"
@@ -295,14 +286,14 @@ onUnmounted(() => {
                       rows="3"
                       :disabled="isSubmitting"
                       class="w-full px-3 py-2 bg-surface-secondary border border-edge rounded-md text-content placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent disabled:opacity-50 resize-none"
-                      placeholder="輸入專案描述（選填）"
+                      :placeholder="t('project.enterDescription')"
                     ></textarea>
                   </div>
 
                   <!-- Identifier -->
                   <div>
                     <label for="project-identifier" class="block text-sm font-medium text-content mb-1">
-                      專案識別碼
+                      {{ t('project.identifier') }}
                     </label>
                     <input
                       id="project-identifier"
@@ -310,10 +301,10 @@ onUnmounted(() => {
                       type="text"
                       :disabled="isSubmitting"
                       class="w-full px-3 py-2 bg-surface-secondary border border-edge rounded-md text-content placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent disabled:opacity-50"
-                      placeholder="例如：PROJ（選填）"
+                      :placeholder="t('project.identifierPlaceholder')"
                     />
                     <p class="mt-1 text-xs text-content-tertiary">
-                      用於任務編號前綴，如：PROJ-123
+                      {{ t('project.identifierHint') }}
                     </p>
                   </div>
                 </div>
@@ -329,7 +320,7 @@ onUnmounted(() => {
                       <!-- Owner (full width) -->
                       <div class="col-span-2 owner-dropdown-container">
                         <label class="block text-sm font-medium text-content mb-1">
-                          擁有者
+                          {{ t('project.owner') }}
                         </label>
                         <div class="relative">
                           <button
@@ -340,7 +331,7 @@ onUnmounted(() => {
                           >
                             <UserAvatar :user="selectedOwner" size="sm" />
                             <span class="flex-1 truncate text-sm text-content">
-                              {{ selectedOwner?.name || selectedOwner?.username || '選擇擁有者' }}
+                              {{ selectedOwner?.name || selectedOwner?.username || t('project.selectOwner') }}
                             </span>
                             <ph-icon icon="chevron-down" class="w-4 h-4 text-content-tertiary" />
                           </button>
@@ -356,7 +347,7 @@ onUnmounted(() => {
                                 <input
                                   v-model="ownerSearchQuery"
                                   type="text"
-                                  placeholder="搜尋使用者..."
+                                  :placeholder="t('user.searchUsers')"
                                   class="w-full px-2 py-1 text-sm bg-surface-secondary border border-edge rounded text-content placeholder:text-content-tertiary focus:outline-none focus:ring-1 focus:ring-accent"
                                 />
                               </div>
@@ -377,21 +368,21 @@ onUnmounted(() => {
                                   </div>
                                 </button>
                                 <div v-if="filteredUsers.length === 0" class="px-3 py-2 text-sm text-content-tertiary">
-                                  找不到使用者
+                                  {{ t('project.noUserFound') }}
                                 </div>
                               </div>
                             </div>
                           </Transition>
                         </div>
                         <p class="mt-1 text-xs text-content-tertiary">
-                          預設為當前使用者
+                          {{ t('project.defaultIsCurrentUser') }}
                         </p>
                       </div>
 
                       <!-- Start Date -->
                       <div>
                         <label for="project-start-date" class="block text-sm font-medium text-content mb-1">
-                          開始日期
+                          {{ t('project.startDate') }}
                         </label>
                         <input
                           id="project-start-date"
@@ -405,7 +396,7 @@ onUnmounted(() => {
                       <!-- End Date -->
                       <div>
                         <label for="project-end-date" class="block text-sm font-medium text-content mb-1">
-                          結束日期
+                          {{ t('project.endDate') }}
                         </label>
                         <input
                           id="project-end-date"
@@ -419,7 +410,7 @@ onUnmounted(() => {
 
                       <!-- Priority Default -->
                       <div>
-                        <label class="block text-sm font-medium text-content mb-1">預設優先級</label>
+                        <label class="block text-sm font-medium text-content mb-1">{{ t('project.defaultPriority') }}</label>
                         <input
                           v-model.number="priorityDefault"
                           type="number"
@@ -432,7 +423,7 @@ onUnmounted(() => {
 
                       <!-- Priority Range -->
                       <div>
-                        <label class="block text-sm font-medium text-content mb-1">優先級範圍</label>
+                        <label class="block text-sm font-medium text-content mb-1">{{ t('project.priorityRange') }}</label>
                         <div class="flex items-center gap-1">
                           <input
                             v-model.number="priorityStart"
@@ -457,7 +448,7 @@ onUnmounted(() => {
                       <!-- Project Email (full width) -->
                       <div class="col-span-2">
                         <label for="project-email" class="block text-sm font-medium text-content mb-1">
-                          專案通知 Email
+                          {{ t('project.projectEmail') }}
                         </label>
                         <input
                           id="project-email"
@@ -469,21 +460,21 @@ onUnmounted(() => {
                         />
                       </div>
 
-                      <!-- Enable Public Access (full width) -->
+                      <!-- Disable Public Access (full width) -->
                       <div class="col-span-2 flex items-start gap-3 pt-2 border-t border-edge">
                         <input
-                          id="enable-public-access"
-                          v-model="enablePublicAccess"
+                          id="disable-public-access"
+                          v-model="disablePublicAccess"
                           type="checkbox"
                           :disabled="isSubmitting"
                           class="mt-0.5 w-4 h-4 rounded border-edge text-accent focus:ring-accent focus:ring-offset-0"
                         />
                         <div>
-                          <label for="enable-public-access" class="text-sm text-content font-medium cursor-pointer">
-                            啟用公開存取
+                          <label for="disable-public-access" class="text-sm text-content font-medium cursor-pointer">
+                            {{ t('project.disablePublicAccess') }}
                           </label>
                           <p class="text-xs text-content-tertiary mt-0.5">
-                            允許任何人透過公開連結檢視專案（唯讀）
+                            {{ t('project.disablePublicAccessDescription') }}
                           </p>
                         </div>
                       </div>
@@ -500,7 +491,7 @@ onUnmounted(() => {
                   :disabled="isSubmitting"
                   class="px-4 py-2 text-sm font-medium text-content bg-surface-secondary hover:bg-surface-hover rounded-md transition-colors disabled:opacity-50"
                 >
-                  取消
+                  {{ t('common.cancel') }}
                 </button>
                 <button
                   type="submit"
@@ -508,7 +499,7 @@ onUnmounted(() => {
                   class="px-4 py-2 text-sm font-medium text-white bg-accent hover:bg-accent/90 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                 >
                   <ph-icon v-if="isSubmitting" icon="spinner" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
-                  {{ isSubmitting ? '建立中...' : '建立專案' }}
+                  {{ isSubmitting ? t('project.creating') : t('project.createProject') }}
                 </button>
               </div>
             </form>

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAttachmentsStore } from '@/stores/attachments'
+import { useToast } from '@/stores/toast'
 import type { TaskFile } from '@/types'
 
 const props = defineProps<{
@@ -12,6 +14,8 @@ const emit = defineEmits<{
   updated: []
 }>()
 
+const { t } = useI18n()
+const toast = useToast()
 const attachmentsStore = useAttachmentsStore()
 
 const isUploading = ref(false)
@@ -90,7 +94,7 @@ const handleFileSelect = async (event: Event) => {
     reader.readAsDataURL(file)
   } catch (error) {
     console.error('Failed to upload file:', error)
-    alert('上傳檔案失敗')
+    toast.error(t('attachment.uploadFailed'))
   } finally {
     isUploading.value = false
   }
@@ -108,12 +112,12 @@ const handleDownload = async (attachment: TaskFile) => {
     document.body.removeChild(link)
   } catch (error) {
     console.error('Failed to download file:', error)
-    alert('下載檔案失敗')
+    toast.error(t('attachment.downloadFailed'))
   }
 }
 
 const handleRemove = async (attachmentId: number) => {
-  if (!confirm('確定要刪除此附件嗎？')) return
+  if (!confirm(t('attachment.confirmRemove'))) return
 
   try {
     await attachmentsStore.removeAttachment(attachmentId)
@@ -121,7 +125,7 @@ const handleRemove = async (attachmentId: number) => {
     emit('updated')
   } catch (error) {
     console.error('Failed to remove attachment:', error)
-    alert('刪除附件失敗')
+    toast.error(t('attachment.removeFailed'))
   }
 }
 
@@ -141,7 +145,7 @@ const closePreview = () => {
     <!-- Header -->
     <div class="flex items-center justify-between">
       <h3 class="text-sm font-medium text-gray-700">
-        附件
+        {{ t('attachment.title') }}
         <span v-if="attachmentsStore.attachmentsCount > 0" class="text-gray-400">
           ({{ attachmentsStore.attachmentsCount }})
         </span>
@@ -151,7 +155,7 @@ const closePreview = () => {
         :disabled="isUploading"
         class="text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50"
       >
-        + 上傳
+        + {{ t('attachment.upload') }}
       </button>
       <input
         ref="fileInputRef"
@@ -164,7 +168,7 @@ const closePreview = () => {
     <!-- Loading -->
     <div v-if="attachmentsStore.isLoading || isUploading" class="text-center py-2">
       <ph-icon icon="spinner" class="animate-spin h-5 w-5 text-blue-600 mx-auto" />
-      <p v-if="isUploading" class="text-xs text-gray-500 mt-1">上傳中...</p>
+      <p v-if="isUploading" class="text-xs text-gray-500 mt-1">{{ t('attachment.uploading') }}</p>
     </div>
 
     <!-- Attachments list -->
@@ -204,14 +208,14 @@ const closePreview = () => {
           <button
             @click="handleDownload(attachment)"
             class="p-1 text-gray-400 hover:text-blue-600"
-            title="下載"
+            :title="t('attachment.download')"
           >
             <ph-icon icon="download" class="w-4 h-4" />
           </button>
           <button
             @click="handleRemove(attachment.id)"
             class="p-1 text-gray-400 hover:text-red-500"
-            title="刪除"
+            :title="t('attachment.remove')"
           >
             <ph-icon icon="trash" class="w-4 h-4" />
           </button>
@@ -223,7 +227,7 @@ const closePreview = () => {
         v-if="attachmentsStore.attachments.length === 0"
         class="text-center py-4 text-gray-400 text-sm"
       >
-        沒有附件
+        {{ t('attachment.noAttachments') }}
       </div>
     </div>
 
@@ -244,7 +248,7 @@ const closePreview = () => {
           <div class="text-center">
             <p class="text-white mb-2">{{ previewImage.name }}</p>
             <p class="text-gray-400 text-sm">
-              (圖片預覽需要實際 API 支援)
+              {{ t('attachment.previewNotAvailable') }}
             </p>
           </div>
         </div>

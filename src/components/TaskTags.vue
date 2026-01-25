@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useTagsStore } from '@/stores/tags'
+import { useToast } from '@/stores/toast'
 
 const props = defineProps<{
   taskId: number
@@ -11,6 +13,8 @@ const emit = defineEmits<{
   updated: []
 }>()
 
+const { t } = useI18n()
+const toast = useToast()
 const tagsStore = useTagsStore()
 
 const isEditing = ref(false)
@@ -80,7 +84,7 @@ const saveTags = async () => {
     emit('updated')
   } catch (error) {
     console.error('Failed to save tags:', error)
-    alert('儲存標籤失敗')
+    toast.error(t('tag.saveFailed'))
   } finally {
     isSubmitting.value = false
   }
@@ -114,13 +118,13 @@ const getTagColor = (tagName: string): string => {
   <div class="space-y-2">
     <!-- Header -->
     <div class="flex items-center justify-between">
-      <h3 class="text-sm font-medium text-gray-700">標籤</h3>
+      <h3 class="text-sm font-medium text-gray-700">{{ t('tag.title') }}</h3>
       <button
         v-if="!isEditing"
         @click="startEditing"
         class="text-sm text-blue-600 hover:text-blue-800"
       >
-        編輯
+        {{ t('tag.edit') }}
       </button>
     </div>
 
@@ -143,7 +147,7 @@ const getTagColor = (tagName: string): string => {
           v-if="tagsStore.taskTags.length === 0"
           class="text-xs text-gray-400 italic"
         >
-          無標籤
+          {{ t('tag.noTags') }}
         </span>
       </div>
 
@@ -168,7 +172,7 @@ const getTagColor = (tagName: string): string => {
 
         <!-- Available tags dropdown -->
         <div v-if="availableTags.length > 0" class="space-y-1">
-          <span class="text-xs text-gray-500">可用標籤：</span>
+          <span class="text-xs text-gray-500">{{ t('tag.availableTags') }}</span>
           <div class="flex flex-wrap gap-1">
             <button
               v-for="tag in availableTags"
@@ -186,7 +190,7 @@ const getTagColor = (tagName: string): string => {
           <input
             v-model="newTagName"
             type="text"
-            placeholder="新增標籤..."
+            :placeholder="t('tag.enterNewTag')"
             class="flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
             @keyup.enter="addNewTag"
           />
@@ -195,7 +199,7 @@ const getTagColor = (tagName: string): string => {
             :disabled="!newTagName.trim()"
             class="px-2 py-1 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 disabled:opacity-50"
           >
-            新增
+            {{ t('common.add') }}
           </button>
         </div>
 
@@ -206,14 +210,14 @@ const getTagColor = (tagName: string): string => {
             :disabled="isSubmitting"
             class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
           >
-            儲存
+            {{ t('common.save') }}
           </button>
           <button
             @click="cancelEditing"
             :disabled="isSubmitting"
             class="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
           >
-            取消
+            {{ t('common.cancel') }}
           </button>
         </div>
       </div>

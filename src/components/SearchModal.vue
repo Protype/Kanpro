@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useSearchStore } from '@/stores/search'
 import type { Task } from '@/types'
 
@@ -16,6 +17,7 @@ const emit = defineEmits<{
   select: [task: Task]
 }>()
 
+const { t } = useI18n()
 const searchStore = useSearchStore()
 
 const searchInput = ref('')
@@ -142,7 +144,7 @@ onUnmounted(() => {
                 v-model="searchInput"
                 type="text"
                 class="w-full pl-10 pr-4 py-3 border-0 focus:outline-none focus:ring-0 text-lg"
-                placeholder="搜尋任務... (例如: status:open)"
+                :placeholder="t('search.placeholder')"
                 @keyup.escape="handleClose"
                 @keydown="handleKeydown"
               />
@@ -156,13 +158,13 @@ onUnmounted(() => {
 
           <!-- Search Tips (when no query) -->
           <div v-if="!searchInput && !searchStore.results.length" class="p-4 text-sm text-gray-500">
-            <p class="font-medium mb-2">搜尋語法提示：</p>
+            <p class="font-medium mb-2">{{ t('search.syntaxTips') }}</p>
             <ul class="space-y-1 text-gray-400">
-              <li><code class="bg-gray-100 px-1 rounded">status:open</code> - 開啟中的任務</li>
-              <li><code class="bg-gray-100 px-1 rounded">status:closed</code> - 已關閉的任務</li>
-              <li><code class="bg-gray-100 px-1 rounded">assignee:me</code> - 指派給我的任務</li>
-              <li><code class="bg-gray-100 px-1 rounded">due:today</code> - 今天到期</li>
-              <li><code class="bg-gray-100 px-1 rounded">#123</code> - 任務編號</li>
+              <li><code class="bg-gray-100 px-1 rounded">status:open</code> - {{ t('search.syntaxStatusOpen') }}</li>
+              <li><code class="bg-gray-100 px-1 rounded">status:closed</code> - {{ t('search.syntaxStatusClosed') }}</li>
+              <li><code class="bg-gray-100 px-1 rounded">assignee:me</code> - {{ t('search.syntaxAssigneeMe') }}</li>
+              <li><code class="bg-gray-100 px-1 rounded">due:today</code> - {{ t('search.syntaxDueToday') }}</li>
+              <li><code class="bg-gray-100 px-1 rounded">#123</code> - {{ t('search.syntaxTaskId') }}</li>
             </ul>
           </div>
 
@@ -199,7 +201,7 @@ onUnmounted(() => {
                     task.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
                   ]"
                 >
-                  {{ task.is_active ? '開啟' : '已關閉' }}
+                  {{ task.is_active ? t('task.open') : t('task.closed') }}
                 </span>
               </div>
             </div>
@@ -211,8 +213,8 @@ onUnmounted(() => {
             class="p-8 text-center text-gray-500"
           >
             <ph-icon icon="face-frown" class="w-12 h-12 mx-auto text-gray-300 mb-3" />
-            <p>找不到符合的任務</p>
-            <p class="text-sm text-gray-400 mt-1">嘗試其他搜尋詞或搜尋語法</p>
+            <p>{{ t('search.noResults') }}</p>
+            <p class="text-sm text-gray-400 mt-1">{{ t('search.tryOtherTerms') }}</p>
           </div>
         </div>
       </div>

@@ -27,7 +27,7 @@ describe('useTheme', () => {
     })
 
     it('should have correct theme info', () => {
-      expect(theme.themeInfo.value.name).toBe('Twenty CRM')
+      expect(theme.themeInfo.value.nameKey).toBe('theme.twentyCrm')
       expect(theme.themeInfo.value.isDark).toBe(false)
     })
   })
@@ -100,8 +100,8 @@ describe('useTheme', () => {
       theme.setTheme('twenty-crm')
 
       expect(theme.themeInfo.value.id).toBe('twenty-crm')
-      expect(theme.themeInfo.value.name).toBe('Twenty CRM')
-      expect(theme.themeInfo.value.description).toBe('清爽專業風格')
+      expect(theme.themeInfo.value.nameKey).toBe('theme.twentyCrm')
+      expect(theme.themeInfo.value.descriptionKey).toBe('theme.twentyCrmDesc')
       expect(theme.themeInfo.value.isDark).toBe(false)
     })
 
@@ -109,8 +109,8 @@ describe('useTheme', () => {
       theme.setTheme('github-dark')
 
       expect(theme.themeInfo.value.id).toBe('github-dark')
-      expect(theme.themeInfo.value.name).toBe('GitHub Dark')
-      expect(theme.themeInfo.value.description).toBe('工程師護眼風格')
+      expect(theme.themeInfo.value.nameKey).toBe('theme.githubDark')
+      expect(theme.themeInfo.value.descriptionKey).toBe('theme.githubDarkDesc')
       expect(theme.themeInfo.value.isDark).toBe(true)
     })
 
@@ -118,8 +118,8 @@ describe('useTheme', () => {
       theme.setTheme('dracula')
 
       expect(theme.themeInfo.value.id).toBe('dracula')
-      expect(theme.themeInfo.value.name).toBe('Dracula')
-      expect(theme.themeInfo.value.description).toBe('經典暗色主題')
+      expect(theme.themeInfo.value.nameKey).toBe('theme.dracula')
+      expect(theme.themeInfo.value.descriptionKey).toBe('theme.draculaDesc')
       expect(theme.themeInfo.value.isDark).toBe(true)
     })
   })
@@ -201,8 +201,8 @@ describe('useTheme', () => {
     it('should have all required fields', () => {
       THEMES.forEach(theme => {
         expect(theme.id).toBeDefined()
-        expect(theme.name).toBeDefined()
-        expect(theme.description).toBeDefined()
+        expect(theme.nameKey).toBeDefined()
+        expect(theme.descriptionKey).toBeDefined()
         expect(typeof theme.isDark).toBe('boolean')
       })
     })

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useBoardStore } from '@/stores/board'
 import { useNotificationsStore } from '@/stores/notifications'
 import UserAvatar from '@/components/UserAvatar.vue'
@@ -17,6 +18,7 @@ const emit = defineEmits<{
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 const boardStore = useBoardStore()
 const notificationsStore = useNotificationsStore()
 
@@ -25,24 +27,24 @@ const isLoading = ref(false)
 const activities = ref<Activity[]>([])
 const error = ref<string | null>(null)
 
-const eventLabels: Record<string, string> = {
-  'task.create': '建立了任務',
-  'task.update': '更新了任務',
-  'task.close': '關閉了任務',
-  'task.open': '重新開啟了任務',
-  'task.move.column': '移動任務至清單',
-  'task.move.swimlane': '將任務移至泳道',
-  'task.move.position': '調整了任務位置',
-  'task.assignee_change': '變更了任務指派人',
-  'comment.create': '發表了評論於',
-  'comment.update': '更新了評論於',
-  'comment.delete': '刪除了評論於',
-  'subtask.create': '新增了子任務',
-  'subtask.update': '更新了子任務',
-  'subtask.delete': '刪除了子任務',
-  'task_file.create': '上傳了附件至',
-  'task_internal_link.create_update': '建立了任務連結',
-  'task_internal_link.delete': '刪除了任務連結'
+const eventLabelKeys: Record<string, string> = {
+  'task.create': 'activity.eventTaskCreate',
+  'task.update': 'activity.eventTaskUpdate',
+  'task.close': 'activity.eventTaskClose',
+  'task.open': 'activity.eventTaskOpen',
+  'task.move.column': 'activity.eventTaskMoveColumn',
+  'task.move.swimlane': 'activity.eventTaskMoveSwimlane',
+  'task.move.position': 'activity.eventTaskMovePosition',
+  'task.assignee_change': 'activity.eventTaskAssigneeChange',
+  'comment.create': 'activity.eventCommentCreate',
+  'comment.update': 'activity.eventCommentUpdate',
+  'comment.delete': 'activity.eventCommentDelete',
+  'subtask.create': 'activity.eventSubtaskCreate',
+  'subtask.update': 'activity.eventSubtaskUpdate',
+  'subtask.delete': 'activity.eventSubtaskDelete',
+  'task_file.create': 'activity.eventFileCreate',
+  'task_internal_link.create_update': 'activity.eventLinkCreate',
+  'task_internal_link.delete': 'activity.eventLinkDelete'
 }
 
 watch(() => route.params.id, async (newId) => {
@@ -68,14 +70,15 @@ const loadData = async () => {
       a => a.project_id === projectId.value
     )
   } catch (e) {
-    error.value = e instanceof Error ? e.message : '載入專案動態失敗'
+    error.value = e instanceof Error ? e.message : t('activity.loadProjectActivityFailed')
   } finally {
     isLoading.value = false
   }
 }
 
 const getEventLabel = (eventName: string): string => {
-  return eventLabels[eventName] || eventName
+  const key = eventLabelKeys[eventName]
+  return key ? t(key) : eventName
 }
 
 const formatDate = (timestamp: number): string => {
@@ -86,18 +89,12 @@ const formatDate = (timestamp: number): string => {
   const diffHours = Math.floor(diffMs / 3600000)
   const diffDays = Math.floor(diffMs / 86400000)
 
-  if (diffMins < 1) return '剛剛'
-  if (diffMins < 60) return `${diffMins} 分鐘前`
-  if (diffHours < 24) return `${diffHours} 小時前`
-  if (diffDays < 7) return `${diffDays} 天前`
+  if (diffMins < 1) return t('time.justNow')
+  if (diffMins < 60) return t('time.minutesAgo', { n: diffMins })
+  if (diffHours < 24) return t('time.hoursAgo', { n: diffHours })
+  if (diffDays < 7) return t('time.daysAgo', { n: diffDays })
 
-  return date.toLocaleDateString('zh-TW', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
+  return date.toLocaleDateString()
 }
 
 // Helper to safely extract nested data from activity
@@ -122,7 +119,7 @@ function getTaskTitle(activity: Activity): string {
 }
 
 function getAuthorName(activity: Activity): string {
-  return activity.author_name || activity.author_username || '未知使用者'
+  return activity.author_name || activity.author_username || t('activity.unknownUser')
 }
 
 function getAssigneeName(activity: Activity): string | null {
@@ -236,7 +233,7 @@ const groupedActivities = computed(() => {
       <!-- Error -->
       <div v-else-if="error" class="bg-error/10 border border-error/20 rounded-lg p-4 text-error max-w-2xl mx-auto">
         {{ error }}
-        <button @click="loadData" class="ml-4 underline">重試</button>
+        <button @click="loadData" class="ml-4 underline cursor-pointer">{{ t('common.retry') }}</button>
       </div>
 
       <!-- Activities Timeline -->
@@ -244,7 +241,7 @@ const groupedActivities = computed(() => {
         <!-- Empty State -->
         <div v-if="activities.length === 0" class="card p-12 text-center">
           <ph-icon icon="bolt" class="w-16 h-16 mx-auto mb-4 text-content-tertiary" />
-          <p class="text-content-secondary">沒有近期活動</p>
+          <p class="text-content-secondary">{{ t('activity.noRecentActivity') }}</p>
         </div>
 
         <!-- Grouped Activities -->
@@ -292,13 +289,13 @@ const groupedActivities = computed(() => {
                       <!-- Column info for move events -->
                       <p v-if="activity.event_name === 'task.move.column' && getColumnName(activity)">
                         <ph-icon icon="arrow-right" class="w-3.5 h-3.5 inline mr-1" />
-                        狀態：{{ getColumnName(activity) }}
+                        {{ t('activity.column') }}: {{ getColumnName(activity) }}
                       </p>
 
                       <!-- Assignee info -->
                       <p v-if="activity.event_name === 'task.assignee_change' && getAssigneeName(activity)">
                         <ph-icon icon="user" class="w-3.5 h-3.5 inline mr-1" />
-                        指派給：{{ getAssigneeName(activity) }}
+                        {{ t('activity.assignedTo') }}: {{ getAssigneeName(activity) }}
                       </p>
 
                       <!-- Comment preview -->

@@ -3,14 +3,14 @@
     <!-- Loading State -->
     <div v-if="isLoading" class="flex flex-col items-center justify-center h-64 gap-3">
       <div class="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
-      <span class="text-sm text-content-tertiary">載入中...</span>
+      <span class="text-sm text-content-tertiary">{{ t('common.loading') }}</span>
     </div>
 
     <!-- Error State -->
     <div v-else-if="error" class="flex flex-col items-center justify-center h-64">
         <ph-icon icon="warning" class="w-12 h-12 text-error mb-3" />
         <p class="text-error font-medium">{{ error }}</p>
-        <button @click="loadData" class="btn-secondary mt-4">重試</button>
+        <button @click="loadData" class="btn-secondary mt-4">{{ t('common.retry') }}</button>
       </div>
 
       <!-- Content -->
@@ -18,8 +18,8 @@
       <!-- Progress Section -->
       <section class="mb-6">
         <div class="flex items-center justify-between mb-3">
-          <h2 class="text-xs font-semibold text-content-tertiary uppercase tracking-wider">任務進度</h2>
-          <span class="text-sm text-content-secondary">共 {{ totalTasks }} 項任務</span>
+          <h2 class="text-xs font-semibold text-content-tertiary uppercase tracking-wider">{{ t('project.taskProgress') }}</h2>
+          <span class="text-sm text-content-secondary">{{ t('project.totalTaskCount', { count: totalTasks }) }}</span>
         </div>
 
         <!-- Progress Bar -->
@@ -65,14 +65,14 @@
             <div class="flex items-center justify-between px-5 py-4 border-b border-edge">
               <h3 class="flex items-center gap-2 text-sm font-semibold text-content">
                 <ph-icon icon="file-text" class="w-4 h-4" />
-                專案描述
+                {{ t('project.projectDescription') }}
               </h3>
             </div>
             <div class="px-5 py-4">
               <p v-if="project?.description" class="text-sm text-content-secondary leading-relaxed whitespace-pre-wrap">
                 {{ project.description }}
               </p>
-              <p v-else class="text-sm text-content-tertiary">尚未添加專案描述</p>
+              <p v-else class="text-sm text-content-tertiary">{{ t('project.noDescription') }}</p>
             </div>
           </section>
 
@@ -81,20 +81,20 @@
             <div class="flex items-center justify-between px-5 py-4 border-b border-edge">
               <h3 class="flex items-center gap-2 text-sm font-semibold text-content">
                 <ph-icon icon="bolt" class="w-4 h-4" />
-                最近活動
+                {{ t('activity.recentActivity') }}
               </h3>
               <router-link
                 v-if="activities.length > 0"
                 :to="`/projects/${projectId}/activity`"
                 class="text-xs text-accent hover:text-accent-hover font-medium"
               >
-                查看全部
+                {{ t('activity.viewAll') }}
               </router-link>
             </div>
             <div class="px-5 py-4">
               <div v-if="activities.length === 0" class="flex flex-col items-center justify-center py-6 gap-2">
                 <ph-icon icon="clock" class="w-8 h-8 text-content-tertiary" />
-                <p class="text-sm text-content-tertiary">目前沒有活動紀錄</p>
+                <p class="text-sm text-content-tertiary">{{ t('activity.noRecentActivity') }}</p>
               </div>
               <div v-else class="space-y-0">
                 <div
@@ -131,10 +131,10 @@
         <div class="flex flex-col gap-5">
           <!-- Project Info Card -->
           <section class="bg-surface rounded-xl border border-edge p-5 shadow-sm">
-            <h3 class="text-sm font-semibold text-content mb-4">專案資訊</h3>
+            <h3 class="text-sm font-semibold text-content mb-4">{{ t('project.projectInfo') }}</h3>
             <dl class="space-y-3">
               <div class="flex items-center justify-between">
-                <dt class="text-sm text-content-tertiary">狀態</dt>
+                <dt class="text-sm text-content-tertiary">{{ t('common.status') }}</dt>
                 <dd>
                   <span
                     :class="[
@@ -144,16 +144,16 @@
                         : 'bg-surface-tertiary text-content-tertiary'
                     ]"
                   >
-                    {{ isProjectActive ? '啟用中' : '已停用' }}
+                    {{ isProjectActive ? t('common.active') : t('common.inactive') }}
                   </span>
                 </dd>
               </div>
               <div v-if="project?.identifier" class="flex items-center justify-between">
-                <dt class="text-sm text-content-tertiary">識別碼</dt>
+                <dt class="text-sm text-content-tertiary">{{ t('project.identifier') }}</dt>
                 <dd class="text-sm font-mono text-xs bg-surface-secondary px-2 py-0.5 rounded">{{ project.identifier }}</dd>
               </div>
               <div v-if="projectOwner" class="flex items-center justify-between">
-                <dt class="text-sm text-content-tertiary">擁有者</dt>
+                <dt class="text-sm text-content-tertiary">{{ t('project.owner') }}</dt>
                 <dd class="text-sm text-content font-medium">{{ projectOwner }}</dd>
               </div>
             </dl>
@@ -162,12 +162,12 @@
           <!-- Team Card -->
           <section class="bg-surface rounded-xl border border-edge p-5 shadow-sm">
             <div class="flex items-center justify-between mb-4">
-              <h3 class="text-sm font-semibold text-content">團隊成員</h3>
+              <h3 class="text-sm font-semibold text-content">{{ t('project.teamMembers') }}</h3>
               <span class="text-xs text-content-tertiary bg-surface-secondary px-2 py-0.5 rounded-full">{{ membersList.length }}</span>
             </div>
 
             <div v-if="membersList.length === 0" class="flex flex-col items-center justify-center py-6 gap-2">
-              <p class="text-sm text-content-tertiary">尚未添加成員</p>
+              <p class="text-sm text-content-tertiary">{{ t('project.noMembers') }}</p>
             </div>
 
             <div v-else class="flex flex-wrap gap-2">
@@ -185,19 +185,19 @@
 
           <!-- Quick Stats -->
           <section class="bg-surface rounded-xl border border-edge p-5 shadow-sm">
-            <h3 class="text-sm font-semibold text-content mb-4">統計數據</h3>
+            <h3 class="text-sm font-semibold text-content mb-4">{{ t('project.statistics') }}</h3>
             <div class="grid grid-cols-3 gap-3">
               <div class="flex flex-col items-center text-center">
                 <span class="text-xl font-bold text-content tabular-nums">{{ activityStats.taskCreated }}</span>
-                <span class="text-xs text-content-tertiary mt-0.5">已建立</span>
+                <span class="text-xs text-content-tertiary mt-0.5">{{ t('project.created') }}</span>
               </div>
               <div class="flex flex-col items-center text-center">
                 <span class="text-xl font-bold text-content tabular-nums">{{ activityStats.taskClosed }}</span>
-                <span class="text-xs text-content-tertiary mt-0.5">已完成</span>
+                <span class="text-xs text-content-tertiary mt-0.5">{{ t('project.completed') }}</span>
               </div>
               <div class="flex flex-col items-center text-center">
                 <span class="text-xl font-bold text-content tabular-nums">{{ activityStats.total }}</span>
-                <span class="text-xs text-content-tertiary mt-0.5">總活動</span>
+                <span class="text-xs text-content-tertiary mt-0.5">{{ t('project.totalActivities') }}</span>
               </div>
             </div>
           </section>
@@ -210,6 +210,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useBoardStore } from '@/stores/board'
 import { useMembersStore } from '@/stores/members'
 import { useProjectsStore } from '@/stores/projects'
@@ -218,6 +219,7 @@ import UserAvatar from '@/components/UserAvatar.vue'
 import type { ProjectMember } from '@/types'
 
 const route = useRoute()
+const { t } = useI18n()
 const boardStore = useBoardStore()
 const membersStore = useMembersStore()
 const projectsStore = useProjectsStore()
@@ -293,34 +295,36 @@ function getColumnPercentage(count: number | undefined): number {
   return ((count || 0) / totalTasks.value) * 100
 }
 
+const eventLabelKeys: Record<string, string> = {
+  'task.create': 'activity.eventTaskCreate',
+  'task.update': 'activity.eventTaskUpdate',
+  'task.close': 'activity.eventTaskClose',
+  'task.open': 'activity.eventTaskOpen',
+  'task.move.column': 'activity.eventTaskMoveColumn',
+  'task.move.swimlane': 'activity.eventTaskMoveSwimlane',
+  'task.move.position': 'activity.eventTaskMovePosition',
+  'comment.create': 'activity.eventCommentCreate',
+  'subtask.create': 'activity.eventSubtaskCreate',
+  'subtask.update': 'activity.eventSubtaskUpdate',
+  'task_file.create': 'activity.eventFileCreate'
+}
+
 function formatEventName(eventName: string): string {
-  const eventMap: Record<string, string> = {
-    'task.create': '建立了任務',
-    'task.update': '更新了任務',
-    'task.close': '完成了任務',
-    'task.open': '重新開啟任務',
-    'task.move.column': '移動了任務',
-    'task.move.swimlane': '移動了任務',
-    'task.move.position': '調整了位置',
-    'comment.create': '評論了',
-    'subtask.create': '新增子任務',
-    'subtask.update': '更新子任務',
-    'file.create': '上傳了附件'
-  }
-  return eventMap[eventName] || eventName.replace(/\./g, ' ')
+  const key = eventLabelKeys[eventName]
+  return key ? t(key) : eventName.replace(/\./g, ' ')
 }
 
 function formatRelativeTime(timestamp: number): string {
   const now = Date.now() / 1000
   const diff = now - timestamp
 
-  if (diff < 60) return '剛剛'
-  if (diff < 3600) return `${Math.floor(diff / 60)} 分鐘前`
-  if (diff < 86400) return `${Math.floor(diff / 3600)} 小時前`
-  if (diff < 604800) return `${Math.floor(diff / 86400)} 天前`
+  if (diff < 60) return t('time.justNow')
+  if (diff < 3600) return t('time.minutesAgo', { n: Math.floor(diff / 60) })
+  if (diff < 86400) return t('time.hoursAgo', { n: Math.floor(diff / 3600) })
+  if (diff < 604800) return t('time.daysAgo', { n: Math.floor(diff / 86400) })
 
   const date = new Date(timestamp * 1000)
-  return date.toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' })
+  return date.toLocaleDateString()
 }
 
 async function loadData() {
@@ -335,7 +339,7 @@ async function loadData() {
       analyticsStore.fetchProjectActivity(projectId.value)
     ])
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '載入專案資料失敗'
+    error.value = err instanceof Error ? err.message : t('project.loadProjectFailed')
   } finally {
     isLoading.value = false
   }

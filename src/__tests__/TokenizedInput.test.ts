@@ -1,7 +1,18 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { createI18n } from 'vue-i18n'
 import TokenizedInput from '@/components/TokenizedInput.vue'
 import type { InputToken } from '@/components/TokenizedInput.vue'
+import en_US from '@/i18n/locales/en_US.json'
+import zh_TW from '@/i18n/locales/zh_TW.json'
+
+// Create i18n instance for tests
+const i18n = createI18n({
+  legacy: false,
+  locale: 'zh_TW',
+  fallbackLocale: 'zh_TW',
+  messages: { en_US, zh_TW }
+})
 
 describe('TokenizedInput', () => {
   const mockTokens: InputToken[] = [
@@ -16,7 +27,8 @@ describe('TokenizedInput', () => {
           tokens: [],
           textInput: '',
           placeholder: 'Enter text...'
-        }
+        },
+        global: { plugins: [i18n] }
       })
 
       expect(wrapper.find('input').exists()).toBe(true)
@@ -28,7 +40,8 @@ describe('TokenizedInput', () => {
           tokens: mockTokens,
           textInput: '',
           placeholder: ''
-        }
+        },
+        global: { plugins: [i18n] }
       })
 
       const pills = wrapper.findAll('[data-testid="token-pill"]')
@@ -41,7 +54,8 @@ describe('TokenizedInput', () => {
           tokens: mockTokens,
           textInput: '',
           placeholder: ''
-        }
+        },
+        global: { plugins: [i18n] }
       })
 
       const pills = wrapper.findAll('[data-testid="token-pill"]')
@@ -55,7 +69,8 @@ describe('TokenizedInput', () => {
           tokens: [],
           textInput: '',
           placeholder: 'Enter text...'
-        }
+        },
+        global: { plugins: [i18n] }
       })
 
       const input = wrapper.find('input')
@@ -80,7 +95,8 @@ describe('TokenizedInput', () => {
             tokens: [{ type: 'symbol', symbol, value: 'test', display: 'Test' }],
             textInput: '',
             placeholder: ''
-          }
+          },
+          global: { plugins: [i18n] }
         })
 
         const pill = wrapper.find('[data-testid="token-pill"]')
@@ -96,7 +112,8 @@ describe('TokenizedInput', () => {
           tokens: [],
           textInput: '',
           placeholder: ''
-        }
+        },
+        global: { plugins: [i18n] }
       })
 
       const input = wrapper.find('input')
@@ -112,7 +129,8 @@ describe('TokenizedInput', () => {
           tokens: mockTokens,
           textInput: '',
           placeholder: ''
-        }
+        },
+        global: { plugins: [i18n] }
       })
 
       const input = wrapper.find('input')
@@ -129,7 +147,8 @@ describe('TokenizedInput', () => {
           tokens: mockTokens,
           textInput: 'some text',
           placeholder: ''
-        }
+        },
+        global: { plugins: [i18n] }
       })
 
       const input = wrapper.find('input')
@@ -148,7 +167,8 @@ describe('TokenizedInput', () => {
           tokens: [],
           textInput: 'test',
           placeholder: ''
-        }
+        },
+        global: { plugins: [i18n] }
       })
 
       const input = wrapper.find('input')
@@ -163,7 +183,8 @@ describe('TokenizedInput', () => {
           tokens: [],
           textInput: 'test task',
           placeholder: ''
-        }
+        },
+        global: { plugins: [i18n] }
       })
 
       const input = wrapper.find('input')
@@ -178,7 +199,8 @@ describe('TokenizedInput', () => {
           tokens: [],
           textInput: '',
           placeholder: ''
-        }
+        },
+        global: { plugins: [i18n] }
       })
 
       const input = wrapper.find('input')
@@ -196,7 +218,8 @@ describe('TokenizedInput', () => {
           textInput: '',
           placeholder: ''
         },
-        attachTo: document.body
+        attachTo: document.body,
+        global: { plugins: [i18n] }
       })
 
       const component = wrapper.vm as any
@@ -217,7 +240,8 @@ describe('TokenizedInput', () => {
           tokens: mockTokens,
           textInput: '',
           placeholder: ''
-        }
+        },
+        global: { plugins: [i18n] }
       })
 
       const closeButtons = wrapper.findAll('[data-testid="token-remove"]')
@@ -236,7 +260,8 @@ describe('TokenizedInput', () => {
           textInput: '',
           placeholder: '',
           disabled: true
-        }
+        },
+        global: { plugins: [i18n] }
       })
 
       const input = wrapper.find('input')

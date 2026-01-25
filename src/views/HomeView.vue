@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const { t } = useI18n()
 const authStore = useAuthStore()
 
 const handleLogout = async () => {
@@ -24,15 +26,15 @@ const handleLogout = async () => {
             @click="handleLogout"
             class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md"
           >
-            登出
+            {{ t('auth.logout') }}
           </button>
         </div>
       </div>
     </header>
     <main class="mx-auto max-w-7xl px-4 py-6">
       <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">歡迎回來！</h2>
-        <p class="text-gray-600">專案功能開發中...</p>
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">{{ t('dashboard.welcomeBack') }}</h2>
+        <p class="text-gray-600">{{ t('dashboard.developmentInProgress') }}</p>
       </div>
     </main>
   </div>

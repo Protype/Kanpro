@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useNotificationsStore } from '@/stores/notifications'
 import type { Activity } from '@/types'
 
 const router = useRouter()
+const { t } = useI18n()
 const notificationsStore = useNotificationsStore()
 
 const isOpen = ref(false)
@@ -49,7 +51,7 @@ function sendDesktopNotification(activity: Activity): void {
 
   const title = getEventLabel(activity.event_name)
   const taskTitle = getTaskTitle(activity)
-  const body = taskTitle ? `${taskTitle}` : '您有新的通知'
+  const body = taskTitle ? `${taskTitle}` : t('notification.newNotification')
 
   const notification = new Notification(title, {
     body,
@@ -73,28 +75,29 @@ function sendDesktopNotification(activity: Activity): void {
 // 追蹤已處理過的活動 ID（避免重複發送桌面通知）
 const processedActivityIds = new Set<number>()
 
-const eventLabels: Record<string, string> = {
-  'task.create': '建立任務',
-  'task.update': '更新任務',
-  'task.close': '關閉任務',
-  'task.open': '開啟任務',
-  'task.move.column': '移動任務清單',
-  'task.move.swimlane': '移動任務泳道',
-  'task.move.position': '調整任務位置',
-  'task.assignee_change': '變更指派人',
-  'comment.create': '新增評論',
-  'comment.update': '更新評論',
-  'comment.delete': '刪除評論',
-  'subtask.create': '新增子任務',
-  'subtask.update': '更新子任務',
-  'subtask.delete': '刪除子任務',
-  'task_file.create': '上傳附件',
-  'task_internal_link.create_update': '建立任務連結',
-  'task_internal_link.delete': '刪除任務連結'
+const eventLabelKeys: Record<string, string> = {
+  'task.create': 'notification.eventTaskCreate',
+  'task.update': 'notification.eventTaskUpdate',
+  'task.close': 'notification.eventTaskClose',
+  'task.open': 'notification.eventTaskOpen',
+  'task.move.column': 'notification.eventTaskMoveColumn',
+  'task.move.swimlane': 'notification.eventTaskMoveSwimlane',
+  'task.move.position': 'notification.eventTaskMovePosition',
+  'task.assignee_change': 'notification.eventTaskAssigneeChange',
+  'comment.create': 'notification.eventCommentCreate',
+  'comment.update': 'notification.eventCommentUpdate',
+  'comment.delete': 'notification.eventCommentDelete',
+  'subtask.create': 'notification.eventSubtaskCreate',
+  'subtask.update': 'notification.eventSubtaskUpdate',
+  'subtask.delete': 'notification.eventSubtaskDelete',
+  'task_file.create': 'notification.eventFileCreate',
+  'task_internal_link.create_update': 'notification.eventLinkCreate',
+  'task_internal_link.delete': 'notification.eventLinkDelete'
 }
 
 const getEventLabel = (eventName: string): string => {
-  return eventLabels[eventName] || eventName
+  const key = eventLabelKeys[eventName]
+  return key ? t(key) : eventName
 }
 
 const formatDate = (timestamp: number): string => {
@@ -105,12 +108,12 @@ const formatDate = (timestamp: number): string => {
   const diffHours = Math.floor(diffMs / 3600000)
   const diffDays = Math.floor(diffMs / 86400000)
 
-  if (diffMins < 1) return '剛剛'
-  if (diffMins < 60) return `${diffMins} 分鐘前`
-  if (diffHours < 24) return `${diffHours} 小時前`
-  if (diffDays < 7) return `${diffDays} 天前`
+  if (diffMins < 1) return t('time.justNow')
+  if (diffMins < 60) return t('time.minutesAgo', { n: diffMins })
+  if (diffHours < 24) return t('time.hoursAgo', { n: diffHours })
+  if (diffDays < 7) return t('time.daysAgo', { n: diffDays })
 
-  return date.toLocaleDateString('zh-TW')
+  return date.toLocaleDateString()
 }
 
 const getTaskTitle = (activity: Activity): string => {
@@ -239,7 +242,7 @@ watch(() => isOpen.value, (open) => {
       data-testid="notifications-btn"
       @click.stop="toggleDropdown"
       class="relative p-2 text-content-tertiary hover:text-content hover:bg-surface-hover rounded-lg transition-colors"
-      title="通知"
+      :title="t('notification.notifications')"
     >
       <!-- Bell Icon -->
       <ph-icon icon="bell" class="w-5 h-5" />
@@ -270,13 +273,13 @@ watch(() => isOpen.value, (open) => {
       >
         <!-- Header -->
         <div class="flex items-center justify-between px-4 py-3 border-b border-edge bg-surface-secondary">
-          <h3 class="text-sm font-semibold text-content">通知</h3>
+          <h3 class="text-sm font-semibold text-content">{{ t('notification.notifications') }}</h3>
           <button
             v-if="notificationsStore.unreadCount > 0"
             @click="handleMarkAllAsRead"
             class="text-xs text-accent hover:text-accent-hover"
           >
-            全部標為已讀
+            {{ t('notification.markAllAsRead') }}
           </button>
         </div>
 
@@ -333,7 +336,7 @@ watch(() => isOpen.value, (open) => {
             v-if="notificationsStore.activities.length === 0 && !notificationsStore.isLoading"
             class="px-4 py-8 text-center text-content-secondary text-sm"
           >
-            沒有通知
+            {{ t('notification.noNotifications') }}
           </div>
         </div>
       </div>

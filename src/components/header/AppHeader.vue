@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useSidebarStore } from '@/stores/sidebar'
 import { useBoardStore } from '@/stores/board'
 import NotificationsDropdown from '@/components/NotificationsDropdown.vue'
@@ -14,6 +15,7 @@ const emit = defineEmits<{
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 const sidebarStore = useSidebarStore()
 const boardStore = useBoardStore()
 
@@ -26,27 +28,95 @@ const isAdminContext = computed(() => route.path.startsWith('/admin'))
 // Check if we're on project create page
 const isProjectCreatePage = computed(() => route.name === 'project-create')
 
-const projectNavItems = computed(() => {
+// Responsive navigation state
+const navContainerRef = ref<HTMLElement | null>(null)
+const isNavCollapsed = ref(false)
+const showMoreMenu = ref(false)
+
+// Primary nav items (always visible)
+const primaryNavItems = computed(() => {
   const id = currentProjectId.value
   if (!id) return []
   return [
-    { name: 'project-overview', label: '總覽', icon: 'squares-four', route: `/projects/${id}/overview` },
-    { name: 'project-list', label: '列表', icon: 'list', route: `/projects/${id}` },
-    { name: 'project-board', label: '看板', icon: 'table-columns', route: `/projects/${id}/board` },
-    { name: 'project-calendar', label: '行事曆', icon: 'calendar', route: `/projects/${id}/calendar` },
-    { name: 'project-activity', label: '動態', icon: 'lightning', route: `/projects/${id}/activity` },
-    { name: 'project-analytics', label: '分析', icon: 'chart-bar', route: `/projects/${id}/analytics` },
-    { name: 'project-settings', label: '設定', icon: 'gear', route: `/projects/${id}/settings` }
+    { name: 'project-overview', label: t('project.overview'), icon: 'squares-four', route: `/projects/${id}/overview` },
+    { name: 'project-list', label: t('project.list'), icon: 'list', route: `/projects/${id}` },
+    { name: 'project-board', label: t('project.board'), icon: 'table-columns', route: `/projects/${id}/board` },
+    { name: 'project-calendar', label: t('project.calendar'), icon: 'calendar', route: `/projects/${id}/calendar` }
   ]
 })
 
+// Secondary nav items (collapse into dropdown when space is limited)
+const secondaryNavItems = computed(() => {
+  const id = currentProjectId.value
+  if (!id) return []
+  return [
+    { name: 'project-activity', label: t('project.activity'), icon: 'lightning', route: `/projects/${id}/activity` },
+    { name: 'project-analytics', label: t('project.analytics'), icon: 'chart-bar', route: `/projects/${id}/analytics` },
+    { name: 'project-settings', label: t('nav.settings'), icon: 'gear', route: `/projects/${id}/settings` }
+  ]
+})
+
+// All project nav items (for icon-only compact view)
+const projectNavItems = computed(() => [...primaryNavItems.value, ...secondaryNavItems.value])
+
+// Check if any secondary item is active
+const isSecondaryActive = computed(() => {
+  return secondaryNavItems.value.some(item => isActiveRoute(item.name))
+})
+
+const checkNavOverflow = () => {
+  const windowWidth = window.innerWidth
+  // Always collapse when window width is less than 1600px
+  // This ensures the nav doesn't overflow on most screens
+  isNavCollapsed.value = windowWidth < 1600
+}
+
+const setupResizeListener = () => {
+  window.addEventListener('resize', checkNavOverflow)
+  // Run immediately
+  checkNavOverflow()
+}
+
+const cleanupResizeListener = () => {
+  window.removeEventListener('resize', checkNavOverflow)
+}
+
+// Watch for project changes to re-check
+watch(currentProjectId, () => {
+  checkNavOverflow()
+}, { immediate: true })
+
+onMounted(() => {
+  setupResizeListener()
+})
+
+onUnmounted(() => {
+  cleanupResizeListener()
+})
+
+// Close more menu when clicking outside
+const handleClickOutsideMoreMenu = (event: MouseEvent) => {
+  const target = event.target as HTMLElement
+  if (!target.closest('[data-more-menu]')) {
+    showMoreMenu.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutsideMoreMenu)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutsideMoreMenu)
+})
+
 // Admin navigation items
-const adminNavItems = [
-  { name: 'admin-status', label: '系統狀態', icon: 'pulse', route: '/admin' },
-  { name: 'admin-settings', label: '系統設定', icon: 'gear', route: '/admin/settings' },
-  { name: 'admin-users', label: '使用者管理', icon: 'users', route: '/admin/users' },
-  { name: 'admin-groups', label: '群組管理', icon: 'users-three', route: '/admin/groups' }
-]
+const adminNavItems = computed(() => [
+  { name: 'admin-status', label: t('admin.systemStatus'), icon: 'pulse', route: '/admin' },
+  { name: 'admin-settings', label: t('admin.systemSettings'), icon: 'gear', route: '/admin/settings' },
+  { name: 'admin-users', label: t('admin.userManagement'), icon: 'users', route: '/admin/users' },
+  { name: 'admin-groups', label: t('admin.groupManagement'), icon: 'users-three', route: '/admin/groups' }
+])
 
 function isActiveRoute(routeName: string): boolean {
   return route.name === routeName
@@ -92,7 +162,7 @@ function openCreateTask(): void {
             <ph-icon icon="folder-plus" class="w-4 h-4 text-accent" />
           </div>
           <span class="text-base font-semibold text-content">
-            建立新專案
+            {{ t('project.createProject') }}
           </span>
         </div>
       </template>
@@ -103,7 +173,7 @@ function openCreateTask(): void {
         <button
           @click="openCreateProject"
           class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
-          title="新增專案"
+          :title="t('project.newProject')"
         >
           <ph-icon icon="folder-simple-plus" weight="fill" class="w-5 h-5" />
         </button>
@@ -112,7 +182,7 @@ function openCreateTask(): void {
         <button
           @click="openCreateTask"
           class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
-          title="新增任務"
+          :title="t('task.newTask')"
         >
           <ph-icon icon="plus-circle" weight="fill" class="w-5 h-5" />
         </button>
@@ -123,7 +193,7 @@ function openCreateTask(): void {
           class="flex items-center gap-2 px-3 py-1.5 text-sm text-content-tertiary bg-surface-secondary hover:bg-surface-hover rounded-md transition-colors"
         >
           <ph-icon icon="magnifying-glass" weight="bold" class="w-4 h-4" />
-          <span>搜尋</span>
+          <span>{{ t('common.search') }}</span>
           <kbd class="px-1.5 py-0.5 text-xs bg-surface-tertiary rounded">⌘KK</kbd>
         </button>
       </template>
@@ -144,13 +214,14 @@ function openCreateTask(): void {
         <ph-icon icon="caret-right" class="w-4 h-4 text-content-tertiary ml-1 flex-shrink-0" />
 
         <!-- Full Navigation (xl and above) -->
-        <div class="hidden xl:flex items-center gap-1">
+        <div ref="navContainerRef" class="hidden xl:flex items-center gap-1">
+          <!-- Primary Nav Items (always visible) -->
           <button
-            v-for="item in projectNavItems"
+            v-for="item in primaryNavItems"
             :key="item.name"
             @click="navigateTo(item.route)"
             :class="[
-              'flex items-center gap-1.5 px-2 py-1.5 text-sm rounded-md transition-colors',
+              'flex items-center gap-1.5 px-2.5 py-1.5 text-sm rounded-md transition-colors whitespace-nowrap',
               isActiveRoute(item.name)
                 ? 'bg-accent text-content-inverse'
                 : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-hover'
@@ -160,6 +231,79 @@ function openCreateTask(): void {
             <ph-icon :icon="item.icon" class="w-4 h-4" />
             <span>{{ item.label }}</span>
           </button>
+
+          <!-- Secondary Nav Items (visible when not collapsed) -->
+          <template v-if="!isNavCollapsed">
+            <button
+              v-for="item in secondaryNavItems"
+              :key="item.name"
+              @click="navigateTo(item.route)"
+              :class="[
+                'flex items-center gap-1.5 px-2.5 py-1.5 text-sm rounded-md transition-colors whitespace-nowrap',
+                isActiveRoute(item.name)
+                  ? 'bg-accent text-content-inverse'
+                  : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-hover'
+              ]"
+              :title="item.label"
+            >
+              <ph-icon :icon="item.icon" class="w-4 h-4" />
+              <span>{{ item.label }}</span>
+            </button>
+          </template>
+
+          <!-- More Dropdown (visible when collapsed) -->
+          <div v-if="isNavCollapsed" class="relative" data-more-menu>
+            <button
+              @click.stop="showMoreMenu = !showMoreMenu"
+              :class="[
+                'flex items-center gap-1.5 px-2.5 py-1.5 text-sm rounded-md transition-colors whitespace-nowrap',
+                isSecondaryActive
+                  ? 'bg-accent text-content-inverse'
+                  : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-hover'
+              ]"
+            >
+              <ph-icon icon="dots-three" class="w-4 h-4" />
+              <span>{{ t('common.more') }}</span>
+              <ph-icon icon="caret-down" class="w-3 h-3" />
+            </button>
+
+            <!-- Dropdown Menu -->
+            <Transition
+              enter-active-class="transition ease-out duration-100"
+              enter-from-class="transform opacity-0 scale-95"
+              enter-to-class="transform opacity-100 scale-100"
+              leave-active-class="transition ease-in duration-75"
+              leave-from-class="transform opacity-100 scale-100"
+              leave-to-class="transform opacity-0 scale-95"
+            >
+              <div
+                v-if="showMoreMenu"
+                class="absolute left-0 mt-2 w-48 bg-surface rounded-lg shadow-lg ring-1 ring-edge overflow-hidden z-50"
+              >
+                <div class="py-1">
+                  <button
+                    v-for="item in secondaryNavItems"
+                    :key="item.name"
+                    @click="navigateTo(item.route); showMoreMenu = false"
+                    :class="[
+                      'w-full px-4 py-2 text-left text-sm flex items-center gap-3 transition-colors',
+                      isActiveRoute(item.name)
+                        ? 'bg-accent/10 text-accent'
+                        : 'text-content hover:bg-surface-hover'
+                    ]"
+                  >
+                    <ph-icon :icon="item.icon" class="w-4 h-4" />
+                    <span>{{ item.label }}</span>
+                    <ph-icon
+                      v-if="isActiveRoute(item.name)"
+                      icon="check"
+                      class="w-4 h-4 ml-auto"
+                    />
+                  </button>
+                </div>
+              </div>
+            </Transition>
+          </div>
         </div>
 
         <!-- Compact Navigation (lg to xl) - icons only with tooltips -->
@@ -169,7 +313,7 @@ function openCreateTask(): void {
             :key="item.name"
             @click="navigateTo(item.route)"
             :class="[
-              'p-1.5 rounded-md transition-colors',
+              'p-2 rounded-md transition-colors',
               isActiveRoute(item.name)
                 ? 'bg-accent text-content-inverse'
                 : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-hover'
@@ -187,7 +331,7 @@ function openCreateTask(): void {
         <div class="flex items-center gap-2 min-w-0">
           <ph-icon icon="gear-six" class="w-5 h-5 text-content-secondary flex-shrink-0" />
           <span class="text-base font-semibold text-content">
-            系統管理
+            {{ t('admin.administration') }}
           </span>
         </div>
 
@@ -201,7 +345,7 @@ function openCreateTask(): void {
             :key="item.name"
             @click="navigateTo(item.route)"
             :class="[
-              'flex items-center gap-1.5 px-2 py-1.5 text-sm rounded-md transition-colors',
+              'flex items-center gap-1.5 px-2.5 py-1.5 text-sm rounded-md transition-colors',
               isActiveRoute(item.name)
                 ? 'bg-accent text-content-inverse'
                 : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-hover'
@@ -220,7 +364,7 @@ function openCreateTask(): void {
             :key="item.name"
             @click="navigateTo(item.route)"
             :class="[
-              'p-1.5 rounded-md transition-colors',
+              'p-2 rounded-md transition-colors',
               isActiveRoute(item.name)
                 ? 'bg-accent text-content-inverse'
                 : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-hover'
@@ -244,7 +388,7 @@ function openCreateTask(): void {
         <button
           @click="openCreateProject"
           class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
-          title="新增專案"
+          :title="t('project.newProject')"
         >
           <ph-icon icon="folder-simple-plus" weight="fill" class="w-5 h-5" />
         </button>
@@ -253,7 +397,7 @@ function openCreateTask(): void {
         <button
           @click="openCreateTask"
           class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
-          title="新增任務"
+          :title="t('task.newTask')"
         >
           <ph-icon icon="plus-circle" weight="fill" class="w-5 h-5" />
         </button>
@@ -264,7 +408,7 @@ function openCreateTask(): void {
           class="flex items-center gap-2 px-3 py-1.5 text-sm text-content-tertiary bg-surface-secondary hover:bg-surface-hover rounded-md transition-colors"
         >
           <ph-icon icon="magnifying-glass" weight="bold" class="w-4 h-4" />
-          <span>搜尋</span>
+          <span>{{ t('common.search') }}</span>
           <kbd class="px-1.5 py-0.5 text-xs bg-surface-tertiary rounded">⌘KK</kbd>
         </button>
       </template>

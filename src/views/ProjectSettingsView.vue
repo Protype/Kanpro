@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useProjectsStore } from '@/stores/projects'
 import { useBoardStore } from '@/stores/board'
 import { useUsersStore } from '@/stores/users'
@@ -25,6 +26,7 @@ const emit = defineEmits<{
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 const projectsStore = useProjectsStore()
 const boardStore = useBoardStore()
 const usersStore = useUsersStore()
@@ -99,10 +101,10 @@ async function loadProjectData() {
     if (project) {
       populateForm(project)
     } else {
-      error.value = '找不到專案'
+      error.value = t('project.notFound')
     }
   } catch (err) {
-    error.value = '載入專案失敗'
+    error.value = t('project.loadFailed')
   } finally {
     isLoading.value = false
   }
@@ -137,7 +139,7 @@ function clearOwner() {
 
 async function handleSave() {
   if (!projectName.value.trim()) {
-    error.value = '專案名稱不能為空'
+    error.value = t('project.nameRequired')
     return
   }
 
@@ -168,11 +170,11 @@ async function handleSave() {
       }
     }
 
-    toast.success('儲存成功', '專案設定已更新')
+    toast.success(t('message.saved'), t('project.settingsUpdated'))
     await projectsStore.fetchProjects()
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '儲存失敗'
-    toast.error('儲存失敗', error.value)
+    error.value = err instanceof Error ? err.message : t('message.saveFailed')
+    toast.error(t('message.saveFailed'), error.value)
   } finally {
     isSaving.value = false
   }
@@ -184,11 +186,11 @@ async function handleDelete() {
 
   try {
     await projectsStore.removeProject(projectId.value)
-    toast.success('刪除成功', '專案已刪除')
+    toast.success(t('message.deleted'), t('project.projectDeleted'))
     router.push('/')
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '刪除失敗'
-    toast.error('刪除失敗', error.value)
+    error.value = err instanceof Error ? err.message : t('message.deleteFailed')
+    toast.error(t('message.deleteFailed'), error.value)
     showDeleteConfirm.value = false
   } finally {
     isDeleting.value = false
@@ -239,14 +241,14 @@ onMounted(() => {
               <!-- 專案名稱 -->
               <div>
                 <label for="projectName" class="block text-sm font-medium text-content-secondary mb-1.5">
-                  專案名稱 <span class="text-red-500">*</span>
+                  {{ t('project.projectName') }} <span class="text-red-500">*</span>
                 </label>
                 <input
                   id="projectName"
                   v-model="projectName"
                   type="text"
                   class="input"
-                  placeholder="輸入專案名稱"
+                  :placeholder="t('project.enterProjectName')"
                   :disabled="isSaving"
                 />
               </div>
@@ -254,14 +256,14 @@ onMounted(() => {
               <!-- 專案描述 -->
               <div>
                 <label for="projectDescription" class="block text-sm font-medium text-content-secondary mb-1.5">
-                  描述
+                  {{ t('common.description') }}
                 </label>
                 <textarea
                   id="projectDescription"
                   v-model="projectDescription"
                   rows="4"
                   class="input resize-none"
-                  placeholder="輸入專案描述（選填）"
+                  :placeholder="t('project.enterDescription')"
                   :disabled="isSaving"
                 ></textarea>
               </div>
@@ -269,18 +271,18 @@ onMounted(() => {
               <!-- 專案識別碼 -->
               <div>
                 <label for="projectIdentifier" class="block text-sm font-medium text-content-secondary mb-1.5">
-                  專案識別碼
+                  {{ t('project.identifier') }}
                 </label>
                 <input
                   id="projectIdentifier"
                   v-model="projectIdentifier"
                   type="text"
                   class="input"
-                  placeholder="例如：PROJ"
+                  :placeholder="t('project.identifierPlaceholder')"
                   :disabled="isSaving"
                 />
                 <p class="mt-1.5 text-xs text-content-tertiary">
-                  用於任務編號前綴，如：PROJ-123
+                  {{ t('project.identifierHint') }}
                 </p>
               </div>
             </div>
@@ -290,7 +292,7 @@ onMounted(() => {
               <!-- 擁有者 -->
               <div class="owner-dropdown-container">
                 <label class="block text-sm font-medium text-content-secondary mb-1.5">
-                  擁有者
+                  {{ t('project.owner') }}
                 </label>
                 <div class="relative">
                   <button
@@ -313,7 +315,7 @@ onMounted(() => {
                       </button>
                     </template>
                     <template v-else>
-                      <span class="flex-1 text-sm text-content-tertiary">選擇擁有者</span>
+                      <span class="flex-1 text-sm text-content-tertiary">{{ t('project.selectOwner') }}</span>
                     </template>
                     <ph-icon icon="chevron-down" class="w-4 h-4 text-content-tertiary" />
                   </button>
@@ -329,7 +331,7 @@ onMounted(() => {
                         <input
                           v-model="ownerSearchQuery"
                           type="text"
-                          placeholder="搜尋使用者..."
+                          :placeholder="t('user.searchUsers')"
                           class="w-full px-2 py-1 text-sm bg-surface-secondary border border-edge rounded text-content placeholder:text-content-tertiary focus:outline-none focus:ring-1 focus:ring-accent"
                         />
                       </div>
@@ -350,7 +352,7 @@ onMounted(() => {
                           </div>
                         </button>
                         <div v-if="filteredUsers.length === 0" class="px-3 py-2 text-sm text-content-tertiary">
-                          找不到使用者
+                          {{ t('user.noUsers') }}
                         </div>
                       </div>
                     </div>
@@ -362,7 +364,7 @@ onMounted(() => {
               <div class="grid grid-cols-2 gap-3">
                 <div>
                   <label for="startDate" class="block text-sm font-medium text-content-secondary mb-1.5">
-                    開始日期
+                    {{ t('project.startDate') }}
                   </label>
                   <input
                     id="startDate"
@@ -374,7 +376,7 @@ onMounted(() => {
                 </div>
                 <div>
                   <label for="endDate" class="block text-sm font-medium text-content-secondary mb-1.5">
-                    結束日期
+                    {{ t('project.endDate') }}
                   </label>
                   <input
                     id="endDate"
@@ -391,7 +393,7 @@ onMounted(() => {
               <div class="grid grid-cols-2 gap-3">
                 <div>
                   <label for="priorityDefault" class="block text-sm font-medium text-content-secondary mb-1.5">
-                    預設優先級
+                    {{ t('project.defaultPriority') }}
                   </label>
                   <input
                     id="priorityDefault"
@@ -405,7 +407,7 @@ onMounted(() => {
                 </div>
                 <div>
                   <label class="block text-sm font-medium text-content-secondary mb-1.5">
-                    優先級範圍
+                    {{ t('project.priorityRange') }}
                   </label>
                   <div class="flex items-center gap-1">
                     <input
@@ -432,7 +434,7 @@ onMounted(() => {
               <!-- 專案 Email -->
               <div>
                 <label for="projectEmail" class="block text-sm font-medium text-content-secondary mb-1.5">
-                  專案通知 Email
+                  {{ t('project.projectEmail') }}
                 </label>
                 <input
                   id="projectEmail"
@@ -455,10 +457,10 @@ onMounted(() => {
                 />
                 <div>
                   <label for="publicAccess" class="text-sm text-content font-medium cursor-pointer">
-                    啟用公開存取
+                    {{ t('project.enablePublicAccess') }}
                   </label>
                   <p class="text-xs text-content-tertiary mt-0.5">
-                    允許未登入的使用者檢視此專案
+                    {{ t('project.publicAccessDescription') }}
                   </p>
                 </div>
               </div>
@@ -473,7 +475,7 @@ onMounted(() => {
               class="btn-primary"
             >
               <ph-icon v-if="isSaving" icon="spinner" class="animate-spin -ml-1 mr-2 h-4 w-4" />
-              {{ isSaving ? '儲存中...' : '儲存變更' }}
+              {{ isSaving ? t('message.saving') : t('settings.saveChanges') }}
             </button>
           </div>
         </div>
@@ -522,15 +524,15 @@ onMounted(() => {
           <div class="px-6 py-4 bg-red-50 dark:bg-red-950/30 border-b border-red-200 dark:border-red-900/50">
             <div class="flex items-center gap-2">
               <ph-icon icon="warning" class="w-5 h-5 text-red-600 dark:text-red-400" />
-              <h2 class="text-base font-semibold text-red-700 dark:text-red-400">危險區域</h2>
+              <h2 class="text-base font-semibold text-red-700 dark:text-red-400">{{ t('project.dangerZone') }}</h2>
             </div>
           </div>
           <div class="p-6">
             <div class="flex items-center justify-between gap-4">
               <div>
-                <h3 class="font-medium text-content">刪除專案</h3>
+                <h3 class="font-medium text-content">{{ t('project.removeProject') }}</h3>
                 <p class="text-sm text-content-secondary mt-1">
-                  刪除後無法恢復，專案中的所有任務和資料將被永久刪除。
+                  {{ t('project.deleteWarning') }}
                 </p>
               </div>
               <button
@@ -538,7 +540,7 @@ onMounted(() => {
                 :disabled="isDeleting"
                 class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 shrink-0 transition-colors"
               >
-                刪除專案
+                {{ t('project.removeProject') }}
               </button>
             </div>
           </div>
@@ -558,9 +560,9 @@ onMounted(() => {
         ></div>
         <div class="flex min-h-full items-center justify-center p-4">
           <div class="relative card w-full max-w-md p-6">
-            <h3 class="text-lg font-semibold text-content mb-2">確認刪除專案</h3>
+            <h3 class="text-lg font-semibold text-content mb-2">{{ t('project.confirmDelete') }}</h3>
             <p class="text-content-secondary mb-4">
-              您確定要刪除「{{ currentProject?.name }}」嗎？此操作無法復原。
+              {{ t('project.confirmDeleteMessage', { name: currentProject?.name }) }}
             </p>
 
             <div class="flex justify-end gap-3">
@@ -569,15 +571,15 @@ onMounted(() => {
                 :disabled="isDeleting"
                 class="btn-secondary"
               >
-                取消
+                {{ t('common.cancel') }}
               </button>
               <button
                 @click="handleDelete"
                 :disabled="isDeleting"
                 class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
               >
-                <span v-if="isDeleting">刪除中...</span>
-                <span v-else>確認刪除</span>
+                <span v-if="isDeleting">{{ t('message.deleting') }}</span>
+                <span v-else>{{ t('project.confirmDeleteButton') }}</span>
               </button>
             </div>
           </div>

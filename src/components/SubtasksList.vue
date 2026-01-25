@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useSubtasksStore } from '@/stores/subtasks'
+import { useToast } from '@/stores/toast'
 import type { Subtask } from '@/types'
 
 const props = defineProps<{
@@ -11,16 +13,18 @@ const emit = defineEmits<{
   updated: []
 }>()
 
+const { t } = useI18n()
+const toast = useToast()
 const subtasksStore = useSubtasksStore()
 
 const newSubtaskTitle = ref('')
 const isAdding = ref(false)
 const isSubmitting = ref(false)
 
-const statusLabels: Record<number, string> = {
-  0: '待辦',
-  1: '進行中',
-  2: '完成'
+const getStatusLabel = (status: number): string => {
+  if (status === 0) return t('subtask.todo')
+  if (status === 1) return t('subtask.inProgress')
+  return t('subtask.done')
 }
 
 const statusClasses: Record<number, string> = {
@@ -53,7 +57,7 @@ const handleStatusClick = async (subtask: Subtask) => {
     emit('updated')
   } catch (error) {
     console.error('Failed to update subtask status:', error)
-    alert('更新子任務狀態失敗')
+    toast.error(t('subtask.updateStatusFailed'))
   }
 }
 
@@ -69,14 +73,14 @@ const handleAddSubtask = async () => {
     emit('updated')
   } catch (error) {
     console.error('Failed to create subtask:', error)
-    alert('建立子任務失敗')
+    toast.error(t('subtask.createFailed'))
   } finally {
     isSubmitting.value = false
   }
 }
 
 const handleRemoveSubtask = async (subtaskId: number) => {
-  if (!confirm('確定要刪除此子任務嗎？')) return
+  if (!confirm(t('subtask.confirmRemove'))) return
 
   try {
     await subtasksStore.removeSubtask(subtaskId)
@@ -84,7 +88,7 @@ const handleRemoveSubtask = async (subtaskId: number) => {
     emit('updated')
   } catch (error) {
     console.error('Failed to remove subtask:', error)
-    alert('刪除子任務失敗')
+    toast.error(t('subtask.removeFailed'))
   }
 }
 
@@ -99,7 +103,7 @@ const cancelAdd = () => {
     <!-- Header with progress -->
     <div class="flex items-center justify-between">
       <h3 class="text-sm font-medium text-gray-700">
-        子任務
+        {{ t('subtask.title') }}
         <span v-if="subtasksStore.totalCount > 0" class="text-gray-400">
           ({{ subtasksStore.completedCount }}/{{ subtasksStore.totalCount }})
         </span>
@@ -109,7 +113,7 @@ const cancelAdd = () => {
         @click="isAdding = true"
         class="text-sm text-blue-600 hover:text-blue-800"
       >
-        + 新增
+        + {{ t('common.add') }}
       </button>
     </div>
 
@@ -140,9 +144,9 @@ const cancelAdd = () => {
             'px-2 py-0.5 text-xs rounded transition-colors',
             statusClasses[subtask.status]
           ]"
-          :title="`點擊切換狀態（目前: ${statusLabels[subtask.status]}）`"
+          :title="t('subtask.clickToToggleStatus', { status: getStatusLabel(subtask.status) })"
         >
-          {{ statusLabels[subtask.status] }}
+          {{ getStatusLabel(subtask.status) }}
         </button>
 
         <!-- Title -->
@@ -159,7 +163,7 @@ const cancelAdd = () => {
         <button
           @click.stop="handleRemoveSubtask(subtask.id)"
           class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity"
-          title="刪除子任務"
+          :title="t('subtask.remove')"
         >
           <ph-icon icon="xmark" class="w-4 h-4" />
         </button>
@@ -170,7 +174,7 @@ const cancelAdd = () => {
         v-if="subtasksStore.subtasks.length === 0 && !isAdding"
         class="text-center py-4 text-gray-400 text-sm"
       >
-        沒有子任務
+        {{ t('subtask.noSubtasks') }}
       </div>
 
       <!-- Add subtask form -->
@@ -178,7 +182,7 @@ const cancelAdd = () => {
         <input
           v-model="newSubtaskTitle"
           type="text"
-          placeholder="子任務標題"
+          :placeholder="t('subtask.enterTitle')"
           class="flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
           :disabled="isSubmitting"
           @keyup.enter="handleAddSubtask"
@@ -189,14 +193,14 @@ const cancelAdd = () => {
           :disabled="!newSubtaskTitle.trim() || isSubmitting"
           class="px-2 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
         >
-          新增
+          {{ t('common.add') }}
         </button>
         <button
           @click="cancelAdd"
           :disabled="isSubmitting"
           class="px-2 py-1 text-sm text-gray-600 hover:text-gray-800"
         >
-          取消
+          {{ t('common.cancel') }}
         </button>
       </div>
     </div>
