@@ -1,9 +1,20 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
+import { createI18n } from 'vue-i18n'
 import SearchModal from '@/components/SearchModal.vue'
 import { useAuthStore } from '@/stores/auth'
+import en_US from '@/i18n/locales/en_US.json'
+import zh_TW from '@/i18n/locales/zh_TW.json'
 import type { Task } from '@/types'
+
+// Create i18n instance for tests
+const i18n = createI18n({
+  legacy: false,
+  locale: 'zh_TW',
+  fallbackLocale: 'zh_TW',
+  messages: { en_US, zh_TW }
+})
 
 const mockFetch = vi.fn()
 
@@ -67,6 +78,7 @@ describe('SearchModal', () => {
           projectId: 1
         },
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -83,6 +95,7 @@ describe('SearchModal', () => {
           projectId: 1
         },
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -99,6 +112,7 @@ describe('SearchModal', () => {
           projectId: 1
         },
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -126,6 +140,7 @@ describe('SearchModal', () => {
           projectId: 1
         },
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -158,6 +173,7 @@ describe('SearchModal', () => {
           projectId: 1
         },
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -191,6 +207,7 @@ describe('SearchModal', () => {
           projectId: 1
         },
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -216,6 +233,7 @@ describe('SearchModal', () => {
           projectId: 1
         },
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -242,6 +260,7 @@ describe('SearchModal', () => {
           projectId: 1
         },
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -269,6 +288,7 @@ describe('SearchModal', () => {
           projectId: 1
         },
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }

@@ -620,10 +620,18 @@
     "search": "Search",
     "searchTasks": "Search tasks",
     "searchProjects": "Search projects",
+    "placeholder": "Search tasks... (e.g. status:open)",
     "advancedSearch": "Advanced search",
     "recentSearches": "Recent searches",
     "noResults": "No results found",
-    "resultsFor": "Results for"
+    "resultsFor": "Results for",
+    "syntaxTips": "Search syntax tips:",
+    "syntaxStatusOpen": "Open tasks",
+    "syntaxStatusClosed": "Closed tasks",
+    "syntaxAssigneeMe": "Tasks assigned to me",
+    "syntaxDueToday": "Due today",
+    "syntaxTaskId": "Task ID",
+    "tryOtherTerms": "Try other search terms or syntax"
   },
   "action": {
     "action": "Action",

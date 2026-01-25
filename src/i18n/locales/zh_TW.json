@@ -620,10 +620,18 @@
     "search": "搜尋",
     "searchTasks": "搜尋任務",
     "searchProjects": "搜尋專案",
+    "placeholder": "搜尋任務... (例如: status:open)",
     "advancedSearch": "進階搜尋",
     "recentSearches": "最近搜尋",
-    "noResults": "找不到結果",
-    "resultsFor": "搜尋結果"
+    "noResults": "找不到符合的任務",
+    "resultsFor": "搜尋結果",
+    "syntaxTips": "搜尋語法提示：",
+    "syntaxStatusOpen": "開啟中的任務",
+    "syntaxStatusClosed": "已關閉的任務",
+    "syntaxAssigneeMe": "指派給我的任務",
+    "syntaxDueToday": "今天到期",
+    "syntaxTaskId": "任務編號",
+    "tryOtherTerms": "嘗試其他搜尋詞或搜尋語法"
   },
   "action": {
     "action": "動作",
