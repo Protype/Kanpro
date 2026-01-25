@@ -83,7 +83,15 @@
     "connectionError": "Server connection error, unable to connect",
     "loginFailed": "Login failed",
     "openKanboard": "Open Kanboard server",
-    "sessionExpired": "Session expired"
+    "sessionExpired": "Session expired",
+    "sessionExpiredTitle": "Session Expired",
+    "sessionExpiredDescription": "Your session has expired. Please re-enter your password to continue.",
+    "account": "Account",
+    "enterPassword": "Enter password",
+    "verifying": "Verifying...",
+    "reauth": "Re-authenticate",
+    "backToLogin": "Back to login",
+    "authFailed": "Authentication failed"
   },
   "project": {
     "project": "Project",

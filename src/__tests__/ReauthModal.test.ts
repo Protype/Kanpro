@@ -1,8 +1,19 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
+import { createI18n } from 'vue-i18n'
 import ReauthModal from '@/components/ReauthModal.vue'
 import { useAuthStore } from '@/stores/auth'
+import en_US from '@/i18n/locales/en_US.json'
+import zh_TW from '@/i18n/locales/zh_TW.json'
+
+// Create i18n instance for tests
+const i18n = createI18n({
+  legacy: false,
+  locale: 'zh_TW',
+  fallbackLocale: 'zh_TW',
+  messages: { en_US, zh_TW }
+})
 
 const mockFetch = vi.fn()
 
@@ -21,6 +32,7 @@ describe('ReauthModal', () => {
     it('should not render when session is not locked', () => {
       const wrapper = mount(ReauthModal, {
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -43,6 +55,7 @@ describe('ReauthModal', () => {
 
       const wrapper = mount(ReauthModal, {
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -64,6 +77,7 @@ describe('ReauthModal', () => {
 
       const wrapper = mount(ReauthModal, {
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -85,6 +99,7 @@ describe('ReauthModal', () => {
 
       const wrapper = mount(ReauthModal, {
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -108,6 +123,7 @@ describe('ReauthModal', () => {
 
       const wrapper = mount(ReauthModal, {
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -129,6 +145,7 @@ describe('ReauthModal', () => {
 
       const wrapper = mount(ReauthModal, {
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -162,6 +179,7 @@ describe('ReauthModal', () => {
 
       const wrapper = mount(ReauthModal, {
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -195,6 +213,7 @@ describe('ReauthModal', () => {
 
       const wrapper = mount(ReauthModal, {
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -239,6 +258,7 @@ describe('ReauthModal', () => {
 
       const wrapper = mount(ReauthModal, {
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -265,6 +285,7 @@ describe('ReauthModal', () => {
 
       const wrapper = mount(ReauthModal, {
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -291,6 +312,7 @@ describe('ReauthModal', () => {
 
       const wrapper = mount(ReauthModal, {
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -326,6 +348,7 @@ describe('ReauthModal', () => {
 
       const wrapper = mount(ReauthModal, {
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }

@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 
 const password = ref('')
@@ -22,7 +24,7 @@ const handleReauth = async () => {
     await authStore.reauthenticate(password.value)
     password.value = ''
   } catch (error) {
-    errorMessage.value = error instanceof Error ? error.message : '認證失敗'
+    errorMessage.value = error instanceof Error ? error.message : t('auth.authFailed')
   } finally {
     isLoading.value = false
   }
@@ -55,9 +57,9 @@ const handleLogout = () => {
             <div class="mx-auto w-12 h-12 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center mb-4">
               <ph-icon icon="lock" class="h-6 w-6 text-yellow-600 dark:text-yellow-500" />
             </div>
-            <h2 class="text-lg font-semibold text-content">Session 已過期</h2>
+            <h2 class="text-lg font-semibold text-content">{{ t('auth.sessionExpiredTitle') }}</h2>
             <p class="mt-2 text-sm text-content-secondary">
-              您的登入 Session 已過期，請重新輸入密碼以繼續操作。
+              {{ t('auth.sessionExpiredDescription') }}
             </p>
           </div>
 
@@ -66,7 +68,7 @@ const handleLogout = () => {
             <!-- Username display -->
             <div class="mb-4">
               <label class="block text-sm font-medium text-content-secondary mb-1">
-                帳號
+                {{ t('auth.account') }}
               </label>
               <div class="px-3 py-2 bg-surface-secondary rounded-md text-content">
                 {{ authStore.username }}
@@ -76,7 +78,7 @@ const handleLogout = () => {
             <!-- Password input -->
             <div class="mb-4">
               <label for="reauth-password" class="block text-sm font-medium text-content-secondary mb-1">
-                密碼
+                {{ t('auth.password') }}
               </label>
               <input
                 id="reauth-password"
@@ -85,7 +87,7 @@ const handleLogout = () => {
                 data-testid="password-input"
                 :disabled="isLoading"
                 class="w-full px-3 py-2 border border-edge rounded-md shadow-sm bg-surface text-content focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
-                placeholder="請輸入密碼"
+                :placeholder="t('auth.enterPassword')"
                 autofocus
               />
             </div>
@@ -112,7 +114,7 @@ const handleLogout = () => {
                   icon="spinner"
                   class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
                 />
-                {{ isLoading ? '驗證中...' : '重新登入' }}
+                {{ isLoading ? t('auth.verifying') : t('auth.reauth') }}
               </button>
 
               <button
@@ -122,7 +124,7 @@ const handleLogout = () => {
                 @click="handleLogout"
                 class="w-full px-4 py-2 text-sm font-medium text-content-secondary hover:text-content bg-surface-secondary hover:bg-surface-tertiary rounded-md disabled:opacity-50"
               >
-                返回登入頁
+                {{ t('auth.backToLogin') }}
               </button>
             </div>
           </form>

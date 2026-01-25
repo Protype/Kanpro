@@ -83,7 +83,15 @@
     "connectionError": "伺服器連線錯誤，無法連線到伺服器",
     "loginFailed": "登入失敗",
     "openKanboard": "開啟 Kanboard 伺服器",
-    "sessionExpired": "登入已逾期"
+    "sessionExpired": "登入已逾期",
+    "sessionExpiredTitle": "Session 已過期",
+    "sessionExpiredDescription": "您的登入 Session 已過期，請重新輸入密碼以繼續操作。",
+    "account": "帳號",
+    "enterPassword": "請輸入密碼",
+    "verifying": "驗證中...",
+    "reauth": "重新登入",
+    "backToLogin": "返回登入頁",
+    "authFailed": "認證失敗"
   },
   "project": {
     "project": "專案",
