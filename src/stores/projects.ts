@@ -4,8 +4,12 @@ import { useAuthStore } from './auth'
 import type { Project } from '@/types'
 
 /**
- * Kanboard createProject API 支援的完整參數
- * 注意：is_private 不被 API 支援，需建立後呼叫 disableProjectPublicAccess
+ * Kanboard createProject API 支援的參數（建立團隊專案）
+ *
+ * 注意：
+ * - 此 API 建立的是團隊專案 (is_private=0)
+ * - 若要建立個人專案 (is_private=1)，需使用 createMyPrivateProject API
+ * - is_public 無法在建立時設定，需建立後呼叫 disableProjectPublicAccess
  */
 export interface CreateProjectParams {
   name: string
@@ -18,6 +22,19 @@ export interface CreateProjectParams {
   priority_start?: number
   priority_end?: number
   email?: string
+}
+
+/**
+ * Kanboard createMyPrivateProject API 支援的參數（建立個人專案）
+ *
+ * 個人專案特性：
+ * - is_private=1，建立後無法變更
+ * - 僅擁有者和系統管理員可存取
+ * - 無成員管理功能（addProjectUser 等 API 無效）
+ */
+export interface CreatePrivateProjectParams {
+  name: string
+  description?: string
 }
 
 /**
@@ -37,11 +54,14 @@ export interface UpdateProjectParams {
 }
 
 /**
- * 建立專案的選項（包含建立後的額外操作）
+ * 建立團隊專案的選項（包含建立後的額外操作）
  */
 export interface CreateProjectOptions extends CreateProjectParams {
-  /** 建立後是否限制公開存取（呼叫 disableProjectPublicAccess） */
-  disablePublicAccess?: boolean
+  /**
+   * 建立後是否啟用公開存取
+   * 預設專案是 is_public=0（停用），勾選此選項會呼叫 enableProjectPublicAccess
+   */
+  enablePublicAccess?: boolean
 }
 
 export const useProjectsStore = defineStore('projects', () => {
@@ -170,7 +190,39 @@ export const useProjectsStore = defineStore('projects', () => {
   }
 
   /**
-   * 建立專案
+   * 建立個人專案
+   * @param params 個人專案建立參數
+   * @returns 建立成功返回專案 ID，失敗返回 false
+   */
+  async function createMyPrivateProject(params: CreatePrivateProjectParams): Promise<number | false> {
+    const authStore = useAuthStore()
+    const client = authStore.getClient()
+
+    // 過濾掉 undefined 值
+    const apiParams: Record<string, unknown> = {}
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== undefined && value !== '') {
+        apiParams[key] = value
+      }
+    }
+
+    try {
+      const projectId = await client.call<number | false>('createMyPrivateProject', apiParams)
+
+      if (projectId !== false) {
+        // 重新載入專案列表
+        await fetchProjects()
+      }
+
+      return projectId
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : '建立個人專案失敗'
+      return false
+    }
+  }
+
+  /**
+   * 建立團隊專案
    * @param options 專案建立選項
    * @returns 建立成功返回專案 ID，失敗返回 false
    */
@@ -179,7 +231,7 @@ export const useProjectsStore = defineStore('projects', () => {
     const client = authStore.getClient()
 
     // 分離建立後操作選項與 API 參數
-    const { disablePublicAccess, ...apiParams } = options
+    const { enablePublicAccess, ...apiParams } = options
 
     // 過濾掉 undefined 值
     const params: Record<string, unknown> = {}
@@ -193,9 +245,9 @@ export const useProjectsStore = defineStore('projects', () => {
       const projectId = await client.call<number | false>('createProject', params)
 
       if (projectId !== false) {
-        // 建立成功後，若需要限制公開存取
-        if (disablePublicAccess) {
-          await disableProjectPublicAccess(projectId)
+        // 建立成功後，若需要啟用公開存取
+        if (enablePublicAccess) {
+          await enableProjectPublicAccess(projectId)
         }
 
         // 重新載入專案列表
@@ -232,6 +284,7 @@ export const useProjectsStore = defineStore('projects', () => {
     updateProject,
     removeProject,
     createProject,
+    createMyPrivateProject,
     disableProjectPublicAccess,
     enableProjectPublicAccess,
     $reset

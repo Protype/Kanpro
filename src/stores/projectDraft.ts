@@ -15,7 +15,7 @@ export interface ProjectDraftInfo {
   priorityStart: number | undefined
   priorityEnd: number | undefined
   email: string
-  disablePublicAccess: boolean
+  enablePublicAccess: boolean
 }
 
 /**
@@ -63,7 +63,7 @@ function getDefaultDraft(): ProjectDraftInfo {
     priorityStart: undefined,
     priorityEnd: undefined,
     email: '',
-    disablePublicAccess: false
+    enablePublicAccess: false
   }
 }
 

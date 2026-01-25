@@ -28,24 +28,57 @@ export interface User {
 
 /**
  * Kanboard 專案
+ *
+ * 專案類型說明：
+ * - 團隊專案 (is_private=0)：可管理成員與權限，使用 createProject API 建立
+ * - 個人專案 (is_private=1)：僅擁有者可存取，無成員管理，使用 createMyPrivateProject API 建立
+ *
+ * 公開存取說明：
+ * - is_public=1：啟用公開存取，可透過公開連結檢視（無需登入）
+ * - is_public=0：停用公開存取，僅專案成員可檢視
+ * - 使用 enableProjectPublicAccess / disableProjectPublicAccess API 切換
  */
 export interface Project {
   id: number
   name: string
   description?: string | null
-  is_active: boolean | number | string  // API 可能回傳不同類型
-  is_public: boolean | number | string
-  is_private: boolean | number | string
   owner_id: number
+
+  /**
+   * 專案是否啟用
+   * API 可能回傳 boolean、number 或 string
+   */
+  is_active: boolean | number | string
+
+  /**
+   * 是否為個人專案（專案類型）
+   * - 0: 團隊專案 - 可管理成員、設定角色權限
+   * - 1: 個人專案 - 僅擁有者和管理員可存取，無成員管理功能
+   * 注意：建立後無法變更，由建立時使用的 API 決定
+   */
+  is_private: boolean | number | string
+
+  /**
+   * 是否開放公開存取
+   * - 0: 停用公開存取 - 僅專案成員可檢視
+   * - 1: 啟用公開存取 - 可透過公開連結檢視（無需登入）
+   * 可透過 enableProjectPublicAccess / disableProjectPublicAccess 切換
+   */
+  is_public: boolean | number | string
+
+  /** 公開存取的 Token（啟用公開存取時使用） */
   token?: string | null
+
   start_date?: string | null
   end_date?: string | null
   identifier?: string | null
   last_modified?: number
+
   // 優先級設定
   priority_default?: number
   priority_start?: number
   priority_end?: number
+
   // 專案 Email
   email?: string | null
 }

@@ -36,6 +36,16 @@ interface ExtendedProjectUser {
   avatar: string | null  // base64 encoded avatar image or null
 }
 
+/**
+ * 專案角色資料結構
+ * 包含標準角色和自定義角色
+ */
+export interface ProjectRole {
+  id: string           // 角色 ID (e.g., 'project-manager', '測試角色')
+  name: string         // 顯示名稱
+  isCustom: boolean    // 是否為自定義角色
+}
+
 export const useMembersStore = defineStore('members', () => {
   // 專案所有成員（含瀏覽者）- 用於專案設定
   const members = ref<ProjectMember[]>([])
@@ -44,6 +54,9 @@ export const useMembersStore = defineStore('members', () => {
   // 可指派任務的成員（不含瀏覽者）- 用於任務指派
   const assignableUsers = ref<ProjectMember[]>([])
   const assignableUsersMap = ref<Record<string | number, string>>({})
+
+  // 專案角色（標準 + 自定義）
+  const projectRoles = ref<ProjectRole[]>([])
 
   const allUsers = ref<User[]>([])
   const isLoading = ref(false)
@@ -316,6 +329,52 @@ export const useMembersStore = defineStore('members', () => {
     }
   }
 
+  /**
+   * 取得專案角色（含自定義角色）
+   * 需要 Kanpro Bridge 外掛支援擴展的 getProjectRoles API
+   *
+   * API 回傳格式：{ "role-id": "Role Name", ... }
+   * - 標準角色：project-manager, project-member, project-viewer
+   * - 自定義角色：任意字串 ID
+   */
+  async function fetchProjectRoles(projectId: number): Promise<void> {
+    const authStore = useAuthStore()
+
+    try {
+      const client = authStore.getClient()
+      // Kanpro Bridge 擴展的 getProjectRoles 支援 projectId 參數（camelCase）
+      const result = await client.call<Record<string, string>>('getProjectRoles', { projectId: projectId })
+
+      if (result) {
+        const standardRoleIds = ['project-manager', 'project-member', 'project-viewer']
+        const roles: ProjectRole[] = []
+
+        for (const [id, name] of Object.entries(result)) {
+          roles.push({
+            id,
+            name,
+            isCustom: !standardRoleIds.includes(id)
+          })
+        }
+
+        // 排序：標準角色在前，自定義角色在後
+        roles.sort((a, b) => {
+          if (a.isCustom === b.isCustom) return 0
+          return a.isCustom ? 1 : -1
+        })
+
+        projectRoles.value = roles
+      }
+    } catch {
+      // 如果 API 不支援 project_id 參數，回退到預設的三個標準角色
+      projectRoles.value = [
+        { id: 'project-manager', name: '專案經理', isCustom: false },
+        { id: 'project-member', name: '專案成員', isCustom: false },
+        { id: 'project-viewer', name: '瀏覽者', isCustom: false }
+      ]
+    }
+  }
+
   async function addProjectUser(
     projectId: number,
     userId: number,
@@ -359,11 +418,57 @@ export const useMembersStore = defineStore('members', () => {
     return result
   }
 
+  // === 專案群組權限管理 ===
+
+  async function addProjectGroup(
+    projectId: number,
+    groupId: number,
+    role: 'project-manager' | 'project-member' | 'project-viewer'
+  ): Promise<boolean> {
+    const authStore = useAuthStore()
+    const client = authStore.getClient()
+
+    const result = await client.call<boolean>('addProjectGroup', {
+      project_id: projectId,
+      group_id: groupId,
+      role: role
+    })
+    return result
+  }
+
+  async function removeProjectGroup(projectId: number, groupId: number): Promise<boolean> {
+    const authStore = useAuthStore()
+    const client = authStore.getClient()
+
+    const result = await client.call<boolean>('removeProjectGroup', {
+      project_id: projectId,
+      group_id: groupId
+    })
+    return result
+  }
+
+  async function changeProjectGroupRole(
+    projectId: number,
+    groupId: number,
+    role: 'project-manager' | 'project-member' | 'project-viewer'
+  ): Promise<boolean> {
+    const authStore = useAuthStore()
+    const client = authStore.getClient()
+
+    const result = await client.call<boolean>('changeProjectGroupRole', {
+      project_id: projectId,
+      group_id: groupId,
+      role: role
+    })
+    return result
+  }
+
   function clearMembers(): void {
     members.value = []
     membersMap.value = {}
     assignableUsers.value = []
     assignableUsersMap.value = {}
+    projectRoles.value = []
     error.value = null
   }
 
@@ -378,6 +483,9 @@ export const useMembersStore = defineStore('members', () => {
     assignableUsersMap,
     assignableUsersCount,
 
+    // 專案角色（標準 + 自定義）
+    projectRoles,
+
     // 所有使用者（需 admin 權限）
     allUsers,
     availableUsers,
@@ -391,11 +499,18 @@ export const useMembersStore = defineStore('members', () => {
     fetchAssignableUsers,   // 用於任務指派
     fetchMembers,           // alias for fetchAssignableUsers
     fetchAllUsers,          // 需 admin 權限
+    fetchProjectRoles,      // 取得專案角色（含自定義）
 
-    // 成員管理
+    // 使用者成員管理
     addProjectUser,
     removeProjectUser,
     changeProjectUserRole,
+
+    // 群組成員管理
+    addProjectGroup,
+    removeProjectGroup,
+    changeProjectGroupRole,
+
     clearMembers
   }
 })
