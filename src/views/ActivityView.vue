@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useNotificationsStore } from '@/stores/notifications'
 import { useProjectsStore } from '@/stores/projects'
 import SearchModal from '@/components/SearchModal.vue'
@@ -15,6 +16,7 @@ const emit = defineEmits<{
 }>()
 
 const router = useRouter()
+const { t } = useI18n()
 const notificationsStore = useNotificationsStore()
 const projectsStore = useProjectsStore()
 
@@ -22,24 +24,24 @@ const isLoading = ref(false)
 const activities = ref<Activity[]>([])
 const error = ref<string | null>(null)
 
-const eventLabels: Record<string, string> = {
-  'task.create': '建立任務',
-  'task.update': '更新任務',
-  'task.close': '關閉任務',
-  'task.open': '開啟任務',
-  'task.move.column': '移動任務欄位',
-  'task.move.swimlane': '移動任務泳道',
-  'task.move.position': '調整任務位置',
-  'task.assignee_change': '變更指派人',
-  'comment.create': '新增評論',
-  'comment.update': '更新評論',
-  'comment.delete': '刪除評論',
-  'subtask.create': '新增子任務',
-  'subtask.update': '更新子任務',
-  'subtask.delete': '刪除子任務',
-  'task_file.create': '上傳附件',
-  'task_internal_link.create_update': '建立任務連結',
-  'task_internal_link.delete': '刪除任務連結'
+const eventLabelKeys: Record<string, string> = {
+  'task.create': 'activity.eventTaskCreate',
+  'task.update': 'activity.eventTaskUpdate',
+  'task.close': 'activity.eventTaskClose',
+  'task.open': 'activity.eventTaskOpen',
+  'task.move.column': 'activity.eventTaskMoveColumn',
+  'task.move.swimlane': 'activity.eventTaskMoveSwimlane',
+  'task.move.position': 'activity.eventTaskMovePosition',
+  'task.assignee_change': 'activity.eventTaskAssigneeChange',
+  'comment.create': 'activity.eventCommentCreate',
+  'comment.update': 'activity.eventCommentUpdate',
+  'comment.delete': 'activity.eventCommentDelete',
+  'subtask.create': 'activity.eventSubtaskCreate',
+  'subtask.update': 'activity.eventSubtaskUpdate',
+  'subtask.delete': 'activity.eventSubtaskDelete',
+  'task_file.create': 'activity.eventFileCreate',
+  'task_internal_link.create_update': 'activity.eventLinkCreate',
+  'task_internal_link.delete': 'activity.eventLinkDelete'
 }
 
 onMounted(async () => {
@@ -55,22 +57,22 @@ const loadData = async () => {
   error.value = null
   try {
     await notificationsStore.fetchActivities()
-    // Show all activities without filtering
     activities.value = notificationsStore.activities
   } catch (e) {
-    error.value = e instanceof Error ? e.message : '載入動態失敗'
+    error.value = e instanceof Error ? e.message : t('activity.loadFailed')
   } finally {
     isLoading.value = false
   }
 }
 
 const getEventLabel = (eventName: string): string => {
-  return eventLabels[eventName] || eventName
+  const key = eventLabelKeys[eventName]
+  return key ? t(key) : eventName
 }
 
 const getProjectName = (projectId: number): string => {
   const project = projectsStore.projects.find(p => p.id === projectId)
-  return project?.name || `專案 #${projectId}`
+  return project?.name || t('task.projectNumber', { id: projectId })
 }
 
 const formatDate = (timestamp: number): string => {
@@ -81,12 +83,12 @@ const formatDate = (timestamp: number): string => {
   const diffHours = Math.floor(diffMs / 3600000)
   const diffDays = Math.floor(diffMs / 86400000)
 
-  if (diffMins < 1) return '剛剛'
-  if (diffMins < 60) return `${diffMins} 分鐘前`
-  if (diffHours < 24) return `${diffHours} 小時前`
-  if (diffDays < 7) return `${diffDays} 天前`
+  if (diffMins < 1) return t('time.justNow')
+  if (diffMins < 60) return t('time.minutesAgo', { n: diffMins })
+  if (diffHours < 24) return t('time.hoursAgo', { n: diffHours })
+  if (diffDays < 7) return t('time.daysAgo', { n: diffDays })
 
-  return date.toLocaleDateString('zh-TW')
+  return date.toLocaleDateString()
 }
 
 const getTaskTitle = (activity: Activity): string => {
@@ -134,8 +136,8 @@ const getEventIcon = (eventName: string): string => {
     <div class="max-w-4xl mx-auto">
       <!-- Header -->
       <div class="mb-6">
-        <h1 class="text-2xl font-bold text-content">動態總覽</h1>
-        <p class="text-content-secondary mt-1">所有專案的最近活動</p>
+        <h1 class="text-2xl font-bold text-content">{{ t('activity.activityOverview') }}</h1>
+        <p class="text-content-secondary mt-1">{{ t('activity.activityOverviewDesc') }}</p>
       </div>
 
       <!-- Loading -->
@@ -146,7 +148,7 @@ const getEventIcon = (eventName: string): string => {
       <!-- Error -->
       <div v-else-if="error" class="bg-error/10 border border-error/20 rounded-lg p-4 text-error">
         {{ error }}
-        <button @click="loadData" class="ml-4 underline cursor-pointer">重試</button>
+        <button @click="loadData" class="ml-4 underline cursor-pointer">{{ t('common.retry') }}</button>
       </div>
 
       <!-- Activities -->
@@ -200,7 +202,7 @@ const getEventIcon = (eventName: string): string => {
         <!-- Empty State -->
         <div v-if="activities.length === 0" class="bg-surface rounded-lg border border-edge p-12 text-center">
           <ph-icon icon="bolt" class="w-16 h-16 mx-auto mb-4 text-content-tertiary" />
-          <p class="text-content-secondary">沒有近期活動</p>
+          <p class="text-content-secondary">{{ t('activity.noRecentActivity') }}</p>
         </div>
       </div>
     </div>
