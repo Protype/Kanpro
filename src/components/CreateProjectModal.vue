@@ -38,7 +38,7 @@ const priorityDefault = ref<number | undefined>(undefined)
 const priorityStart = ref<number | undefined>(undefined)
 const priorityEnd = ref<number | undefined>(undefined)
 const projectEmail = ref('')
-const disablePublicAccess = ref(false)
+const enablePublicAccess = ref(false)
 
 // === UI 狀態 ===
 const isSubmitting = ref(false)
@@ -89,7 +89,7 @@ function resetForm() {
   priorityStart.value = undefined
   priorityEnd.value = undefined
   projectEmail.value = ''
-  disablePublicAccess.value = false
+  enablePublicAccess.value = false
   errorMessage.value = ''
   showAdvanced.value = false
   ownerSearchQuery.value = ''
@@ -113,7 +113,7 @@ function handleExpand() {
     priorityStart: priorityStart.value,
     priorityEnd: priorityEnd.value,
     email: projectEmail.value,
-    disablePublicAccess: disablePublicAccess.value
+    enablePublicAccess: enablePublicAccess.value
   })
 
   // 關閉燈箱並導向專案建立頁
@@ -144,7 +144,7 @@ async function handleSubmit() {
     priority_start: priorityStart.value,
     priority_end: priorityEnd.value,
     email: projectEmail.value.trim() || undefined,
-    disablePublicAccess: disablePublicAccess.value
+    enablePublicAccess: enablePublicAccess.value
   }
 
   try {
@@ -216,29 +216,31 @@ onMounted(() => {
             <div class="flex items-center justify-between p-4 h-14 border-b border-edge">
               <div class="flex items-center gap-3">
                 <h3 class="text-lg font-semibold text-content">{{ t('project.newProject') }}</h3>
-                <!-- Advanced Settings Toggle (styled like search bar) -->
-                <button
-                  type="button"
-                  @click="toggleAdvanced"
-                  class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium leading-none rounded transition-colors"
-                  :class="showAdvanced
-                    ? 'bg-surface-tertiary text-content-secondary'
-                    : 'bg-surface-secondary text-content-tertiary hover:text-content-secondary'"
-                >
-                  <span>{{ t('project.advancedSettings') }}</span>
-                  <!-- Chevron: > when collapsed, < when expanded -->
-                  <ph-icon :icon="showAdvanced ? 'chevron-left' : 'chevron-right'" class="w-3.5 h-3.5" />
-                </button>
-                <!-- Expand to full page button -->
-                <button
-                  type="button"
-                  data-testid="expand-button"
-                  @click="handleExpand"
-                  class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium leading-none rounded transition-colors bg-surface-secondary text-content-tertiary hover:text-content-secondary"
-                  :title="t('project.expandToFullPage')"
-                >
-                  <ph-icon icon="arrows-out" class="w-3.5 h-3.5" />
-                </button>
+                <!-- Button Group: Advanced + Expand -->
+                <div class="flex items-center gap-0 rounded-md bg-surface-secondary px-1 py-0.5">
+                  <!-- Advanced Settings Toggle -->
+                  <button
+                    type="button"
+                    @click="toggleAdvanced"
+                    class="flex items-center gap-1 ps-2 pe-1 py-1 text-xs font-medium leading-none rounded transition-colors"
+                    :class="showAdvanced
+                      ? 'bg-surface-tertiary text-content-secondary'
+                      : 'text-content-tertiary hover:text-content-secondary hover:bg-surface-tertiary'"
+                  >
+                    <span>{{ t('project.advancedSettings') }}</span>
+                    <ph-icon :icon="showAdvanced ? 'chevron-left' : 'chevron-right'" class="w-3.5 h-3.5" />
+                  </button>
+                  <!-- Expand to full page button -->
+                  <button
+                    type="button"
+                    data-testid="expand-button"
+                    @click="handleExpand"
+                    class="flex items-center justify-center p-1 rounded transition-colors text-content-tertiary hover:text-content-secondary hover:bg-surface-tertiary"
+                    :title="t('project.expandToFullPage')"
+                  >
+                    <ph-icon icon="arrows-out" class="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
               <button
                 type="button"
@@ -460,21 +462,21 @@ onMounted(() => {
                         />
                       </div>
 
-                      <!-- Disable Public Access (full width) -->
+                      <!-- Enable Public Access (full width) -->
                       <div class="col-span-2 flex items-start gap-3 pt-2 border-t border-edge">
                         <input
-                          id="disable-public-access"
-                          v-model="disablePublicAccess"
+                          id="enable-public-access"
+                          v-model="enablePublicAccess"
                           type="checkbox"
                           :disabled="isSubmitting"
                           class="mt-0.5 w-4 h-4 rounded border-edge text-accent focus:ring-accent focus:ring-offset-0"
                         />
                         <div>
-                          <label for="disable-public-access" class="text-sm text-content font-medium cursor-pointer">
-                            {{ t('project.disablePublicAccess') }}
+                          <label for="enable-public-access" class="text-sm text-content font-medium cursor-pointer">
+                            {{ t('project.enablePublicAccess') }}
                           </label>
                           <p class="text-xs text-content-tertiary mt-0.5">
-                            {{ t('project.disablePublicAccessDescription') }}
+                            {{ t('project.enablePublicAccessDescription') }}
                           </p>
                         </div>
                       </div>
