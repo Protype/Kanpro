@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useTasksStore } from '@/stores/tasks'
 import { useBoardStore } from '@/stores/board'
 import { getTaskColorBgClass } from '@/utils/task'
@@ -17,6 +18,7 @@ const emit = defineEmits<{
 }>()
 
 const route = useRoute()
+const { t, tm } = useI18n()
 const tasksStore = useTasksStore()
 const boardStore = useBoardStore()
 
@@ -29,14 +31,13 @@ const currentDate = ref(new Date())
 const selectedTask = ref<Task | null>(null)
 const isTaskModalOpen = ref(false)
 
-const monthNames = ['一月', '二月', '三月', '四月', '五月', '六月',
-                   '七月', '八月', '九月', '十月', '十一月', '十二月']
-
-const weekDays = ['日', '一', '二', '三', '四', '五', '六']
+// Get localized month names and week days from i18n
+const monthNames = computed(() => tm('calendar.months') as string[])
+const weekDays = computed(() => tm('calendar.weekDays') as string[])
 
 const currentYear = computed(() => currentDate.value.getFullYear())
 const currentMonth = computed(() => currentDate.value.getMonth())
-const currentMonthName = computed(() => monthNames[currentMonth.value])
+const currentMonthName = computed(() => monthNames.value[currentMonth.value])
 
 // Get first day of the month (0 = Sunday)
 const firstDayOfMonth = computed(() => {
@@ -175,7 +176,7 @@ watch(projectId, () => {
           @click="goToToday"
           class="btn-secondary btn-sm"
         >
-          今天
+          {{ t('time.today') }}
         </button>
         <div class="flex items-center gap-2">
           <button

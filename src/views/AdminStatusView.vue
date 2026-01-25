@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useSystemStore } from '@/stores/system'
 import { useAppConfig } from '@/composables/useAppConfig'
 
+const { t } = useI18n()
 const systemStore = useSystemStore()
 const { configFileApiUrl, getStoredApiUrl } = useAppConfig()
 
@@ -32,11 +34,11 @@ function getConnectionStatusBadge(status: string): string {
 function getConnectionStatusText(status: string): string {
   switch (status) {
     case 'connected':
-      return '正常'
+      return t('admin.connected')
     case 'disconnected':
-      return '無法連線'
+      return t('admin.disconnected')
     default:
-      return '檢查中'
+      return t('admin.checking')
   }
 }
 </script>
@@ -64,7 +66,7 @@ function getConnectionStatusText(status: string): string {
         <div class="card overflow-hidden">
           <div class="px-4 py-3 bg-surface-secondary border-b border-edge flex items-center justify-between">
             <h2 class="text-sm font-semibold text-content-secondary uppercase tracking-wide">
-              Kanboard 伺服器
+              {{ t('admin.kanboardServer') }}
             </h2>
             <div class="flex items-center gap-2">
               <span
@@ -79,7 +81,7 @@ function getConnectionStatusText(status: string): string {
                 @click="systemStore.fetchAll"
                 :disabled="systemStore.isLoading"
                 class="p-1 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded"
-                title="重新整理"
+                :title="t('admin.refresh')"
               >
                 <ph-icon
                   icon="arrow-clockwise"
@@ -91,19 +93,19 @@ function getConnectionStatusText(status: string): string {
           <table class="table">
             <tbody class="divide-y divide-edge">
               <tr class="table-row">
-                <td class="table-cell text-content-secondary w-32">版本</td>
+                <td class="table-cell text-content-secondary w-32">{{ t('admin.version') }}</td>
                 <td class="table-cell font-mono">
                   {{ systemStore.kanboardVersion || '-' }}
                 </td>
               </tr>
               <tr class="table-row">
-                <td class="table-cell text-content-secondary">時區</td>
+                <td class="table-cell text-content-secondary">{{ t('settings.timezone') }}</td>
                 <td class="table-cell">
                   {{ systemStore.kanboardTimezone || '-' }}
                 </td>
               </tr>
               <tr class="table-row">
-                <td class="table-cell text-content-secondary">API 位址</td>
+                <td class="table-cell text-content-secondary">{{ t('admin.apiUrl') }}</td>
                 <td class="table-cell font-mono text-sm break-all">
                   {{ getOriginalApiUrl() }}
                 </td>
@@ -116,7 +118,7 @@ function getConnectionStatusText(status: string): string {
         <div class="card overflow-hidden">
           <div class="px-4 py-3 bg-surface-secondary border-b border-edge flex items-center justify-between">
             <h2 class="text-sm font-semibold text-content-secondary uppercase tracking-wide">
-              KanproBridge 外掛
+              {{ t('admin.kanproBridgePlugin') }}
             </h2>
             <span
               v-if="systemStore.bridgeStatus"
@@ -128,7 +130,7 @@ function getConnectionStatusText(status: string): string {
               v-else-if="systemStore.bridgeError"
               class="badge-warning"
             >
-              未安裝
+              {{ t('admin.notInstalled') }}
             </span>
           </div>
 
@@ -138,7 +140,7 @@ function getConnectionStatusText(status: string): string {
               <div class="flex items-start gap-3">
                 <ph-icon icon="warning" class="w-5 h-5 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p class="font-medium">無法取得外掛狀態</p>
+                  <p class="font-medium">{{ t('admin.cannotGetPluginStatus') }}</p>
                   <p class="text-sm mt-1 opacity-80">{{ systemStore.bridgeError }}</p>
                 </div>
               </div>
@@ -149,8 +151,8 @@ function getConnectionStatusText(status: string): string {
           <table v-else-if="systemStore.bridgeStatus" class="table">
             <thead class="table-header">
               <tr>
-                <th class="table-header-cell">功能模組</th>
-                <th class="table-header-cell w-20 text-center">狀態</th>
+                <th class="table-header-cell">{{ t('admin.featureModule') }}</th>
+                <th class="table-header-cell w-20 text-center">{{ t('common.status') }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-edge">
@@ -167,7 +169,7 @@ function getConnectionStatusText(status: string): string {
                   <span
                     :class="module.enabled ? 'badge-success' : 'badge-neutral'"
                   >
-                    {{ module.enabled ? '啟用' : '停用' }}
+                    {{ module.enabled ? t('common.enabled') : t('common.disabled') }}
                   </span>
                 </td>
               </tr>

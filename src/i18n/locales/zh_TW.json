@@ -51,7 +51,8 @@
     "color": "顏色",
     "position": "位置",
     "default": "預設",
-    "descriptionOptional": "描述（選填）"
+    "descriptionOptional": "描述（選填）",
+    "retry": "重試"
   },
   "nav": {
     "dashboard": "儀表板",
@@ -323,7 +324,13 @@
     "removeSwimlane": "刪除泳道",
     "defaultSwimlane": "預設泳道",
     "collapseSwimlane": "收合",
-    "expandSwimlane": "展開"
+    "expandSwimlane": "展開",
+    "wipLimitReached": "已達 WIP 限制",
+    "noTasks": "無任務",
+    "updating": "正在更新...",
+    "taskMoved": "任務已移動",
+    "moveTaskFailed": "移動任務失敗",
+    "createTaskFailed": "建立任務失敗"
   },
   "column": {
     "columnManagement": "欄位管理",
@@ -617,6 +624,10 @@
     "hoursAgo": "{n} 小時前",
     "daysAgo": "{n} 天前"
   },
+  "calendar": {
+    "months": ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+    "weekDays": ["日", "一", "二", "三", "四", "五", "六"]
+  },
   "message": {
     "confirmDelete": "確定要刪除此項目嗎？",
     "confirmClose": "確定要關閉此任務嗎？",
@@ -696,7 +707,18 @@
     "systemStatus": "系統狀態",
     "systemSettings": "系統設定",
     "userManagement": "使用者管理",
-    "groupManagement": "群組管理"
+    "groupManagement": "群組管理",
+    "kanboardServer": "Kanboard 伺服器",
+    "kanproBridgePlugin": "KanproBridge 外掛",
+    "version": "版本",
+    "apiUrl": "API 位址",
+    "connected": "正常",
+    "disconnected": "無法連線",
+    "checking": "檢查中",
+    "notInstalled": "未安裝",
+    "cannotGetPluginStatus": "無法取得外掛狀態",
+    "featureModule": "功能模組",
+    "refresh": "重新整理"
   },
   "dashboard": {
     "activityOverview": "所有專案的活動總覽",
@@ -704,7 +726,9 @@
     "noTasksAssigned": "目前沒有指派給您的任務",
     "viewAll": "查看全部",
     "statistics": "統計",
-    "activeProjects": "啟用專案"
+    "activeProjects": "啟用專案",
+    "welcomeBack": "歡迎回來！",
+    "developmentInProgress": "專案功能開發中..."
   },
   "projects": {
     "allAccessible": "所有可存取的專案",

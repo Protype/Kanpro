@@ -51,7 +51,8 @@
     "color": "Color",
     "position": "Position",
     "default": "Default",
-    "descriptionOptional": "Description (optional)"
+    "descriptionOptional": "Description (optional)",
+    "retry": "Retry"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -323,7 +324,13 @@
     "removeSwimlane": "Remove swimlane",
     "defaultSwimlane": "Default swimlane",
     "collapseSwimlane": "Collapse",
-    "expandSwimlane": "Expand"
+    "expandSwimlane": "Expand",
+    "wipLimitReached": "WIP limit reached",
+    "noTasks": "No tasks",
+    "updating": "Updating...",
+    "taskMoved": "Task moved",
+    "moveTaskFailed": "Failed to move task",
+    "createTaskFailed": "Failed to create task"
   },
   "column": {
     "columnManagement": "Column management",
@@ -617,6 +624,10 @@
     "hoursAgo": "{n} hours ago",
     "daysAgo": "{n} days ago"
   },
+  "calendar": {
+    "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    "weekDays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+  },
   "message": {
     "confirmDelete": "Do you really want to remove this item?",
     "confirmClose": "Do you really want to close this task?",
@@ -696,7 +707,18 @@
     "systemStatus": "System status",
     "systemSettings": "System settings",
     "userManagement": "User management",
-    "groupManagement": "Group management"
+    "groupManagement": "Group management",
+    "kanboardServer": "Kanboard Server",
+    "kanproBridgePlugin": "KanproBridge Plugin",
+    "version": "Version",
+    "apiUrl": "API URL",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "checking": "Checking",
+    "notInstalled": "Not installed",
+    "cannotGetPluginStatus": "Cannot get plugin status",
+    "featureModule": "Feature Module",
+    "refresh": "Refresh"
   },
   "dashboard": {
     "activityOverview": "Activity overview for all projects",
@@ -704,7 +726,9 @@
     "noTasksAssigned": "No tasks assigned to you",
     "viewAll": "View all",
     "statistics": "Statistics",
-    "activeProjects": "Active projects"
+    "activeProjects": "Active projects",
+    "welcomeBack": "Welcome back!",
+    "developmentInProgress": "Project features are under development..."
   },
   "projects": {
     "allAccessible": "All accessible projects",
