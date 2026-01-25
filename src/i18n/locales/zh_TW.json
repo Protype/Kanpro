@@ -250,10 +250,21 @@
   "comment": {
     "comment": "評論",
     "comments": "評論",
+    "title": "評論",
     "addComment": "新增評論",
     "editComment": "編輯評論",
+    "edit": "編輯",
     "removeComment": "刪除評論",
-    "noComments": "沒有評論"
+    "remove": "刪除",
+    "noComments": "沒有評論",
+    "enterContent": "輸入評論內容...",
+    "publish": "發表",
+    "unknownUser": "未知使用者",
+    "edited": "(已編輯)",
+    "confirmRemove": "確定要刪除此評論嗎？",
+    "createFailed": "建立評論失敗",
+    "updateFailed": "更新評論失敗",
+    "removeFailed": "刪除評論失敗"
   },
   "attachment": {
     "attachment": "附件",
