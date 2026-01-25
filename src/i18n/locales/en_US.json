@@ -528,7 +528,11 @@
     "removeFailed": "Failed to delete user",
     "enableSuccess": "User enabled",
     "disableSuccess": "User disabled",
-    "toggleFailed": "Failed to toggle status"
+    "toggleFailed": "Failed to toggle status",
+    "management": "User Management",
+    "manageSystemUsers": "Manage system user accounts",
+    "allUsers": "All Users",
+    "admin": "Admin"
   },
   "group": {
     "group": "Group",
