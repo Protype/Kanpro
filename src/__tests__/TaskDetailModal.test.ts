@@ -1,9 +1,20 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
+import { createI18n } from 'vue-i18n'
 import TaskDetailModal from '@/components/TaskDetailModal.vue'
 import { useAuthStore } from '@/stores/auth'
+import en_US from '@/i18n/locales/en_US.json'
+import zh_TW from '@/i18n/locales/zh_TW.json'
 import type { Task } from '@/types'
+
+// Create i18n instance for tests
+const i18n = createI18n({
+  legacy: false,
+  locale: 'en_US',
+  fallbackLocale: 'en_US',
+  messages: { en_US, zh_TW }
+})
 
 const mockFetch = vi.fn()
 
@@ -71,6 +82,7 @@ describe('TaskDetailModal', () => {
           projectId: 1
         },
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -89,6 +101,7 @@ describe('TaskDetailModal', () => {
           projectId: 1
         },
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -107,6 +120,7 @@ describe('TaskDetailModal', () => {
           projectId: 1
         },
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -125,6 +139,7 @@ describe('TaskDetailModal', () => {
           projectId: 1
         },
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -143,6 +158,7 @@ describe('TaskDetailModal', () => {
           projectId: 1
         },
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -161,13 +177,14 @@ describe('TaskDetailModal', () => {
           projectId: 1
         },
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
         }
       })
 
-      expect(wrapper.text()).toContain('開啟')
+      expect(wrapper.text()).toContain('Open')
     })
 
     it('should display task status as closed', () => {
@@ -180,13 +197,14 @@ describe('TaskDetailModal', () => {
           projectId: 1
         },
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
         }
       })
 
-      expect(wrapper.text()).toContain('已關閉')
+      expect(wrapper.text()).toContain('Closed')
     })
   })
 
@@ -200,6 +218,7 @@ describe('TaskDetailModal', () => {
           projectId: 1
         },
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -219,6 +238,7 @@ describe('TaskDetailModal', () => {
           projectId: 1
         },
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true,
             SubtasksList: true,
@@ -254,6 +274,7 @@ describe('TaskDetailModal', () => {
           projectId: 1
         },
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -273,6 +294,7 @@ describe('TaskDetailModal', () => {
           projectId: 1
         },
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true,
             SubtasksList: true
@@ -299,6 +321,7 @@ describe('TaskDetailModal', () => {
           projectId: 1
         },
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true,
             SubtasksList: true
@@ -326,6 +349,7 @@ describe('TaskDetailModal', () => {
           projectId: 1
         },
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -353,6 +377,7 @@ describe('TaskDetailModal', () => {
           projectId: 1
         },
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -376,6 +401,7 @@ describe('TaskDetailModal', () => {
           projectId: 1
         },
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }
@@ -395,6 +421,7 @@ describe('TaskDetailModal', () => {
           projectId: 1
         },
         global: {
+          plugins: [i18n],
           stubs: {
             teleport: true
           }

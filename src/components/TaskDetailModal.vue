@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useTasksStore } from '@/stores/tasks'
 import { useMembersStore } from '@/stores/members'
 import { useCategoriesStore } from '@/stores/categories'
 import { useSwimlanesStore } from '@/stores/swimlanes'
+import { useToast } from '@/stores/toast'
 import SubtasksList from '@/components/SubtasksList.vue'
 import CommentsList from '@/components/CommentsList.vue'
 import TaskTags from '@/components/TaskTags.vue'
@@ -24,10 +26,12 @@ const emit = defineEmits<{
   updated: []
 }>()
 
+const { t } = useI18n()
 const tasksStore = useTasksStore()
 const membersStore = useMembersStore()
 const categoriesStore = useCategoriesStore()
 const swimlanesStore = useSwimlanesStore()
+const toast = useToast()
 
 // Edit states
 const isEditingTitle = ref(false)
@@ -36,26 +40,26 @@ const editTitle = ref('')
 const editDescription = ref('')
 const isUpdating = ref(false)
 
-const colors = [
-  { id: 'yellow', name: '黃色', class: 'bg-yellow-500' },
-  { id: 'blue', name: '藍色', class: 'bg-blue-500' },
-  { id: 'green', name: '綠色', class: 'bg-green-500' },
-  { id: 'purple', name: '紫色', class: 'bg-purple-500' },
-  { id: 'red', name: '紅色', class: 'bg-red-500' },
-  { id: 'orange', name: '橘色', class: 'bg-orange-500' },
-  { id: 'grey', name: '灰色', class: 'bg-gray-500' },
-  { id: 'cyan', name: '青色', class: 'bg-cyan-500' },
-  { id: 'lime', name: '萊姆綠', class: 'bg-lime-500' },
-  { id: 'pink', name: '粉紅', class: 'bg-pink-500' },
-  { id: 'teal', name: '藍綠', class: 'bg-teal-500' },
-  { id: 'amber', name: '琥珀', class: 'bg-amber-500' },
-  { id: 'brown', name: '棕色', class: 'bg-amber-800' },
-  { id: 'deep_orange', name: '深橘', class: 'bg-orange-700' },
-  { id: 'dark_grey', name: '深灰', class: 'bg-gray-700' },
-  { id: 'white', name: '白色', class: 'bg-white border border-edge' }
-]
+const colors = computed(() => [
+  { id: 'yellow', name: t('task.colorYellow'), class: 'bg-yellow-500' },
+  { id: 'blue', name: t('task.colorBlue'), class: 'bg-blue-500' },
+  { id: 'green', name: t('task.colorGreen'), class: 'bg-green-500' },
+  { id: 'purple', name: t('task.colorPurple'), class: 'bg-purple-500' },
+  { id: 'red', name: t('task.colorRed'), class: 'bg-red-500' },
+  { id: 'orange', name: t('task.colorOrange'), class: 'bg-orange-500' },
+  { id: 'grey', name: t('task.colorGrey'), class: 'bg-gray-500' },
+  { id: 'cyan', name: t('task.colorCyan'), class: 'bg-cyan-500' },
+  { id: 'lime', name: t('task.colorLime'), class: 'bg-lime-500' },
+  { id: 'pink', name: t('task.colorPink'), class: 'bg-pink-500' },
+  { id: 'teal', name: t('task.colorTeal'), class: 'bg-teal-500' },
+  { id: 'amber', name: t('task.colorAmber'), class: 'bg-amber-500' },
+  { id: 'brown', name: t('task.colorBrown'), class: 'bg-amber-800' },
+  { id: 'deep_orange', name: t('task.colorDeepOrange'), class: 'bg-orange-700' },
+  { id: 'dark_grey', name: t('task.colorDarkGrey'), class: 'bg-gray-700' },
+  { id: 'white', name: t('task.colorWhite'), class: 'bg-white border border-edge' }
+])
 
-const statusLabel = computed(() => props.task?.is_active ? '開啟' : '已關閉')
+const statusLabel = computed(() => props.task?.is_active ? t('task.open') : t('task.closed'))
 
 const formattedCreationDate = computed(() => {
   if (!props.task?.date_creation) return '-'
@@ -128,7 +132,7 @@ const saveTitle = async () => {
     emit('updated')
   } catch (error) {
     console.error('Failed to update title:', error)
-    alert('更新標題失敗')
+    toast.error(t('task.updateTitleFailed'))
   } finally {
     isUpdating.value = false
   }
@@ -158,7 +162,7 @@ const saveDescription = async () => {
     emit('updated')
   } catch (error) {
     console.error('Failed to update description:', error)
-    alert('更新描述失敗')
+    toast.error(t('task.updateDescriptionFailed'))
   } finally {
     isUpdating.value = false
   }
@@ -173,7 +177,7 @@ const updateColor = async (colorId: string) => {
     emit('updated')
   } catch (error) {
     console.error('Failed to update color:', error)
-    alert('更新顏色失敗')
+    toast.error(t('task.updateColorFailed'))
   } finally {
     isUpdating.value = false
   }
@@ -188,7 +192,7 @@ const closeTask = async () => {
     emit('updated')
   } catch (error) {
     console.error('Failed to close task:', error)
-    alert('關閉任務失敗')
+    toast.error(t('task.closeTaskFailed'))
   } finally {
     isUpdating.value = false
   }
@@ -203,7 +207,7 @@ const openTask = async () => {
     emit('updated')
   } catch (error) {
     console.error('Failed to open task:', error)
-    alert('重新開啟任務失敗')
+    toast.error(t('task.reopenTaskFailed'))
   } finally {
     isUpdating.value = false
   }
@@ -295,7 +299,7 @@ const updateCategory = async (categoryId: number | null) => {
                   data-testid="edit-title-btn"
                   @click="startEditTitle"
                   class="text-content-tertiary hover:text-content-secondary"
-                  title="編輯標題"
+                  :title="t('task.editTitle')"
                 >
                   <ph-icon icon="pen-to-square" class="w-4 h-4" />
                 </button>
@@ -345,25 +349,25 @@ const updateCategory = async (categoryId: number | null) => {
                 <!-- Description -->
                 <div>
                   <div class="flex items-center justify-between mb-2">
-                    <h3 class="text-sm font-medium text-content-secondary">描述</h3>
+                    <h3 class="text-sm font-medium text-content-secondary">{{ t('task.description') }}</h3>
                     <button
                       v-if="!isEditingDescription"
                       @click="startEditDescription"
                       class="text-content-tertiary hover:text-content-secondary text-sm"
                     >
-                      編輯
+                      {{ t('common.edit') }}
                     </button>
                   </div>
                   <div v-if="!isEditingDescription">
                     <p v-if="task.description" class="text-content-secondary whitespace-pre-wrap">{{ task.description }}</p>
-                    <p v-else class="text-content-tertiary italic">無描述</p>
+                    <p v-else class="text-content-tertiary italic">{{ t('task.noDescription') }}</p>
                   </div>
                   <div v-else class="space-y-2">
                     <textarea
                       v-model="editDescription"
                       rows="4"
                       class="w-full px-3 py-2 border border-edge rounded-md focus:outline-none focus:ring-2 focus:ring-accent"
-                      placeholder="輸入任務描述..."
+                      :placeholder="t('task.enterDescriptionPlaceholder')"
                     ></textarea>
                     <div class="flex gap-2">
                       <button
@@ -371,13 +375,13 @@ const updateCategory = async (categoryId: number | null) => {
                         :disabled="isUpdating"
                         class="px-3 py-1 text-sm bg-accent text-content-inverse rounded hover:bg-accent-hover disabled:opacity-50"
                       >
-                        儲存
+                        {{ t('common.save') }}
                       </button>
                       <button
                         @click="cancelEditDescription"
                         class="px-3 py-1 text-sm bg-surface-tertiary text-content rounded hover:bg-surface-hover"
                       >
-                        取消
+                        {{ t('common.cancel') }}
                       </button>
                     </div>
                   </div>
@@ -422,7 +426,7 @@ const updateCategory = async (categoryId: number | null) => {
               <div class="space-y-4">
                 <!-- Status -->
                 <div>
-                  <h3 class="text-sm font-medium text-content-secondary mb-2">狀態</h3>
+                  <h3 class="text-sm font-medium text-content-secondary mb-2">{{ t('task.status') }}</h3>
                   <div class="flex items-center gap-2">
                     <span
                       :class="[
@@ -439,7 +443,7 @@ const updateCategory = async (categoryId: number | null) => {
                       :disabled="isUpdating"
                       class="text-xs text-content-tertiary hover:text-content-secondary"
                     >
-                      關閉任務
+                      {{ t('task.closeTask') }}
                     </button>
                     <button
                       v-else
@@ -448,21 +452,21 @@ const updateCategory = async (categoryId: number | null) => {
                       :disabled="isUpdating"
                       class="text-xs text-accent hover:text-accent-hover"
                     >
-                      重新開啟
+                      {{ t('task.reopenTask') }}
                     </button>
                   </div>
                 </div>
 
                 <!-- Assignee -->
                 <div>
-                  <h3 class="text-sm font-medium text-content-secondary mb-2">指派人</h3>
+                  <h3 class="text-sm font-medium text-content-secondary mb-2">{{ t('task.assignee') }}</h3>
                   <select
                     :value="task.owner_id || ''"
                     @change="updateOwner(($event.target as HTMLSelectElement).value ? Number(($event.target as HTMLSelectElement).value) : null)"
                     :disabled="isUpdating"
                     class="w-full text-sm px-2 py-1 border border-edge rounded bg-surface focus:outline-none focus:ring-1 focus:ring-accent"
                   >
-                    <option value="">未指派</option>
+                    <option value="">{{ t('task.unassigned') }}</option>
                     <option
                       v-for="member in assignableUsers"
                       :key="member.id"
@@ -475,7 +479,7 @@ const updateCategory = async (categoryId: number | null) => {
 
                 <!-- Column -->
                 <div>
-                  <h3 class="text-sm font-medium text-content-secondary mb-2">欄位</h3>
+                  <h3 class="text-sm font-medium text-content-secondary mb-2">{{ t('board.column') }}</h3>
                   <select
                     :value="task.column_id"
                     @change="updateColumn(Number(($event.target as HTMLSelectElement).value))"
@@ -494,14 +498,14 @@ const updateCategory = async (categoryId: number | null) => {
 
                 <!-- Swimlane -->
                 <div>
-                  <h3 class="text-sm font-medium text-content-secondary mb-2">泳道</h3>
+                  <h3 class="text-sm font-medium text-content-secondary mb-2">{{ t('board.swimlane') }}</h3>
                   <select
                     :value="task.swimlane_id || ''"
                     @change="updateSwimlane(($event.target as HTMLSelectElement).value ? Number(($event.target as HTMLSelectElement).value) : null)"
                     :disabled="isUpdating"
                     class="w-full text-sm px-2 py-1 border border-edge rounded bg-surface focus:outline-none focus:ring-1 focus:ring-accent"
                   >
-                    <option value="">預設泳道</option>
+                    <option value="">{{ t('task.defaultSwimlane') }}</option>
                     <option
                       v-for="swimlane in swimlanes"
                       :key="swimlane.id"
@@ -514,14 +518,14 @@ const updateCategory = async (categoryId: number | null) => {
 
                 <!-- Category -->
                 <div>
-                  <h3 class="text-sm font-medium text-content-secondary mb-2">類別</h3>
+                  <h3 class="text-sm font-medium text-content-secondary mb-2">{{ t('task.category') }}</h3>
                   <select
                     :value="task.category_id || ''"
                     @change="updateCategory(($event.target as HTMLSelectElement).value ? Number(($event.target as HTMLSelectElement).value) : null)"
                     :disabled="isUpdating"
                     class="w-full text-sm px-2 py-1 border border-edge rounded bg-surface focus:outline-none focus:ring-1 focus:ring-accent"
                   >
-                    <option value="">無類別</option>
+                    <option value="">{{ t('category.noCategory') }}</option>
                     <option
                       v-for="category in categories"
                       :key="category.id"
@@ -534,7 +538,7 @@ const updateCategory = async (categoryId: number | null) => {
 
                 <!-- Color -->
                 <div data-testid="color-selector">
-                  <h3 class="text-sm font-medium text-content-secondary mb-2">顏色</h3>
+                  <h3 class="text-sm font-medium text-content-secondary mb-2">{{ t('task.color') }}</h3>
                   <div class="flex flex-wrap gap-2">
                     <button
                       v-for="color in colors"
@@ -563,18 +567,18 @@ const updateCategory = async (categoryId: number | null) => {
 
                 <!-- Due Date -->
                 <div data-testid="due-date" v-if="formattedDueDate">
-                  <h3 class="text-sm font-medium text-content-secondary mb-2">到期日</h3>
+                  <h3 class="text-sm font-medium text-content-secondary mb-2">{{ t('task.dueDate') }}</h3>
                   <span class="text-sm text-content-secondary">{{ formattedDueDate }}</span>
                 </div>
 
                 <!-- Priority & Score -->
                 <div class="grid grid-cols-2 gap-2">
                   <div>
-                    <h3 class="text-sm font-medium text-content-secondary mb-2">優先級</h3>
+                    <h3 class="text-sm font-medium text-content-secondary mb-2">{{ t('task.priority') }}</h3>
                     <span class="text-sm text-content-secondary">{{ task.priority || '-' }}</span>
                   </div>
                   <div>
-                    <h3 class="text-sm font-medium text-content-secondary mb-2">Story Points</h3>
+                    <h3 class="text-sm font-medium text-content-secondary mb-2">{{ t('task.storyPoints') }}</h3>
                     <span class="text-sm text-content-secondary">{{ task.score || '-' }}</span>
                   </div>
                 </div>
@@ -582,11 +586,11 @@ const updateCategory = async (categoryId: number | null) => {
                 <!-- Dates -->
                 <div class="pt-4 border-t border-edge space-y-2">
                   <div>
-                    <span class="text-xs text-content-tertiary">建立於</span>
+                    <span class="text-xs text-content-tertiary">{{ t('task.createdAt') }}</span>
                     <span class="text-xs text-content-secondary ml-1">{{ formattedCreationDate }}</span>
                   </div>
                   <div>
-                    <span class="text-xs text-content-tertiary">更新於</span>
+                    <span class="text-xs text-content-tertiary">{{ t('task.updatedAt') }}</span>
                     <span class="text-xs text-content-secondary ml-1">{{ formattedModificationDate }}</span>
                   </div>
                 </div>
