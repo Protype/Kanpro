@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useGroupsStore } from '@/stores/groups'
 import { useUsersStore } from '@/stores/users'
 import UserAvatar from '@/components/UserAvatar.vue'
@@ -15,6 +16,7 @@ const emit = defineEmits<{
   'close-search-modal': []
 }>()
 
+const { t } = useI18n()
 const router = useRouter()
 const groupsStore = useGroupsStore()
 const usersStore = useUsersStore()
@@ -73,12 +75,12 @@ const handleAddGroup = async () => {
     )
     await groupsStore.fetchAllGroups()
     cancelAdding()
-    successMessage.value = '群組新增成功'
+    successMessage.value = t('group.addSuccess')
     setTimeout(() => {
       successMessage.value = null
     }, 3000)
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '新增群組失敗'
+    error.value = err instanceof Error ? err.message : t('group.addFailed')
   } finally {
     isSubmitting.value = false
   }
@@ -109,29 +111,29 @@ const handleSaveGroup = async () => {
     )
     await groupsStore.fetchAllGroups()
     cancelEditing()
-    successMessage.value = '群組更新成功'
+    successMessage.value = t('group.updateSuccess')
     setTimeout(() => {
       successMessage.value = null
     }, 3000)
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '更新群組失敗'
+    error.value = err instanceof Error ? err.message : t('group.updateFailed')
   } finally {
     isSubmitting.value = false
   }
 }
 
 const handleRemoveGroup = async (group: Group) => {
-  if (!confirm(`確定要刪除群組「${group.name}」嗎？此操作無法復原。`)) return
+  if (!confirm(t('group.confirmRemove', { name: group.name }))) return
 
   try {
     await groupsStore.removeGroup(group.id)
     await groupsStore.fetchAllGroups()
-    successMessage.value = '群組已刪除'
+    successMessage.value = t('group.removeSuccess')
     setTimeout(() => {
       successMessage.value = null
     }, 3000)
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '刪除群組失敗'
+    error.value = err instanceof Error ? err.message : t('group.removeFailed')
   }
 }
 
@@ -145,7 +147,7 @@ const openMembersModal = async (group: Group) => {
   try {
     groupMembers.value = await groupsStore.getGroupMembers(group.id)
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '載入成員失敗'
+    error.value = err instanceof Error ? err.message : t('group.loadMembersFailed')
   } finally {
     isLoadingMembers.value = false
   }
@@ -165,28 +167,28 @@ const handleAddMember = async () => {
     groupMembers.value = await groupsStore.getGroupMembers(selectedGroup.value.id)
     showAddMemberForm.value = false
     selectedUserId.value = null
-    successMessage.value = '成員已加入'
+    successMessage.value = t('group.addMemberSuccess')
     setTimeout(() => {
       successMessage.value = null
     }, 3000)
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '加入成員失敗'
+    error.value = err instanceof Error ? err.message : t('group.addMemberFailed')
   }
 }
 
 const handleRemoveMember = async (userId: number) => {
   if (!selectedGroup.value) return
-  if (!confirm('確定要移除此成員嗎？')) return
+  if (!confirm(t('group.confirmRemoveMember'))) return
 
   try {
     await groupsStore.removeGroupMember(selectedGroup.value.id, userId)
     groupMembers.value = await groupsStore.getGroupMembers(selectedGroup.value.id)
-    successMessage.value = '成員已移除'
+    successMessage.value = t('group.removeMemberSuccess')
     setTimeout(() => {
       successMessage.value = null
     }, 3000)
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '移除成員失敗'
+    error.value = err instanceof Error ? err.message : t('group.removeMemberFailed')
   }
 }
 
@@ -206,8 +208,8 @@ const handleSearchSelect = (task: Task) => {
     <main class="mx-auto max-w-4xl px-4 py-6">
       <!-- Page Title -->
       <div class="mb-6">
-        <h1 class="text-2xl font-bold text-content">群組管理</h1>
-        <p class="text-content-secondary mt-1">管理使用者群組</p>
+        <h1 class="text-2xl font-bold text-content">{{ t('group.memberManagement') }}</h1>
+        <p class="text-content-secondary mt-1">{{ t('group.manageGroups') }}</p>
       </div>
       <!-- Error Alert -->
       <div v-if="error" class="alert-error mb-6">
@@ -228,7 +230,7 @@ const handleSearchSelect = (task: Task) => {
       <!-- Header with Add button -->
       <div class="flex items-center justify-between mb-6">
         <h2 class="text-lg font-semibold text-content">
-          所有群組
+          {{ t('group.groups') }}
           <span v-if="groupsStore.groupsCount > 0" class="text-content-tertiary text-sm font-normal">
             ({{ groupsStore.groupsCount }})
           </span>
@@ -238,7 +240,7 @@ const handleSearchSelect = (task: Task) => {
           @click="startAdding"
           class="btn-primary"
         >
-          + 新增群組
+          + {{ t('group.addGroup') }}
         </button>
       </div>
 
@@ -250,25 +252,25 @@ const handleSearchSelect = (task: Task) => {
       <div v-else class="space-y-4">
         <!-- Add group form -->
         <div v-if="isAdding" class="card p-6 space-y-4">
-          <h3 class="text-lg font-semibold text-content">新增群組</h3>
+          <h3 class="text-lg font-semibold text-content">{{ t('group.addGroup') }}</h3>
 
           <div class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-content-secondary mb-1">群組名稱 *</label>
+              <label class="block text-sm font-medium text-content-secondary mb-1">{{ t('group.name') }} *</label>
               <input
                 v-model="newGroupName"
                 type="text"
                 class="input"
-                placeholder="輸入群組名稱"
+                :placeholder="t('group.enterName')"
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-content-secondary mb-1">外部 ID（選填）</label>
+              <label class="block text-sm font-medium text-content-secondary mb-1">{{ t('group.externalId') }}</label>
               <input
                 v-model="newExternalId"
                 type="text"
                 class="input"
-                placeholder="如 LDAP 群組 ID"
+                :placeholder="t('group.externalIdPlaceholder')"
               />
             </div>
           </div>
@@ -279,14 +281,14 @@ const handleSearchSelect = (task: Task) => {
               :disabled="isSubmitting"
               class="btn-secondary"
             >
-              取消
+              {{ t('common.cancel') }}
             </button>
             <button
               @click="handleAddGroup"
               :disabled="!newGroupName.trim() || isSubmitting"
               class="btn-primary"
             >
-              新增
+              {{ t('common.add') }}
             </button>
           </div>
         </div>
@@ -311,7 +313,7 @@ const handleSearchSelect = (task: Task) => {
                   <div>
                     <div class="font-medium text-content">{{ group.name }}</div>
                     <div v-if="group.external_id" class="text-sm text-content-tertiary">
-                      外部 ID: {{ group.external_id }}
+                      {{ t('group.externalId') }}: {{ group.external_id }}
                     </div>
                   </div>
                 </div>
@@ -321,7 +323,7 @@ const handleSearchSelect = (task: Task) => {
                   <button
                     @click="openMembersModal(group)"
                     class="p-2 text-content-tertiary hover:text-content-secondary"
-                    title="管理成員"
+                    :title="t('group.manageMembers')"
                   >
                     <ph-icon icon="users" class="w-5 h-5" />
                   </button>
@@ -329,7 +331,7 @@ const handleSearchSelect = (task: Task) => {
                   <button
                     @click="startEditing(group)"
                     class="p-2 text-content-tertiary hover:text-content-secondary"
-                    title="編輯"
+                    :title="t('common.edit')"
                   >
                     <ph-icon icon="pen-to-square" class="w-5 h-5" />
                   </button>
@@ -337,7 +339,7 @@ const handleSearchSelect = (task: Task) => {
                   <button
                     @click="handleRemoveGroup(group)"
                     class="p-2 text-content-tertiary hover:text-error"
-                    title="刪除"
+                    :title="t('common.delete')"
                   >
                     <ph-icon icon="trash" class="w-5 h-5" />
                   </button>
@@ -347,7 +349,7 @@ const handleSearchSelect = (task: Task) => {
               <!-- Edit mode -->
               <div v-else class="space-y-4">
                 <div>
-                  <label class="block text-sm font-medium text-content-secondary mb-1">群組名稱 *</label>
+                  <label class="block text-sm font-medium text-content-secondary mb-1">{{ t('group.name') }} *</label>
                   <input
                     v-model="editName"
                     type="text"
@@ -355,7 +357,7 @@ const handleSearchSelect = (task: Task) => {
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-content-secondary mb-1">外部 ID（選填）</label>
+                  <label class="block text-sm font-medium text-content-secondary mb-1">{{ t('group.externalId') }}</label>
                   <input
                     v-model="editExternalId"
                     type="text"
@@ -368,14 +370,14 @@ const handleSearchSelect = (task: Task) => {
                     :disabled="isSubmitting"
                     class="btn-secondary"
                   >
-                    取消
+                    {{ t('common.cancel') }}
                   </button>
                   <button
                     @click="handleSaveGroup"
                     :disabled="!editName.trim() || isSubmitting"
                     class="btn-primary"
                   >
-                    儲存
+                    {{ t('common.save') }}
                   </button>
                 </div>
               </div>
@@ -386,7 +388,7 @@ const handleSearchSelect = (task: Task) => {
               v-if="groupsStore.groups.length === 0 && !groupsStore.isLoading"
               class="p-8 text-center text-content-tertiary"
             >
-              沒有群組
+              {{ t('group.noMatchingGroups') }}
             </div>
           </div>
         </div>
@@ -408,7 +410,7 @@ const handleSearchSelect = (task: Task) => {
             <div class="p-6">
               <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-content">
-                  {{ selectedGroup?.name }} - 成員管理
+                  {{ selectedGroup?.name }} - {{ t('group.memberManagement') }}
                 </h3>
                 <button
                   @click="closeMembersModal"
@@ -426,12 +428,12 @@ const handleSearchSelect = (task: Task) => {
               <div v-else>
                 <!-- Add member form -->
                 <div v-if="showAddMemberForm" class="mb-4 p-4 bg-surface-tertiary rounded-lg">
-                  <label class="block text-sm font-medium text-content-secondary mb-2">選擇使用者</label>
+                  <label class="block text-sm font-medium text-content-secondary mb-2">{{ t('group.selectUser') }}</label>
                   <select
                     v-model="selectedUserId"
                     class="select"
                   >
-                    <option :value="null">請選擇</option>
+                    <option :value="null">{{ t('common.pleaseSelect') }}</option>
                     <option v-for="user in availableUsers" :key="user.id" :value="user.id">
                       {{ user.name || user.username }} (@{{ user.username }})
                     </option>
@@ -441,14 +443,14 @@ const handleSearchSelect = (task: Task) => {
                       @click="showAddMemberForm = false"
                       class="px-3 py-1.5 text-sm text-content-secondary hover:text-content"
                     >
-                      取消
+                      {{ t('common.cancel') }}
                     </button>
                     <button
                       @click="handleAddMember"
                       :disabled="!selectedUserId"
                       class="btn-primary btn-sm"
                     >
-                      加入
+                      {{ t('group.addToGroup') }}
                     </button>
                   </div>
                 </div>
@@ -458,7 +460,7 @@ const handleSearchSelect = (task: Task) => {
                     @click="showAddMemberForm = true"
                     class="btn-secondary w-full"
                   >
-                    + 新增成員
+                    + {{ t('group.addMember') }}
                   </button>
                 </div>
 
@@ -481,7 +483,7 @@ const handleSearchSelect = (task: Task) => {
                     <button
                       @click="handleRemoveMember(member.id)"
                       class="p-1 text-content-tertiary hover:text-error"
-                      title="移除"
+                      :title="t('common.remove')"
                     >
                       <ph-icon icon="xmark" class="w-4 h-4" />
                     </button>
@@ -491,7 +493,7 @@ const handleSearchSelect = (task: Task) => {
                     v-if="groupMembers.length === 0"
                     class="text-center py-4 text-content-tertiary text-sm"
                   >
-                    此群組沒有成員
+                    {{ t('group.noMembers') }}
                   </div>
                 </div>
               </div>
