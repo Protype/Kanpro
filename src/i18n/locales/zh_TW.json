@@ -269,14 +269,23 @@
   "attachment": {
     "attachment": "附件",
     "attachments": "附件",
+    "title": "附件",
     "addAttachment": "新增附件",
     "uploadFile": "上傳檔案",
+    "upload": "上傳",
+    "uploading": "上傳中...",
     "removeAttachment": "刪除附件",
+    "remove": "刪除",
     "download": "下載",
     "noAttachments": "沒有附件",
     "fileSize": "檔案大小",
     "uploadedBy": "上傳者",
-    "uploadedAt": "上傳時間"
+    "uploadedAt": "上傳時間",
+    "confirmRemove": "確定要刪除此附件嗎？",
+    "uploadFailed": "上傳檔案失敗",
+    "downloadFailed": "下載檔案失敗",
+    "removeFailed": "刪除附件失敗",
+    "previewNotAvailable": "(圖片預覽需要實際 API 支援)"
   },
   "board": {
     "board": "看板",

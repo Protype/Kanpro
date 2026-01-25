@@ -269,14 +269,23 @@
   "attachment": {
     "attachment": "Attachment",
     "attachments": "Attachments",
+    "title": "Attachments",
     "addAttachment": "Add attachment",
     "uploadFile": "Upload file",
+    "upload": "Upload",
+    "uploading": "Uploading...",
     "removeAttachment": "Remove attachment",
+    "remove": "Delete",
     "download": "Download",
     "noAttachments": "No attachments",
     "fileSize": "File size",
     "uploadedBy": "Uploaded by",
-    "uploadedAt": "Uploaded at"
+    "uploadedAt": "Uploaded at",
+    "confirmRemove": "Are you sure you want to delete this attachment?",
+    "uploadFailed": "Failed to upload file",
+    "downloadFailed": "Failed to download file",
+    "removeFailed": "Failed to remove attachment",
+    "previewNotAvailable": "(Image preview requires API support)"
   },
   "board": {
     "board": "Board",
