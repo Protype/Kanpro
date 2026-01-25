@@ -52,10 +52,12 @@ import {
   PhUsersThree,
   PhBell,
 
-  // 主題
+  // 主題與語言
   PhSun,
   PhMoon,
   PhPalette,
+  PhTranslate,
+  PhArrowsClockwise,
 
   // 系統與狀態
   PhGlobe,
@@ -181,10 +183,12 @@ export const iconComponents = {
   'user-group': PhUsersThree,
   'bell': PhBell,
 
-  // 主題
+  // 主題與語言
   'sun': PhSun,
   'moon': PhMoon,
   'palette': PhPalette,
+  'translate': PhTranslate,
+  'arrows-clockwise': PhArrowsClockwise,
 
   // 系統與狀態
   'globe': PhGlobe,

@@ -518,6 +518,8 @@
     "dark": "深色",
     "system": "跟隨系統",
     "followKanboard": "跟隨 Kanboard 設定",
+    "languageEnUS": "English",
+    "languageZhTW": "中文（繁體）",
     "userId": "使用者 ID",
     "server": "伺服器",
     "displayName": "顯示名稱",
