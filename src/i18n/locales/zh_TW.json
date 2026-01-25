@@ -229,14 +229,23 @@
   "subtask": {
     "subtask": "子任務",
     "subtasks": "子任務",
+    "title": "子任務",
     "newSubtask": "新增子任務",
     "addSubtask": "新增子任務",
     "editSubtask": "編輯子任務",
     "removeSubtask": "刪除子任務",
+    "remove": "刪除子任務",
     "todo": "待辦",
     "inProgress": "進行中",
     "done": "完成",
-    "progress": "進度"
+    "progress": "進度",
+    "noSubtasks": "沒有子任務",
+    "enterTitle": "子任務標題",
+    "clickToToggleStatus": "點擊切換狀態（目前: {status}）",
+    "updateStatusFailed": "更新子任務狀態失敗",
+    "createFailed": "建立子任務失敗",
+    "confirmRemove": "確定要刪除此子任務嗎？",
+    "removeFailed": "刪除子任務失敗"
   },
   "comment": {
     "comment": "評論",

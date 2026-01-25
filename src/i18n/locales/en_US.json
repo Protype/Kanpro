@@ -229,14 +229,23 @@
   "subtask": {
     "subtask": "Sub-task",
     "subtasks": "Sub-tasks",
+    "title": "Sub-tasks",
     "newSubtask": "New sub-task",
     "addSubtask": "Add a sub-task",
     "editSubtask": "Edit sub-task",
     "removeSubtask": "Remove sub-task",
+    "remove": "Remove sub-task",
     "todo": "Todo",
     "inProgress": "In progress",
     "done": "Done",
-    "progress": "Progress"
+    "progress": "Progress",
+    "noSubtasks": "No sub-tasks",
+    "enterTitle": "Sub-task title",
+    "clickToToggleStatus": "Click to toggle status (current: {status})",
+    "updateStatusFailed": "Failed to update sub-task status",
+    "createFailed": "Failed to create sub-task",
+    "confirmRemove": "Are you sure you want to delete this sub-task?",
+    "removeFailed": "Failed to remove sub-task"
   },
   "comment": {
     "comment": "Comment",
