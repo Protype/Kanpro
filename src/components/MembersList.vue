@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useMembersStore } from '@/stores/members'
 import { useToast } from '@/stores/toast'
 import UserAvatar from '@/components/UserAvatar.vue'
@@ -13,6 +14,7 @@ const emit = defineEmits<{
   updated: []
 }>()
 
+const { t } = useI18n()
 const membersStore = useMembersStore()
 const toast = useToast()
 
@@ -91,50 +93,50 @@ const handleAddMember = async () => {
   if (!selectedUserId.value || isSubmitting.value) return
 
   isSubmitting.value = true
-  const loadingToast = toast.loading('新增成員中...')
+  const loadingToast = toast.loading(t('member.addingMember'))
   try {
     await membersStore.addProjectUser(props.projectId, selectedUserId.value, selectedRole.value)
     await membersStore.fetchProjectMembers(props.projectId)
     await membersStore.fetchAllUsers()
-    toast.update(loadingToast, 'success', '成員已新增')
+    toast.update(loadingToast, 'success', t('member.memberAdded'))
     cancelAdding()
     emit('updated')
   } catch (error) {
     console.error('Failed to add member:', error)
-    toast.update(loadingToast, 'error', '新增成員失敗')
+    toast.update(loadingToast, 'error', t('member.addMemberFailed'))
   } finally {
     isSubmitting.value = false
   }
 }
 
 const handleRemoveMember = async (member: ProjectMember) => {
-  if (!confirm(`確定要從專案中移除「${member.name || member.username}」嗎？`)) return
+  if (!confirm(t('member.confirmRemoveMember', { name: member.name || member.username }))) return
 
-  const loadingToast = toast.loading('移除成員中...')
+  const loadingToast = toast.loading(t('member.removingMember'))
   try {
     await membersStore.removeProjectUser(props.projectId, member.id)
     await membersStore.fetchProjectMembers(props.projectId)
     await membersStore.fetchAllUsers()
-    toast.update(loadingToast, 'success', '成員已移除')
+    toast.update(loadingToast, 'success', t('member.memberRemoved'))
     emit('updated')
   } catch (error) {
     console.error('Failed to remove member:', error)
-    toast.update(loadingToast, 'error', '移除成員失敗')
+    toast.update(loadingToast, 'error', t('member.removeMemberFailed'))
   }
 }
 
 const handleChangeRole = async (member: ProjectMember, newRole: 'project-manager' | 'project-member' | 'project-viewer') => {
   if (member.role === newRole) return
 
-  const loadingToast = toast.loading('變更角色中...')
+  const loadingToast = toast.loading(t('member.changingRole'))
   try {
     await membersStore.changeProjectUserRole(props.projectId, member.id, newRole)
     await membersStore.fetchProjectMembers(props.projectId)
-    toast.update(loadingToast, 'success', '角色已變更')
+    toast.update(loadingToast, 'success', t('member.roleChanged'))
     emit('updated')
   } catch (error) {
     console.error('Failed to change role:', error)
-    toast.update(loadingToast, 'error', '變更角色失敗')
+    toast.update(loadingToast, 'error', t('member.changeRoleFailed'))
   }
 }
 
@@ -158,7 +160,7 @@ onMounted(() => {
       <div class="flex items-center gap-2">
         <ph-icon icon="users" class="w-5 h-5 text-content-tertiary" />
         <h3 class="text-base font-semibold text-content">
-          專案成員
+          {{ t('member.projectMembers') }}
         </h3>
         <span v-if="membersStore.membersCount > 0" class="text-xs text-content-tertiary bg-surface-secondary px-1.5 py-0.5 rounded">
           {{ membersStore.membersCount }}
@@ -168,7 +170,7 @@ onMounted(() => {
         v-if="!isAdding"
         @click="startAdding"
         class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
-        title="新增成員"
+        :title="t('member.addMember')"
       >
         <ph-icon icon="user-plus" weight="fill" class="w-5 h-5" />
       </button>
@@ -202,7 +204,7 @@ onMounted(() => {
                   </button>
                 </template>
                 <template v-else>
-                  <span class="flex-1 text-sm text-content-tertiary">選擇使用者...</span>
+                  <span class="flex-1 text-sm text-content-tertiary">{{ t('member.selectUser') }}</span>
                 </template>
                 <ph-icon icon="chevron-down" class="w-4 h-4 text-content-tertiary flex-shrink-0" />
               </button>
@@ -218,7 +220,7 @@ onMounted(() => {
                     <input
                       v-model="userSearchQuery"
                       type="text"
-                      placeholder="搜尋使用者..."
+                      :placeholder="t('user.searchUsers')"
                       class="w-full px-2 py-1 text-sm bg-surface-secondary border border-edge rounded text-content placeholder:text-content-tertiary focus:outline-none focus:ring-1 focus:ring-accent"
                     />
                   </div>
@@ -239,7 +241,7 @@ onMounted(() => {
                       </div>
                     </button>
                     <div v-if="filteredUsers.length === 0" class="px-3 py-2 text-sm text-content-tertiary">
-                      找不到使用者
+                      {{ t('user.noUsers') }}
                     </div>
                   </div>
                 </div>
@@ -254,9 +256,9 @@ onMounted(() => {
               :disabled="isSubmitting"
               class="w-full h-10 px-3 text-sm bg-surface border border-edge rounded-lg text-content focus:outline-none focus:ring-2 focus:ring-accent disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <option value="project-manager">專案經理</option>
-              <option value="project-member">專案成員</option>
-              <option value="project-viewer">瀏覽者</option>
+              <option value="project-manager">{{ t('member.projectManager') }}</option>
+              <option value="project-member">{{ t('member.projectMember') }}</option>
+              <option value="project-viewer">{{ t('member.projectViewer') }}</option>
             </select>
           </div>
         </div>
@@ -266,7 +268,7 @@ onMounted(() => {
             :disabled="isSubmitting"
             class="px-4 py-2 text-sm text-content-secondary hover:text-content transition-colors disabled:opacity-50"
           >
-            取消
+            {{ t('common.cancel') }}
           </button>
           <button
             @click="handleAddMember"
@@ -274,7 +276,7 @@ onMounted(() => {
             class="px-4 py-2 text-sm font-medium bg-accent text-white rounded-lg hover:bg-accent/90 disabled:opacity-50 transition-colors flex items-center gap-2"
           >
             <ph-icon v-if="isSubmitting" icon="spinner" class="w-4 h-4 animate-spin" />
-            新增
+            {{ t('common.add') }}
           </button>
         </div>
       </div>
@@ -312,16 +314,16 @@ onMounted(() => {
                 getRoleBadgeClass(member.role)
               ]"
             >
-              <option value="project-manager">專案經理</option>
-              <option value="project-member">專案成員</option>
-              <option value="project-viewer">瀏覽者</option>
+              <option value="project-manager">{{ t('member.projectManager') }}</option>
+              <option value="project-member">{{ t('member.projectMember') }}</option>
+              <option value="project-viewer">{{ t('member.projectViewer') }}</option>
             </select>
 
             <!-- Remove button -->
             <button
               @click="handleRemoveMember(member)"
               class="p-1.5 text-content-tertiary group-hover:text-content-secondary hover:!text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md transition-colors"
-              title="移除成員"
+              :title="t('member.removeMember')"
             >
               <ph-icon icon="trash" class="w-4 h-4" />
             </button>
@@ -334,7 +336,7 @@ onMounted(() => {
           class="py-8 text-center text-content-tertiary text-sm"
         >
           <ph-icon icon="users" class="w-8 h-8 mx-auto mb-2 opacity-30" />
-          <p>尚無成員</p>
+          <p>{{ t('member.noMembers') }}</p>
         </div>
       </div>
     </div>

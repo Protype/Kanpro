@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useTheme } from '@/composables/useTheme'
 import { useAppConfig } from '@/composables/useAppConfig'
@@ -10,6 +11,7 @@ const router = useRouter()
 const authStore = useAuthStore()
 const theme = useTheme()
 const appConfig = useAppConfig()
+const { t } = useI18n()
 
 const REMEMBER_ME_KEY = 'kanpro_remember_me'
 
@@ -26,7 +28,7 @@ const hasConfigFileUrl = computed(() => !!appConfig.configFileApiUrl.value)
 
 // 顯示的 API URL（用於純文字模式，移除 jsonrpc.php）
 const displayApiUrl = computed(() => {
-  if (!apiUrl.value) return '未設定'
+  if (!apiUrl.value) return t('common.none')
   // 移除結尾的 /jsonrpc.php 或 jsonrpc.php
   return apiUrl.value.replace(/\/?jsonrpc\.php$/, '')
 })
@@ -115,7 +117,7 @@ const handleLogin = async () => {
 
   // 驗證 API URL 格式
   if (!isValidApiUrl(userInputUrl)) {
-    errorMessage.value = '請輸入有效的伺服器網址（如 /kanboard/ 或 http://...）'
+    errorMessage.value = t('auth.invalidServerUrl')
     return
   }
 
@@ -156,34 +158,34 @@ const handleLogin = async () => {
 
       // 認證失敗：帳號或密碼錯誤
       if (msg.includes('認證失敗')) {
-        errorMessage.value = '登入失敗，帳號或密碼錯誤'
+        errorMessage.value = t('auth.invalidCredentials')
       }
       // 認證格式錯誤（通常是程式問題）
       else if (msg.includes('認證格式錯誤')) {
-        errorMessage.value = '登入失敗，認證格式錯誤（請聯絡系統管理員）'
+        errorMessage.value = t('auth.authFormatError')
       }
       // 外掛未安裝或 JWT 未啟用
       else if (msg.includes('KanproBridge') || msg.includes('外掛未安裝') || msg.includes('JWT')) {
-        errorMessage.value = '登入失敗，KanproBridge 外掛未安裝或 JWT 功能未啟用'
+        errorMessage.value = t('auth.pluginNotInstalled')
       }
       // API 路徑錯誤（返回非 JSON）
       else if (msg.includes('Unexpected token') || msg.includes('not valid JSON')) {
-        errorMessage.value = '伺服器連線錯誤，API 端點返回非 JSON 格式（請確認網址是否正確）'
+        errorMessage.value = t('auth.invalidApiResponse')
       }
       // 網路連線問題
       else if (msg.includes('Network') || msg.includes('fetch') || msg.includes('Failed')) {
         if (wasCrossOrigin && !import.meta.env.DEV) {
-          errorMessage.value = '伺服器連線錯誤，可能是 CORS 未設定（請確認伺服器已啟用跨域存取）'
+          errorMessage.value = t('auth.corsError')
         } else {
-          errorMessage.value = '伺服器連線錯誤，無法連線到伺服器'
+          errorMessage.value = t('auth.connectionError')
         }
       }
       // 其他錯誤
       else {
-        errorMessage.value = '登入失敗，' + (msg || '請稍後再試')
+        errorMessage.value = t('auth.loginFailed') + (msg ? ': ' + msg : '')
       }
     } else {
-      errorMessage.value = '登入失敗，請稍後再試'
+      errorMessage.value = t('auth.loginFailed')
     }
   } finally {
     isLoading.value = false
@@ -206,7 +208,7 @@ const handleLogin = async () => {
         target="_blank"
         rel="noopener noreferrer"
         class="absolute top-[37px] -right-3.5 w-7 h-7 rounded-full bg-surface border border-edge flex items-center justify-center text-content-tertiary/50 hover:text-content-tertiary hover:border-content-tertiary/30 transition-colors"
-        title="開啟 Kanboard 伺服器"
+        :title="t('auth.openKanboard')"
       >
         <ph-icon icon="hard-drives" class="w-4 h-4" />
       </a>
@@ -225,14 +227,14 @@ const handleLogin = async () => {
         <!-- 伺服器網址（載入完成且 config 無設定時顯示） -->
         <div v-if="!configLoading && !hasConfigFileUrl">
           <label for="apiUrl" class="block text-sm font-medium text-content-secondary mb-1">
-            伺服器網址
+            {{ t('auth.serverUrl') }}
           </label>
           <input
             id="apiUrl"
             v-model="apiUrl"
             type="text"
             required
-            placeholder="/kanboard/ 或 http://your-kanboard-server/"
+            :placeholder="t('auth.serverUrlPlaceholder')"
             class="input"
           />
         </div>
@@ -240,7 +242,7 @@ const handleLogin = async () => {
         <!-- 帳號 -->
         <div>
           <label for="username" class="block text-sm font-medium text-content-secondary mb-1">
-            帳號
+            {{ t('auth.username') }}
           </label>
           <input
             id="username"
@@ -255,7 +257,7 @@ const handleLogin = async () => {
         <!-- 密碼 -->
         <div>
           <label for="password" class="block text-sm font-medium text-content-secondary mb-1">
-            密碼
+            {{ t('auth.password') }}
           </label>
           <input
             id="password"
@@ -276,7 +278,7 @@ const handleLogin = async () => {
             class="h-4 w-4 text-accent focus:ring-accent border-edge rounded"
           />
           <label for="rememberMe" class="ml-2 block text-sm text-content-secondary">
-            記住我
+            {{ t('auth.rememberMe') }}
           </label>
         </div>
 
@@ -288,9 +290,9 @@ const handleLogin = async () => {
         >
           <span v-if="isLoading" class="flex items-center justify-center">
             <ph-icon icon="spinner" class="animate-spin -ml-1 mr-2 h-4 w-4" />
-            登入中...
+            {{ t('auth.signingIn') }}
           </span>
-          <span v-else>登入</span>
+          <span v-else>{{ t('auth.signIn') }}</span>
         </button>
       </form>
     </div>

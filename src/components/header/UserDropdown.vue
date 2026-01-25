@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useTheme, type ThemeName, THEMES } from '@/composables/useTheme'
 import { getUserDisplayName } from '@/utils/avatar'
 import UserAvatar from '@/components/UserAvatar.vue'
 
 const router = useRouter()
+const { t } = useI18n()
 const authStore = useAuthStore()
 const { currentTheme, setTheme } = useTheme()
 
@@ -138,7 +140,7 @@ onUnmounted(() => {
             class="w-full px-4 py-2 text-left text-sm text-content hover:bg-surface-hover transition-colors flex items-center gap-3"
           >
             <ph-icon icon="user" class="w-4 h-4 text-content-secondary" />
-            個人設定
+            {{ t('settings.profile') }}
           </button>
 
           <!-- System Management (Admin Only) -->
@@ -148,7 +150,7 @@ onUnmounted(() => {
             class="w-full px-4 py-2 text-left text-sm text-content hover:bg-surface-hover transition-colors flex items-center gap-3"
           >
             <ph-icon icon="gear-six" class="w-4 h-4 text-content-secondary" />
-            系統管理
+            {{ t('admin.administration') }}
           </button>
 
           <!-- Theme Selector -->
@@ -158,7 +160,7 @@ onUnmounted(() => {
               class="w-full px-4 py-2 text-left text-sm text-content hover:bg-surface-hover transition-colors flex items-center gap-3"
             >
               <ph-icon icon="palette" class="w-4 h-4 text-content-secondary" />
-              <span class="flex-1">樣板風格</span>
+              <span class="flex-1">{{ t('settings.theme') }}</span>
               <ph-icon
                 icon="chevron-right"
                 class="w-4 h-4 text-content-tertiary transition-transform"
@@ -216,7 +218,7 @@ onUnmounted(() => {
             class="w-full px-4 py-2 text-left text-sm text-error hover:bg-surface-hover transition-colors flex items-center gap-3"
           >
             <ph-icon icon="right-from-bracket" class="w-4 h-4" />
-            登出
+            {{ t('auth.logout') }}
           </button>
         </div>
       </div>

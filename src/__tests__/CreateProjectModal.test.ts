@@ -2,13 +2,24 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import { createRouter, createMemoryHistory } from 'vue-router'
+import { createI18n } from 'vue-i18n'
 import CreateProjectModal from '@/components/CreateProjectModal.vue'
 import { useProjectDraftStore } from '@/stores/projectDraft'
 import { useAuthStore } from '@/stores/auth'
+import en_US from '@/i18n/locales/en_US.json'
+import zh_TW from '@/i18n/locales/zh_TW.json'
 
 // Mock fetch
 const mockFetch = vi.fn()
 vi.stubGlobal('fetch', mockFetch)
+
+// Create i18n instance for tests
+const i18n = createI18n({
+  legacy: false,
+  locale: 'en_US',
+  fallbackLocale: 'en_US',
+  messages: { en_US, zh_TW }
+})
 
 // Create a mock router
 const router = createRouter({
@@ -54,7 +65,7 @@ describe('CreateProjectModal', () => {
     return mount(CreateProjectModal, {
       props,
       global: {
-        plugins: [router],
+        plugins: [router, i18n],
         stubs: {
           Teleport: true,
           PhIcon,

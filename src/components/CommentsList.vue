@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useCommentsStore } from '@/stores/comments'
 import { useAuthStore } from '@/stores/auth'
+import { useToast } from '@/stores/toast'
 import UserAvatar from '@/components/UserAvatar.vue'
 import type { Comment } from '@/types'
 
@@ -13,6 +15,8 @@ const emit = defineEmits<{
   updated: []
 }>()
 
+const { t } = useI18n()
+const toast = useToast()
 const commentsStore = useCommentsStore()
 const authStore = useAuthStore()
 
@@ -50,7 +54,7 @@ const handleAddComment = async () => {
     emit('updated')
   } catch (error) {
     console.error('Failed to create comment:', error)
-    alert('建立評論失敗')
+    toast.error(t('comment.createFailed'))
   } finally {
     isSubmitting.value = false
   }
@@ -78,14 +82,14 @@ const handleUpdateComment = async (commentId: number) => {
     emit('updated')
   } catch (error) {
     console.error('Failed to update comment:', error)
-    alert('更新評論失敗')
+    toast.error(t('comment.updateFailed'))
   } finally {
     isSubmitting.value = false
   }
 }
 
 const handleRemoveComment = async (commentId: number) => {
-  if (!confirm('確定要刪除此評論嗎？')) return
+  if (!confirm(t('comment.confirmRemove'))) return
 
   try {
     await commentsStore.removeComment(commentId)
@@ -93,7 +97,7 @@ const handleRemoveComment = async (commentId: number) => {
     emit('updated')
   } catch (error) {
     console.error('Failed to remove comment:', error)
-    alert('刪除評論失敗')
+    toast.error(t('comment.removeFailed'))
   }
 }
 
@@ -112,7 +116,7 @@ const canEditComment = (comment: Comment): boolean => {
     <!-- Header -->
     <div class="flex items-center justify-between">
       <h3 class="text-sm font-medium text-gray-700">
-        評論
+        {{ t('comment.title') }}
         <span v-if="commentsStore.commentsCount > 0" class="text-gray-400">
           ({{ commentsStore.commentsCount }})
         </span>
@@ -122,7 +126,7 @@ const canEditComment = (comment: Comment): boolean => {
         @click="isAdding = true"
         class="text-sm text-blue-600 hover:text-blue-800"
       >
-        + 新增評論
+        + {{ t('comment.addComment') }}
       </button>
     </div>
 
@@ -138,7 +142,7 @@ const canEditComment = (comment: Comment): boolean => {
         <textarea
           v-model="newCommentContent"
           rows="3"
-          placeholder="輸入評論內容..."
+          :placeholder="t('comment.enterContent')"
           class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
           :disabled="isSubmitting"
         ></textarea>
@@ -148,14 +152,14 @@ const canEditComment = (comment: Comment): boolean => {
             :disabled="isSubmitting"
             class="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
           >
-            取消
+            {{ t('common.cancel') }}
           </button>
           <button
             @click="handleAddComment"
             :disabled="!newCommentContent.trim() || isSubmitting"
             class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
           >
-            發表
+            {{ t('comment.publish') }}
           </button>
         </div>
       </div>
@@ -173,13 +177,13 @@ const canEditComment = (comment: Comment): boolean => {
             <UserAvatar :name="comment.name || comment.username" size="md" />
             <div>
               <span class="text-sm font-medium text-gray-900">
-                {{ comment.name || comment.username || '未知使用者' }}
+                {{ comment.name || comment.username || t('comment.unknownUser') }}
               </span>
               <span class="text-xs text-gray-500 ml-2">
                 {{ formatDate(comment.date_creation) }}
               </span>
               <span v-if="comment.date_modification" class="text-xs text-gray-400 ml-1">
-                (已編輯)
+                {{ t('comment.edited') }}
               </span>
             </div>
           </div>
@@ -190,14 +194,14 @@ const canEditComment = (comment: Comment): boolean => {
               v-if="editingCommentId !== comment.id"
               @click="startEditing(comment)"
               class="text-gray-400 hover:text-gray-600 p-1"
-              title="編輯"
+              :title="t('comment.edit')"
             >
               <ph-icon icon="pen-to-square" class="w-4 h-4" />
             </button>
             <button
               @click="handleRemoveComment(comment.id)"
               class="text-gray-400 hover:text-red-500 p-1"
-              title="刪除"
+              :title="t('comment.remove')"
             >
               <ph-icon icon="trash" class="w-4 h-4" />
             </button>
@@ -218,14 +222,14 @@ const canEditComment = (comment: Comment): boolean => {
               :disabled="isSubmitting"
               class="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
             >
-              取消
+              {{ t('common.cancel') }}
             </button>
             <button
               @click="handleUpdateComment(comment.id)"
               :disabled="!editingContent.trim() || isSubmitting"
               class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
             >
-              儲存
+              {{ t('common.save') }}
             </button>
           </div>
         </div>
@@ -239,7 +243,7 @@ const canEditComment = (comment: Comment): boolean => {
         v-if="commentsStore.comments.length === 0 && !isAdding"
         class="text-center py-6 text-gray-400 text-sm"
       >
-        沒有評論
+        {{ t('comment.noComments') }}
       </div>
     </div>
   </div>

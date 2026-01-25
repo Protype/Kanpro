@@ -180,12 +180,18 @@ export const useMembersStore = defineStore('members', () => {
    */
   async function fetchProjectMembers(projectId: number): Promise<void> {
     const authStore = useAuthStore()
+    const systemStore = useSystemStore()
 
     isLoading.value = true
     error.value = null
 
     try {
       const client = authStore.getClient()
+
+      // 確保 bridge 狀態已載入（避免 race condition）
+      if (systemStore.bridgeStatus === null && systemStore.bridgeError === null) {
+        await systemStore.fetchBridgeStatus()
+      }
 
       // 檢查是否啟用擴展模式
       if (isProjectUserExtendedEnabled()) {
@@ -234,12 +240,18 @@ export const useMembersStore = defineStore('members', () => {
    */
   async function fetchAssignableUsers(projectId: number): Promise<void> {
     const authStore = useAuthStore()
+    const systemStore = useSystemStore()
 
     isLoading.value = true
     error.value = null
 
     try {
       const client = authStore.getClient()
+
+      // 確保 bridge 狀態已載入（避免 race condition）
+      if (systemStore.bridgeStatus === null && systemStore.bridgeError === null) {
+        await systemStore.fetchBridgeStatus()
+      }
 
       // 檢查是否啟用擴展模式
       if (isProjectUserExtendedEnabled()) {

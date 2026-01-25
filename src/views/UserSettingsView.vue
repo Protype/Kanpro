@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from '@/stores/toast'
 import { getAvatarColor, getAvatarInitial, getUserDisplayName } from '@/utils/avatar'
@@ -16,6 +17,7 @@ const emit = defineEmits<{
 }>()
 
 const router = useRouter()
+const { t } = useI18n()
 const authStore = useAuthStore()
 const toast = useToast()
 
@@ -46,9 +48,9 @@ const avatarBgColor = computed(() => getAvatarColor(displayName.value))
 
 const roleLabel = computed(() => {
   const role = authStore.user?.role
-  if (role === 'app-admin') return '系統管理員'
-  if (role === 'app-manager') return '專案經理'
-  return '一般使用者'
+  if (role === 'app-admin') return t('user.appAdmin')
+  if (role === 'app-manager') return t('user.appManager')
+  return t('user.appUser')
 })
 
 const roleBadgeClass = computed(() => {
@@ -66,7 +68,7 @@ async function loadAvatar(): Promise<void> {
     await authStore.loadAvatar()
   } catch (err) {
     console.error('[Avatar] Load error:', err)
-    toast.error('載入失敗', parseAvatarError(err))
+    toast.error(t('message.loadFailed'), parseAvatarError(err))
   }
 }
 
@@ -83,13 +85,13 @@ async function handleFileSelect(event: Event): Promise<void> {
   // 驗證檔案類型
   const validTypes = ['image/png', 'image/jpeg', 'image/gif']
   if (!validTypes.includes(file.type)) {
-    toast.error('格式錯誤', '只支援 PNG、JPG、GIF 格式')
+    toast.error(t('settings.invalidFormat'), t('settings.supportedFormats'))
     return
   }
 
   // 驗證檔案大小 (最大 2MB)
   if (file.size > 2 * 1024 * 1024) {
-    toast.error('檔案過大', '檔案大小不能超過 2MB')
+    toast.error(t('settings.fileTooLarge'), t('settings.maxFileSize'))
     return
   }
 
@@ -102,9 +104,9 @@ async function handleFileSelect(event: Event): Promise<void> {
     // 上傳（store 會自動更新 avatarData）
     await authStore.uploadAvatar(base64)
 
-    toast.success('上傳成功', '頭像已更新')
+    toast.success(t('message.uploadSuccess'), t('settings.avatarUpdated'))
   } catch (err) {
-    toast.error('上傳失敗', parseAvatarError(err))
+    toast.error(t('message.uploadFailed'), parseAvatarError(err))
   } finally {
     isUploadingAvatar.value = false
     // 清除 input 以便重複選擇同一檔案
@@ -113,16 +115,16 @@ async function handleFileSelect(event: Event): Promise<void> {
 }
 
 async function handleRemoveAvatar(): Promise<void> {
-  if (!confirm('確定要移除頭像嗎？')) return
+  if (!confirm(t('settings.confirmRemoveAvatar'))) return
 
   isUploadingAvatar.value = true
 
   try {
     // 移除（store 會自動清除 avatarData）
     await authStore.removeAvatar()
-    toast.success('移除成功', '頭像已移除')
+    toast.success(t('message.removeSuccess'), t('settings.avatarRemoved'))
   } catch (err) {
-    toast.error('移除失敗', parseAvatarError(err))
+    toast.error(t('message.removeFailed'), parseAvatarError(err))
   } finally {
     isUploadingAvatar.value = false
   }
@@ -132,11 +134,11 @@ function parseAvatarError(err: unknown): string {
   if (err instanceof Error) {
     // Method not found - KanproBridge User Avatar 功能未啟用
     if (err.message.includes('-32601') || err.message.includes('Method not found')) {
-      return '頭像功能未啟用，請在 Kanboard 設定中啟用 KanproBridge User Avatar'
+      return t('settings.avatarFeatureDisabled')
     }
     return err.message
   }
-  return '操作失敗'
+  return t('message.operationFailed')
 }
 
 function fileToBase64(file: File): Promise<string> {
@@ -155,7 +157,7 @@ function fileToBase64(file: File): Promise<string> {
 
 async function handleSave(): Promise<void> {
   if (!userName.value.trim()) {
-    toast.error('驗證錯誤', '名稱不能為空')
+    toast.error(t('message.validationError'), t('settings.nameRequired'))
     return
   }
 
@@ -166,13 +168,13 @@ async function handleSave(): Promise<void> {
       name: userName.value.trim(),
       email: userEmail.value.trim()
     })
-    toast.success('儲存成功', '個人資訊已更新')
+    toast.success(t('message.saved'), t('settings.profileUpdated'))
   } catch (err) {
     // 檢查是否為權限錯誤
     if (err instanceof Error && (err.message.includes('403') || err.message.includes('Forbidden'))) {
-      toast.error('權限不足', '修改個人資訊需要管理員權限，請聯繫系統管理員協助修改')
+      toast.error(t('message.insufficientPermissions'), t('settings.adminRequiredForEdit'))
     } else {
-      toast.error('儲存失敗', err instanceof Error ? err.message : '請稍後再試')
+      toast.error(t('message.saveFailed'), err instanceof Error ? err.message : t('message.error'))
     }
   } finally {
     isSaving.value = false
@@ -182,19 +184,19 @@ async function handleSave(): Promise<void> {
 async function handleChangePassword(): Promise<void> {
   // 驗證
   if (!currentPassword.value) {
-    toast.error('驗證錯誤', '請輸入目前密碼')
+    toast.error(t('message.validationError'), t('settings.enterCurrentPassword'))
     return
   }
   if (!newPassword.value) {
-    toast.error('驗證錯誤', '請輸入新密碼')
+    toast.error(t('message.validationError'), t('settings.enterNewPassword'))
     return
   }
   if (newPassword.value.length < 6) {
-    toast.error('驗證錯誤', '新密碼至少需要 6 個字元')
+    toast.error(t('message.validationError'), t('settings.passwordMinLength'))
     return
   }
   if (newPassword.value !== confirmPassword.value) {
-    toast.error('驗證錯誤', '新密碼與確認密碼不一致')
+    toast.error(t('message.validationError'), t('message.passwordMismatch'))
     return
   }
 
@@ -202,13 +204,13 @@ async function handleChangePassword(): Promise<void> {
 
   try {
     await authStore.changePassword(currentPassword.value, newPassword.value)
-    toast.success('變更成功', '密碼已更新')
+    toast.success(t('message.changeSuccess'), t('settings.passwordUpdated'))
     // 清空表單
     currentPassword.value = ''
     newPassword.value = ''
     confirmPassword.value = ''
   } catch (err) {
-    toast.error('變更失敗', parsePasswordError(err))
+    toast.error(t('message.changeFailed'), parsePasswordError(err))
   } finally {
     isChangingPassword.value = false
   }
@@ -218,15 +220,15 @@ function parsePasswordError(err: unknown): string {
   if (err instanceof Error) {
     // Method not found - KanproBridge User Password 功能未啟用
     if (err.message.includes('-32601') || err.message.includes('Method not found')) {
-      return '密碼變更功能未啟用，請在 Kanboard 設定中啟用 KanproBridge User Password'
+      return t('settings.passwordFeatureDisabled')
     }
     // 密碼錯誤
     if (err.message.includes('Invalid') || err.message.includes('incorrect')) {
-      return '目前密碼不正確'
+      return t('settings.incorrectPassword')
     }
     return err.message
   }
-  return '密碼變更失敗'
+  return t('message.changeFailed')
 }
 
 function handleSearchSelect(task: Task): void {
@@ -251,8 +253,8 @@ onMounted(() => {
     <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <!-- Page Header -->
       <div class="mb-8">
-        <h1 class="text-2xl font-bold text-content">使用者設定</h1>
-        <p class="text-content-secondary mt-1">管理您的個人資訊與帳號設定</p>
+        <h1 class="text-2xl font-bold text-content">{{ t('settings.userSettings') }}</h1>
+        <p class="text-content-secondary mt-1">{{ t('settings.userSettingsDescription') }}</p>
       </div>
 
       <!-- Main Content: Two Column Layout -->
@@ -261,7 +263,7 @@ onMounted(() => {
         <div class="lg:col-span-1 space-y-6">
           <!-- Avatar Card -->
           <div class="card p-6">
-            <h2 class="text-lg font-semibold text-content mb-4">個人頭像</h2>
+            <h2 class="text-lg font-semibold text-content mb-4">{{ t('user.avatar') }}</h2>
 
             <!-- Avatar Display -->
             <div class="flex flex-col items-center">
@@ -317,7 +319,7 @@ onMounted(() => {
                   class="btn-secondary text-sm"
                 >
                   <ph-icon icon="upload-simple" class="w-4 h-4 mr-1" />
-                  上傳
+                  {{ t('settings.upload') }}
                 </button>
                 <button
                   v-if="avatarData"
@@ -326,48 +328,48 @@ onMounted(() => {
                   class="btn-secondary text-sm text-error hover:bg-error/10"
                 >
                   <ph-icon icon="trash" class="w-4 h-4 mr-1" />
-                  移除
+                  {{ t('common.remove') }}
                 </button>
               </div>
 
               <!-- Avatar Hint -->
               <p class="mt-3 text-xs text-content-tertiary text-center">
-                支援 PNG、JPG、GIF，最大 2MB
+                {{ t('settings.avatarHint') }}
               </p>
             </div>
           </div>
 
           <!-- Account Info Card -->
           <div class="card p-6">
-            <h2 class="text-lg font-semibold text-content mb-4">帳號資訊</h2>
+            <h2 class="text-lg font-semibold text-content mb-4">{{ t('settings.accountInfo') }}</h2>
 
             <div class="space-y-4">
               <div class="flex items-center justify-between py-2 border-b border-edge">
-                <span class="text-sm text-content-tertiary">使用者 ID</span>
+                <span class="text-sm text-content-tertiary">{{ t('settings.userId') }}</span>
                 <span class="text-sm font-medium text-content">{{ authStore.user?.id }}</span>
               </div>
 
               <div class="flex items-center justify-between py-2 border-b border-edge">
-                <span class="text-sm text-content-tertiary">使用者名稱</span>
+                <span class="text-sm text-content-tertiary">{{ t('user.username') }}</span>
                 <span class="text-sm font-medium text-content font-mono">@{{ authStore.user?.username }}</span>
               </div>
 
               <div class="flex items-center justify-between py-2 border-b border-edge">
-                <span class="text-sm text-content-tertiary">角色</span>
+                <span class="text-sm text-content-tertiary">{{ t('user.role') }}</span>
                 <span :class="['text-xs px-2 py-1 rounded-full font-medium', roleBadgeClass]">
                   {{ roleLabel }}
                 </span>
               </div>
 
               <div class="flex items-center justify-between py-2 border-b border-edge">
-                <span class="text-sm text-content-tertiary">帳號狀態</span>
+                <span class="text-sm text-content-tertiary">{{ t('settings.accountStatus') }}</span>
                 <span :class="authStore.user?.is_active ? 'text-success' : 'text-error'" class="text-sm font-medium">
-                  {{ authStore.user?.is_active ? '啟用中' : '已停用' }}
+                  {{ authStore.user?.is_active ? t('common.active') : t('common.disabled') }}
                 </span>
               </div>
 
               <div class="flex items-center justify-between py-2">
-                <span class="text-sm text-content-tertiary">伺服器</span>
+                <span class="text-sm text-content-tertiary">{{ t('settings.server') }}</span>
                 <span class="text-sm text-content truncate max-w-[180px]" :title="authStore.apiUrl">
                   {{ authStore.apiUrl }}
                 </span>
@@ -381,13 +383,13 @@ onMounted(() => {
           <!-- Profile Information Card -->
           <div class="card">
             <div class="p-6 border-b border-edge">
-              <h2 class="text-lg font-semibold text-content">個人資訊</h2>
-              <p class="text-sm text-content-secondary mt-1">更新您的顯示名稱與聯絡資訊</p>
+              <h2 class="text-lg font-semibold text-content">{{ t('settings.profile') }}</h2>
+              <p class="text-sm text-content-secondary mt-1">{{ t('settings.profileDescription') }}</p>
               <!-- 非管理員提示 -->
               <div v-if="!isAdmin" class="mt-3 p-3 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-md">
                 <p class="text-sm text-amber-800 dark:text-amber-200 flex items-center gap-2">
                   <ph-icon icon="info" class="w-4 h-4 flex-shrink-0" />
-                  <span>修改個人資訊需要管理員權限，如需修改請聯繫系統管理員</span>
+                  <span>{{ t('settings.adminRequiredHint') }}</span>
                 </p>
               </div>
             </div>
@@ -397,7 +399,7 @@ onMounted(() => {
                 <!-- Username (read-only) -->
                 <div>
                   <label class="block text-sm font-medium text-content-secondary mb-2">
-                    使用者名稱
+                    {{ t('user.username') }}
                   </label>
                   <input
                     :value="authStore.user?.username"
@@ -405,20 +407,20 @@ onMounted(() => {
                     disabled
                     class="input bg-surface-tertiary text-content-tertiary cursor-not-allowed"
                   />
-                  <p class="text-xs text-content-tertiary mt-1">使用者名稱無法變更</p>
+                  <p class="text-xs text-content-tertiary mt-1">{{ t('settings.usernameCannotChange') }}</p>
                 </div>
 
                 <!-- Display Name -->
                 <div>
                   <label for="userName" class="block text-sm font-medium text-content-secondary mb-2">
-                    顯示名稱 <span class="text-error">*</span>
+                    {{ t('settings.displayName') }} <span class="text-error">*</span>
                   </label>
                   <input
                     id="userName"
                     v-model="userName"
                     type="text"
                     class="input"
-                    placeholder="輸入顯示名稱"
+                    :placeholder="t('settings.enterDisplayName')"
                     :disabled="isSaving"
                   />
                 </div>
@@ -426,23 +428,23 @@ onMounted(() => {
                 <!-- Email -->
                 <div class="md:col-span-2">
                   <label for="userEmail" class="block text-sm font-medium text-content-secondary mb-2">
-                    電子郵件
+                    {{ t('user.email') }}
                   </label>
                   <input
                     id="userEmail"
                     v-model="userEmail"
                     type="email"
                     class="input"
-                    placeholder="輸入電子郵件"
+                    :placeholder="t('settings.enterEmail')"
                     :disabled="isSaving"
                   />
-                  <p class="text-xs text-content-tertiary mt-1">用於接收通知與帳號相關訊息</p>
+                  <p class="text-xs text-content-tertiary mt-1">{{ t('settings.emailHint') }}</p>
                 </div>
 
                 <!-- Role (read-only) -->
                 <div>
                   <label class="block text-sm font-medium text-content-secondary mb-2">
-                    系統角色
+                    {{ t('settings.systemRole') }}
                   </label>
                   <input
                     :value="roleLabel"
@@ -450,13 +452,13 @@ onMounted(() => {
                     disabled
                     class="input bg-surface-tertiary text-content-tertiary cursor-not-allowed"
                   />
-                  <p class="text-xs text-content-tertiary mt-1">角色由管理員設定</p>
+                  <p class="text-xs text-content-tertiary mt-1">{{ t('settings.roleSetByAdmin') }}</p>
                 </div>
 
                 <!-- Status (read-only) -->
                 <div>
                   <label class="block text-sm font-medium text-content-secondary mb-2">
-                    帳號狀態
+                    {{ t('settings.accountStatus') }}
                   </label>
                   <div class="input bg-surface-tertiary flex items-center gap-2 cursor-not-allowed">
                     <span
@@ -464,7 +466,7 @@ onMounted(() => {
                       class="w-2 h-2 rounded-full"
                     ></span>
                     <span class="text-content-tertiary">
-                      {{ authStore.user?.is_active ? '啟用中' : '已停用' }}
+                      {{ authStore.user?.is_active ? t('common.active') : t('common.disabled') }}
                     </span>
                   </div>
                 </div>
@@ -478,7 +480,7 @@ onMounted(() => {
                   class="btn-primary"
                 >
                   <ph-icon v-if="isSaving" icon="spinner" class="w-4 h-4 mr-2 animate-spin" />
-                  <span>{{ isSaving ? '儲存中...' : '儲存變更' }}</span>
+                  <span>{{ isSaving ? t('message.saving') : t('settings.saveChanges') }}</span>
                 </button>
               </div>
             </div>
@@ -487,20 +489,20 @@ onMounted(() => {
           <!-- Security Section -->
           <div class="card">
             <div class="p-6 border-b border-edge">
-              <h2 class="text-lg font-semibold text-content">安全性設定</h2>
-              <p class="text-sm text-content-secondary mt-1">管理您的密碼與安全選項</p>
+              <h2 class="text-lg font-semibold text-content">{{ t('settings.security') }}</h2>
+              <p class="text-sm text-content-secondary mt-1">{{ t('settings.securityDescription') }}</p>
             </div>
 
             <div class="p-6">
               <!-- Password Change Form -->
               <div>
-                <h3 class="text-sm font-medium text-content mb-4">變更密碼</h3>
+                <h3 class="text-sm font-medium text-content mb-4">{{ t('settings.changePassword') }}</h3>
 
                 <div class="space-y-4">
                   <!-- Current Password -->
                   <div>
                     <label for="currentPassword" class="block text-sm font-medium text-content-secondary mb-2">
-                      目前密碼
+                      {{ t('settings.currentPassword') }}
                     </label>
                     <div class="relative">
                       <input
@@ -508,7 +510,7 @@ onMounted(() => {
                         v-model="currentPassword"
                         :type="showCurrentPassword ? 'text' : 'password'"
                         class="input pr-10"
-                        placeholder="輸入目前密碼"
+                        :placeholder="t('settings.enterCurrentPassword')"
                         :disabled="isChangingPassword"
                         autocomplete="current-password"
                       />
@@ -525,7 +527,7 @@ onMounted(() => {
                   <!-- New Password -->
                   <div>
                     <label for="newPassword" class="block text-sm font-medium text-content-secondary mb-2">
-                      新密碼
+                      {{ t('settings.newPassword') }}
                     </label>
                     <div class="relative">
                       <input
@@ -533,7 +535,7 @@ onMounted(() => {
                         v-model="newPassword"
                         :type="showNewPassword ? 'text' : 'password'"
                         class="input pr-10"
-                        placeholder="輸入新密碼（至少 6 個字元）"
+                        :placeholder="t('settings.enterNewPassword')"
                         :disabled="isChangingPassword"
                         autocomplete="new-password"
                       />
@@ -550,7 +552,7 @@ onMounted(() => {
                   <!-- Confirm Password -->
                   <div>
                     <label for="confirmPassword" class="block text-sm font-medium text-content-secondary mb-2">
-                      確認新密碼
+                      {{ t('settings.confirmPassword') }}
                     </label>
                     <div class="relative">
                       <input
@@ -558,7 +560,7 @@ onMounted(() => {
                         v-model="confirmPassword"
                         :type="showConfirmPassword ? 'text' : 'password'"
                         class="input pr-10"
-                        placeholder="再次輸入新密碼"
+                        :placeholder="t('settings.reenterNewPassword')"
                         :disabled="isChangingPassword"
                         autocomplete="new-password"
                       />
@@ -581,7 +583,7 @@ onMounted(() => {
                     >
                       <ph-icon v-if="isChangingPassword" icon="spinner" class="w-4 h-4 mr-2 animate-spin" />
                       <ph-icon v-else icon="lock" class="w-4 h-4 mr-2" />
-                      <span>{{ isChangingPassword ? '變更中...' : '變更密碼' }}</span>
+                      <span>{{ isChangingPassword ? t('settings.changingPassword') : t('settings.changePassword') }}</span>
                     </button>
                   </div>
                 </div>
@@ -590,9 +592,9 @@ onMounted(() => {
               <!-- 2FA Status -->
               <div class="mt-6 pt-6 border-t border-edge flex items-center justify-between">
                 <div>
-                  <h3 class="text-sm font-medium text-content">雙重認證 (2FA)</h3>
+                  <h3 class="text-sm font-medium text-content">{{ t('settings.twoFactor') }}</h3>
                   <p class="text-sm text-content-tertiary mt-1">
-                    {{ authStore.user?.twofactor_activated ? '已啟用' : '未啟用' }}
+                    {{ authStore.user?.twofactor_activated ? t('common.enabled') : t('common.disabled') }}
                   </p>
                 </div>
                 <span

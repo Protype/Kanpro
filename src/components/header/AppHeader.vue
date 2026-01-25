@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useSidebarStore } from '@/stores/sidebar'
 import { useBoardStore } from '@/stores/board'
 import NotificationsDropdown from '@/components/NotificationsDropdown.vue'
@@ -14,6 +15,7 @@ const emit = defineEmits<{
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 const sidebarStore = useSidebarStore()
 const boardStore = useBoardStore()
 
@@ -30,23 +32,23 @@ const projectNavItems = computed(() => {
   const id = currentProjectId.value
   if (!id) return []
   return [
-    { name: 'project-overview', label: '總覽', icon: 'squares-four', route: `/projects/${id}/overview` },
-    { name: 'project-list', label: '列表', icon: 'list', route: `/projects/${id}` },
-    { name: 'project-board', label: '看板', icon: 'table-columns', route: `/projects/${id}/board` },
-    { name: 'project-calendar', label: '行事曆', icon: 'calendar', route: `/projects/${id}/calendar` },
-    { name: 'project-activity', label: '動態', icon: 'lightning', route: `/projects/${id}/activity` },
-    { name: 'project-analytics', label: '分析', icon: 'chart-bar', route: `/projects/${id}/analytics` },
-    { name: 'project-settings', label: '設定', icon: 'gear', route: `/projects/${id}/settings` }
+    { name: 'project-overview', label: t('project.overview'), icon: 'squares-four', route: `/projects/${id}/overview` },
+    { name: 'project-list', label: t('project.list'), icon: 'list', route: `/projects/${id}` },
+    { name: 'project-board', label: t('project.board'), icon: 'table-columns', route: `/projects/${id}/board` },
+    { name: 'project-calendar', label: t('project.calendar'), icon: 'calendar', route: `/projects/${id}/calendar` },
+    { name: 'project-activity', label: t('project.activity'), icon: 'lightning', route: `/projects/${id}/activity` },
+    { name: 'project-analytics', label: t('project.analytics'), icon: 'chart-bar', route: `/projects/${id}/analytics` },
+    { name: 'project-settings', label: t('nav.settings'), icon: 'gear', route: `/projects/${id}/settings` }
   ]
 })
 
 // Admin navigation items
-const adminNavItems = [
-  { name: 'admin-status', label: '系統狀態', icon: 'pulse', route: '/admin' },
-  { name: 'admin-settings', label: '系統設定', icon: 'gear', route: '/admin/settings' },
-  { name: 'admin-users', label: '使用者管理', icon: 'users', route: '/admin/users' },
-  { name: 'admin-groups', label: '群組管理', icon: 'users-three', route: '/admin/groups' }
-]
+const adminNavItems = computed(() => [
+  { name: 'admin-status', label: t('admin.systemStatus'), icon: 'pulse', route: '/admin' },
+  { name: 'admin-settings', label: t('admin.systemSettings'), icon: 'gear', route: '/admin/settings' },
+  { name: 'admin-users', label: t('admin.userManagement'), icon: 'users', route: '/admin/users' },
+  { name: 'admin-groups', label: t('admin.groupManagement'), icon: 'users-three', route: '/admin/groups' }
+])
 
 function isActiveRoute(routeName: string): boolean {
   return route.name === routeName
@@ -92,7 +94,7 @@ function openCreateTask(): void {
             <ph-icon icon="folder-plus" class="w-4 h-4 text-accent" />
           </div>
           <span class="text-base font-semibold text-content">
-            建立新專案
+            {{ t('project.createProject') }}
           </span>
         </div>
       </template>
@@ -103,7 +105,7 @@ function openCreateTask(): void {
         <button
           @click="openCreateProject"
           class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
-          title="新增專案"
+          :title="t('project.newProject')"
         >
           <ph-icon icon="folder-simple-plus" weight="fill" class="w-5 h-5" />
         </button>
@@ -112,7 +114,7 @@ function openCreateTask(): void {
         <button
           @click="openCreateTask"
           class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
-          title="新增任務"
+          :title="t('task.newTask')"
         >
           <ph-icon icon="plus-circle" weight="fill" class="w-5 h-5" />
         </button>
@@ -123,7 +125,7 @@ function openCreateTask(): void {
           class="flex items-center gap-2 px-3 py-1.5 text-sm text-content-tertiary bg-surface-secondary hover:bg-surface-hover rounded-md transition-colors"
         >
           <ph-icon icon="magnifying-glass" weight="bold" class="w-4 h-4" />
-          <span>搜尋</span>
+          <span>{{ t('common.search') }}</span>
           <kbd class="px-1.5 py-0.5 text-xs bg-surface-tertiary rounded">⌘KK</kbd>
         </button>
       </template>
@@ -187,7 +189,7 @@ function openCreateTask(): void {
         <div class="flex items-center gap-2 min-w-0">
           <ph-icon icon="gear-six" class="w-5 h-5 text-content-secondary flex-shrink-0" />
           <span class="text-base font-semibold text-content">
-            系統管理
+            {{ t('admin.administration') }}
           </span>
         </div>
 
@@ -244,7 +246,7 @@ function openCreateTask(): void {
         <button
           @click="openCreateProject"
           class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
-          title="新增專案"
+          :title="t('project.newProject')"
         >
           <ph-icon icon="folder-simple-plus" weight="fill" class="w-5 h-5" />
         </button>
@@ -253,7 +255,7 @@ function openCreateTask(): void {
         <button
           @click="openCreateTask"
           class="p-2 text-content-tertiary hover:text-content-secondary hover:bg-surface-hover rounded-md transition-colors"
-          title="新增任務"
+          :title="t('task.newTask')"
         >
           <ph-icon icon="plus-circle" weight="fill" class="w-5 h-5" />
         </button>
@@ -264,7 +266,7 @@ function openCreateTask(): void {
           class="flex items-center gap-2 px-3 py-1.5 text-sm text-content-tertiary bg-surface-secondary hover:bg-surface-hover rounded-md transition-colors"
         >
           <ph-icon icon="magnifying-glass" weight="bold" class="w-4 h-4" />
-          <span>搜尋</span>
+          <span>{{ t('common.search') }}</span>
           <kbd class="px-1.5 py-0.5 text-xs bg-surface-tertiary rounded">⌘KK</kbd>
         </button>
       </template>

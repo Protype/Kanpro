@@ -172,12 +172,12 @@
 
             <div v-else class="flex flex-wrap gap-2">
               <div
-                v-for="(member, index) in membersList"
-                :key="index"
+                v-for="member in membersList"
+                :key="member.id"
                 class="flex items-center gap-2 px-2 py-1.5 bg-surface-secondary rounded-lg"
                 :title="getMemberName(member)"
               >
-                <UserAvatar :name="getMemberName(member)" size="xs" />
+                <UserAvatar :user="member" size="xs" />
                 <span class="text-sm text-content truncate max-w-24">{{ getMemberName(member) }}</span>
               </div>
             </div>
@@ -215,6 +215,7 @@ import { useMembersStore } from '@/stores/members'
 import { useProjectsStore } from '@/stores/projects'
 import { useAnalyticsStore } from '@/stores/analytics'
 import UserAvatar from '@/components/UserAvatar.vue'
+import type { ProjectMember } from '@/types'
 
 const route = useRoute()
 const boardStore = useBoardStore()
@@ -274,20 +275,17 @@ const projectOwner = computed(() => {
   return ownerName || null
 })
 
-// Normalize members list (handle both string array and object array formats)
-const membersList = computed(() => {
-  return members.value.filter((m: unknown) => m !== null && m !== undefined)
+// Get members list from store - filter out invalid entries
+const membersList = computed<ProjectMember[]>(() => {
+  return members.value.filter((m): m is ProjectMember => {
+    return m !== null && m !== undefined && typeof m === 'object' && 'id' in m
+  })
 })
 
-// Helper to get member display name (handles both string and object formats)
-function getMemberName(member: unknown): string {
+// Helper to get member display name
+function getMemberName(member: ProjectMember): string {
   if (!member) return ''
-  if (typeof member === 'string') return member
-  if (typeof member === 'object' && member !== null) {
-    const m = member as { name?: string; username?: string }
-    return m.name || m.username || ''
-  }
-  return String(member)
+  return member.name || member.username || ''
 }
 
 function getColumnPercentage(count: number | undefined): number {

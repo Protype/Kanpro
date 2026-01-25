@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useMembersStore } from '@/stores/members'
 import { useCategoriesStore } from '@/stores/categories'
 import { useSwimlanesStore } from '@/stores/swimlanes'
@@ -38,6 +39,7 @@ export interface TaskFormData {
 }
 
 const router = useRouter()
+const { t } = useI18n()
 
 // === Stores ===
 const membersStore = useMembersStore()
@@ -69,16 +71,16 @@ const ownerSearchQuery = ref('')
 const showOwnerDropdown = ref(false)
 
 // === 顏色選項 ===
-const colors = [
-  { id: 'yellow', name: '黃色', class: 'bg-yellow-500' },
-  { id: 'blue', name: '藍色', class: 'bg-blue-500' },
-  { id: 'green', name: '綠色', class: 'bg-green-500' },
-  { id: 'purple', name: '紫色', class: 'bg-purple-500' },
-  { id: 'red', name: '紅色', class: 'bg-red-500' },
-  { id: 'orange', name: '橘色', class: 'bg-orange-500' },
-  { id: 'grey', name: '灰色', class: 'bg-gray-500' },
-  { id: 'cyan', name: '青色', class: 'bg-cyan-500' }
-]
+const colors = computed(() => [
+  { id: 'yellow', name: t('task.colorYellow'), class: 'bg-yellow-500' },
+  { id: 'blue', name: t('task.colorBlue'), class: 'bg-blue-500' },
+  { id: 'green', name: t('task.colorGreen'), class: 'bg-green-500' },
+  { id: 'purple', name: t('task.colorPurple'), class: 'bg-purple-500' },
+  { id: 'red', name: t('task.colorRed'), class: 'bg-red-500' },
+  { id: 'orange', name: t('task.colorOrange'), class: 'bg-orange-500' },
+  { id: 'grey', name: t('task.colorGrey'), class: 'bg-gray-500' },
+  { id: 'cyan', name: t('task.colorCyan'), class: 'bg-cyan-500' }
+])
 
 // === Computed ===
 const isValid = computed(() => title.value.trim().length > 0)
@@ -346,7 +348,7 @@ defineExpose({
             <div class="flex items-center justify-between p-4 h-14 border-b border-edge">
               <div class="flex items-center gap-3">
                 <h3 class="text-lg font-semibold text-content">
-                  {{ isEditMode ? '編輯任務' : '新增任務' }}
+                  {{ isEditMode ? t('task.editTask') : t('task.newTask') }}
                 </h3>
                 <!-- Advanced Settings Toggle -->
                 <button
@@ -357,7 +359,7 @@ defineExpose({
                     ? 'bg-surface-tertiary text-content-secondary'
                     : 'bg-surface-secondary text-content-tertiary hover:text-content-secondary'"
                 >
-                  <span>進階設定</span>
+                  <span>{{ t('project.advancedSettings') }}</span>
                   <ph-icon :icon="showAdvanced ? 'chevron-left' : 'chevron-right'" class="w-3.5 h-3.5" />
                 </button>
                 <!-- Fullscreen Button -->
@@ -365,7 +367,7 @@ defineExpose({
                   type="button"
                   @click="goToFullPage"
                   class="flex items-center justify-center w-7 h-7 rounded transition-colors bg-surface-secondary text-content-tertiary hover:text-content-secondary hover:bg-surface-tertiary"
-                  title="在新頁面編輯"
+                  :title="t('task.editInNewPage')"
                 >
                   <ph-icon icon="arrows-out" class="w-4 h-4" />
                 </button>
@@ -387,7 +389,7 @@ defineExpose({
                 <!-- Title -->
                 <div>
                   <label for="task-title" class="block text-sm font-medium text-content mb-1">
-                    標題 <span class="text-red-500">*</span>
+                    {{ t('task.title') }} <span class="text-red-500">*</span>
                   </label>
                   <input
                     id="task-title"
@@ -396,14 +398,14 @@ defineExpose({
                     required
                     :disabled="isSubmitting"
                     class="w-full px-3 py-2 bg-surface-secondary border border-edge rounded-md text-content placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent disabled:opacity-50"
-                    placeholder="輸入任務標題"
+                    :placeholder="t('task.enterTitle')"
                   />
                 </div>
 
                 <!-- Description -->
                 <div>
                   <label for="task-description" class="block text-sm font-medium text-content mb-1">
-                    描述
+                    {{ t('task.description') }}
                   </label>
                   <textarea
                     id="task-description"
@@ -411,14 +413,14 @@ defineExpose({
                     rows="3"
                     :disabled="isSubmitting"
                     class="w-full px-3 py-2 bg-surface-secondary border border-edge rounded-md text-content placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent disabled:opacity-50 resize-none"
-                    placeholder="輸入任務描述（選填）"
+                    :placeholder="t('task.enterDescription')"
                   ></textarea>
                 </div>
 
                 <!-- Column -->
                 <div>
                   <label for="task-column" class="block text-sm font-medium text-content mb-1">
-                    欄位
+                    {{ t('board.column') }}
                   </label>
                   <select
                     id="task-column"
@@ -439,7 +441,7 @@ defineExpose({
                 <!-- Color -->
                 <div>
                   <label class="block text-sm font-medium text-content mb-2">
-                    顏色
+                    {{ t('task.color') }}
                   </label>
                   <div class="flex flex-wrap gap-2">
                     <button
@@ -469,7 +471,7 @@ defineExpose({
                     <!-- Owner (full width) -->
                     <div class="col-span-2 owner-dropdown-container">
                       <label class="block text-sm font-medium text-content mb-1">
-                        指派人
+                        {{ t('task.assignee') }}
                       </label>
                       <div class="relative">
                         <button
@@ -495,7 +497,7 @@ defineExpose({
                             <div class="w-6 h-6 rounded-full bg-surface-tertiary flex items-center justify-center">
                               <ph-icon icon="user" class="w-3.5 h-3.5 text-content-tertiary" />
                             </div>
-                            <span class="flex-1 text-sm text-content-tertiary">未指派</span>
+                            <span class="flex-1 text-sm text-content-tertiary">{{ t('task.unassigned') }}</span>
                             <ph-icon icon="chevron-down" class="w-4 h-4 text-content-tertiary" />
                           </template>
                         </button>
@@ -511,7 +513,7 @@ defineExpose({
                               <input
                                 v-model="ownerSearchQuery"
                                 type="text"
-                                placeholder="搜尋成員..."
+                                :placeholder="t('task.searchMembers')"
                                 class="w-full px-2 py-1 text-sm bg-surface-secondary border border-edge rounded text-content placeholder:text-content-tertiary focus:outline-none focus:ring-1 focus:ring-accent"
                               />
                             </div>
@@ -532,7 +534,7 @@ defineExpose({
                                 </div>
                               </button>
                               <div v-if="filteredMembers.length === 0" class="px-3 py-2 text-sm text-content-tertiary">
-                                找不到成員
+                                {{ t('task.noMemberFound') }}
                               </div>
                             </div>
                           </div>
@@ -543,7 +545,7 @@ defineExpose({
                     <!-- Swimlane -->
                     <div>
                       <label for="task-swimlane" class="block text-sm font-medium text-content mb-1">
-                        泳道
+                        {{ t('board.swimlane') }}
                       </label>
                       <select
                         id="task-swimlane"
@@ -551,7 +553,7 @@ defineExpose({
                         :disabled="isSubmitting"
                         class="w-full px-2 py-1.5 text-sm bg-surface border border-edge rounded-md text-content focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent disabled:opacity-50"
                       >
-                        <option :value="undefined">預設泳道</option>
+                        <option :value="undefined">{{ t('task.defaultSwimlane') }}</option>
                         <option
                           v-for="sl in swimlanes"
                           :key="sl.id"
@@ -565,7 +567,7 @@ defineExpose({
                     <!-- Category -->
                     <div>
                       <label for="task-category" class="block text-sm font-medium text-content mb-1">
-                        類別
+                        {{ t('task.category') }}
                       </label>
                       <select
                         id="task-category"
@@ -573,7 +575,7 @@ defineExpose({
                         :disabled="isSubmitting"
                         class="w-full px-2 py-1.5 text-sm bg-surface border border-edge rounded-md text-content focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent disabled:opacity-50"
                       >
-                        <option :value="undefined">無類別</option>
+                        <option :value="undefined">{{ t('category.noCategory') }}</option>
                         <option
                           v-for="cat in categories"
                           :key="cat.id"
@@ -587,7 +589,7 @@ defineExpose({
                     <!-- Due Date -->
                     <div>
                       <label for="task-due" class="block text-sm font-medium text-content mb-1">
-                        到期日
+                        {{ t('task.dueDate') }}
                       </label>
                       <input
                         id="task-due"
@@ -601,7 +603,7 @@ defineExpose({
                     <!-- Priority -->
                     <div>
                       <label for="task-priority" class="block text-sm font-medium text-content mb-1">
-                        優先級
+                        {{ t('task.priority') }}
                       </label>
                       <input
                         id="task-priority"
@@ -617,7 +619,7 @@ defineExpose({
                     <!-- Score -->
                     <div>
                       <label for="task-score" class="block text-sm font-medium text-content mb-1">
-                        Story Points
+                        {{ t('task.storyPoints') }}
                       </label>
                       <input
                         id="task-score"
@@ -636,7 +638,7 @@ defineExpose({
                     <!-- Tags (full width) -->
                     <div class="col-span-2 tag-dropdown-container">
                       <label class="block text-sm font-medium text-content mb-1">
-                        標籤
+                        {{ t('task.tags') }}
                       </label>
                       <!-- Selected Tags -->
                       <div v-if="selectedTags.length > 0" class="flex flex-wrap gap-1 mb-2">
@@ -662,7 +664,7 @@ defineExpose({
                           type="text"
                           :disabled="isSubmitting"
                           class="w-full px-2 py-1.5 text-sm bg-surface border border-edge rounded-md text-content placeholder:text-content-tertiary focus:outline-none focus:ring-1 focus:ring-accent disabled:opacity-50"
-                          placeholder="輸入標籤..."
+                          :placeholder="t('task.enterTag')"
                           @focus="showTagDropdown = true"
                           @keydown="handleTagInputKeydown"
                         />
@@ -698,7 +700,7 @@ defineExpose({
                 :disabled="isSubmitting"
                 class="px-4 py-2 text-sm font-medium text-content bg-surface-secondary hover:bg-surface-hover rounded-md transition-colors disabled:opacity-50"
               >
-                取消
+                {{ t('common.cancel') }}
               </button>
               <button
                 type="submit"
@@ -706,7 +708,7 @@ defineExpose({
                 class="px-4 py-2 text-sm font-medium text-white bg-accent hover:bg-accent/90 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
               >
                 <ph-icon v-if="isSubmitting" icon="spinner" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
-                {{ isSubmitting ? (isEditMode ? '儲存中...' : '建立中...') : (isEditMode ? '儲存變更' : '建立任務') }}
+                {{ isSubmitting ? (isEditMode ? t('task.saving') : t('task.creating')) : (isEditMode ? t('task.saveChanges') : t('task.createTask')) }}
               </button>
             </div>
           </form>

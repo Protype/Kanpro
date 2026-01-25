@@ -10,8 +10,8 @@ export type ThemeName = 'twenty-crm' | 'github-dark' | 'dracula'
  */
 export interface ThemeInfo {
   id: ThemeName
-  name: string
-  description: string
+  nameKey: string
+  descriptionKey: string
   isDark: boolean
 }
 
@@ -21,20 +21,20 @@ export interface ThemeInfo {
 export const THEMES: ThemeInfo[] = [
   {
     id: 'twenty-crm',
-    name: 'Twenty CRM',
-    description: '清爽專業風格',
+    nameKey: 'theme.twentyCrm',
+    descriptionKey: 'theme.twentyCrmDesc',
     isDark: false
   },
   {
     id: 'github-dark',
-    name: 'GitHub Dark',
-    description: '工程師護眼風格',
+    nameKey: 'theme.githubDark',
+    descriptionKey: 'theme.githubDarkDesc',
     isDark: true
   },
   {
     id: 'dracula',
-    name: 'Dracula',
-    description: '經典暗色主題',
+    nameKey: 'theme.dracula',
+    descriptionKey: 'theme.draculaDesc',
     isDark: true
   }
 ]

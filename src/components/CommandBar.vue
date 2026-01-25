@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, computed, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useSearchStore } from '@/stores/search'
 import { useSidebarStore } from '@/stores/sidebar'
 import { useProjectsStore } from '@/stores/projects'
@@ -32,6 +33,7 @@ const emit = defineEmits<{
 }>()
 
 const router = useRouter()
+const { t } = useI18n()
 const searchStore = useSearchStore()
 const sidebarStore = useSidebarStore()
 const projectsStore = useProjectsStore()
@@ -77,9 +79,9 @@ const showDropdown = computed(() => {
 
 const placeholder = computed(() => {
   if (mode.value === 'search') {
-    return '搜尋任務... (例如: status:open)'
+    return t('commandBar.searchPlaceholder')
   }
-  return '輸入任務標題... (使用 ^ @ # 快速設定)'
+  return t('commandBar.addPlaceholder')
 })
 
 // Combined input value for task creation
@@ -323,7 +325,7 @@ const handleSubmitAdd = async () => {
   // Check if we have a project
   const projectId = currentProjectId.value
   if (!projectId) {
-    errorMessage.value = '請先選擇專案或在專案頁面中新增任務'
+    errorMessage.value = t('commandBar.selectProjectFirst')
     return
   }
 
@@ -346,7 +348,7 @@ const handleSubmitAdd = async () => {
       router.push(`/projects/${projectId}/tasks/${taskId}`)
     }
   } catch (err) {
-    errorMessage.value = err instanceof Error ? err.message : '建立任務失敗'
+    errorMessage.value = err instanceof Error ? err.message : t('commandBar.createTaskFailed')
   } finally {
     isSubmitting.value = false
   }
@@ -415,7 +417,7 @@ onUnmounted(() => {
                 <button
                   @click="toggleHelp"
                   class="w-6 h-6 flex items-center justify-center rounded hover:bg-surface-hover text-content-tertiary hover:text-content transition-colors"
-                  title="顯示說明"
+                  :title="t('commandBar.showHelp')"
                 >
                   ?
                 </button>
@@ -454,7 +456,7 @@ onUnmounted(() => {
                 <button
                   @click="toggleHelp"
                   class="w-6 h-6 flex items-center justify-center rounded hover:bg-surface-hover text-content-tertiary hover:text-content transition-colors"
-                  title="顯示說明"
+                  :title="t('commandBar.showHelp')"
                 >
                   ?
                 </button>
@@ -480,14 +482,14 @@ onUnmounted(() => {
           <template v-if="mode === 'search'">
             <!-- Search Tips (when no query and help is shown) -->
             <div v-if="!inputValue && showHelp" class="px-4 pb-4 text-sm text-content-tertiary">
-              <p class="font-medium mb-2 text-content-secondary">搜尋語法提示：</p>
+              <p class="font-medium mb-2 text-content-secondary">{{ t('commandBar.searchSyntaxTips') }}</p>
               <div class="grid grid-cols-2 gap-2">
-                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs">status:open</code> 開啟中</div>
-                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs">status:closed</code> 已關閉</div>
-                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs">assignee:me</code> 指派給我</div>
-                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs">due:today</code> 今天到期</div>
-                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs">#123</code> 任務編號</div>
-                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs">color:blue</code> 藍色任務</div>
+                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs">status:open</code> {{ t('commandBar.statusOpen') }}</div>
+                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs">status:closed</code> {{ t('commandBar.statusClosed') }}</div>
+                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs">assignee:me</code> {{ t('commandBar.assigneeMe') }}</div>
+                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs">due:today</code> {{ t('commandBar.dueToday') }}</div>
+                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs">#123</code> {{ t('commandBar.taskId') }}</div>
+                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs">color:blue</code> {{ t('commandBar.colorTask') }}</div>
               </div>
             </div>
 
@@ -524,7 +526,7 @@ onUnmounted(() => {
                       task.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
                     ]"
                   >
-                    {{ task.is_active ? '開啟' : '已關閉' }}
+                    {{ task.is_active ? t('task.open') : t('task.closed') }}
                   </span>
                 </div>
               </div>
@@ -536,8 +538,8 @@ onUnmounted(() => {
               class="p-8 text-center text-content-tertiary border-t border-edge"
             >
               <ph-icon icon="face-frown" class="w-12 h-12 mx-auto text-content-tertiary/30 mb-3" />
-              <p>找不到符合的任務</p>
-              <p class="text-sm mt-1">嘗試其他搜尋詞或搜尋語法</p>
+              <p>{{ t('commandBar.noResults') }}</p>
+              <p class="text-sm mt-1">{{ t('commandBar.tryOtherTerms') }}</p>
             </div>
           </template>
 
@@ -545,14 +547,14 @@ onUnmounted(() => {
           <template v-else>
             <!-- Help Tips (when help is shown) -->
             <div v-if="showHelp" class="px-4 pb-4 text-sm text-content-tertiary">
-              <p class="font-medium mb-2 text-content-secondary">快速輸入提示：</p>
+              <p class="font-medium mb-2 text-content-secondary">{{ t('commandBar.quickInputTips') }}</p>
               <div class="grid grid-cols-2 gap-2">
-                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-blue-500">^</code> 選擇專案</div>
-                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-green-500">@</code> 指派人員</div>
-                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-purple-500">#</code> 標籤（可新增）</div>
-                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-orange-500">:</code> 欄位</div>
-                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-red-500">!</code> 優先級</div>
-                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-cyan-500">&gt;</code> 到期日</div>
+                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-blue-500">^</code> {{ t('commandBar.selectProject') }}</div>
+                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-green-500">@</code> {{ t('commandBar.selectAssignee') }}</div>
+                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-purple-500">#</code> {{ t('commandBar.selectTag') }}</div>
+                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-orange-500">:</code> {{ t('commandBar.selectColumn') }}</div>
+                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-red-500">!</code> {{ t('commandBar.selectPriority') }}</div>
+                <div><code class="bg-surface-tertiary px-1.5 py-0.5 rounded text-xs text-cyan-500">&gt;</code> {{ t('commandBar.selectDueDate') }}</div>
               </div>
             </div>
           </template>
