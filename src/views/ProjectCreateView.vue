@@ -5,6 +5,9 @@ import { useI18n } from 'vue-i18n'
 import { useProjectsStore } from '@/stores/projects'
 import { useUsersStore } from '@/stores/users'
 import { useProjectDraftStore } from '@/stores/projectDraft'
+import { useCategoriesStore } from '@/stores/categories'
+import { useColumnsStore } from '@/stores/columns'
+import { useSwimlanesStore } from '@/stores/swimlanes'
 import { useToast } from '@/stores/toast'
 import UserAvatar from '@/components/UserAvatar.vue'
 import type { User } from '@/types'
@@ -14,6 +17,9 @@ const { t } = useI18n()
 const projectsStore = useProjectsStore()
 const usersStore = useUsersStore()
 const draftStore = useProjectDraftStore()
+const categoriesStore = useCategoriesStore()
+const columnsStore = useColumnsStore()
+const swimlanesStore = useSwimlanesStore()
 const toast = useToast()
 
 // === 基本資訊欄位 (綁定到 draft store) ===
@@ -68,6 +74,12 @@ const error = ref<string | null>(null)
 const ownerSearchQuery = ref('')
 const showOwnerDropdown = ref(false)
 
+// === 管理區塊輸入狀態 ===
+const newCategoryName = ref('')
+const newColumnTitle = ref('')
+const newColumnLimit = ref(0)
+const newSwimlaneName = ref('')
+
 // === Computed ===
 const isValid = computed(() => projectName.value.trim().length > 0)
 
@@ -97,6 +109,48 @@ function clearOwner() {
   showOwnerDropdown.value = false
 }
 
+// === 類別管理 ===
+function addCategory() {
+  if (!newCategoryName.value.trim()) return
+  draftStore.addCachedCategory({
+    name: newCategoryName.value.trim()
+  })
+  newCategoryName.value = ''
+}
+
+function removeCategory(index: number) {
+  draftStore.removeCachedCategory(index)
+}
+
+// === 欄位管理 ===
+function addColumn() {
+  if (!newColumnTitle.value.trim()) return
+  draftStore.addCachedColumn({
+    title: newColumnTitle.value.trim(),
+    taskLimit: newColumnLimit.value || 0
+  })
+  newColumnTitle.value = ''
+  newColumnLimit.value = 0
+}
+
+function removeColumn(index: number) {
+  draftStore.removeCachedColumn(index)
+}
+
+// === 泳道管理 ===
+function addSwimlane() {
+  if (!newSwimlaneName.value.trim()) return
+  draftStore.addCachedSwimlane({
+    name: newSwimlaneName.value.trim(),
+    description: ''
+  })
+  newSwimlaneName.value = ''
+}
+
+function removeSwimlane(index: number) {
+  draftStore.removeCachedSwimlane(index)
+}
+
 // === 建立專案 ===
 async function handleCreate() {
   if (!isValid.value || isCreating.value) return
@@ -122,6 +176,33 @@ async function handleCreate() {
 
     if (projectId === false) {
       throw new Error(projectsStore.error || t('project.createFailed'))
+    }
+
+    // Step 2: 建立緩存的類別
+    for (const category of draftStore.cachedCategories) {
+      try {
+        await categoriesStore.addCategory(projectId, category.name)
+      } catch (err) {
+        console.error('Failed to create category:', err)
+      }
+    }
+
+    // Step 3: 建立緩存的欄位
+    for (const column of draftStore.cachedColumns) {
+      try {
+        await columnsStore.addColumn(projectId, column.title, column.taskLimit)
+      } catch (err) {
+        console.error('Failed to add column:', err)
+      }
+    }
+
+    // Step 4: 建立緩存的泳道
+    for (const swimlane of draftStore.cachedSwimlanes) {
+      try {
+        await swimlanesStore.addSwimlane(projectId, swimlane.name, swimlane.description)
+      } catch (err) {
+        console.error('Failed to add swimlane:', err)
+      }
     }
 
     // 清除草稿資料
@@ -462,10 +543,45 @@ onUnmounted(() => {
           <!-- 類別管理 -->
           <div class="settings-card">
             <div class="px-4 py-3 border-b border-edge">
-              <h3 class="text-base font-semibold text-content">{{ t('category.categories') }}</h3>
+              <h3 class="text-base font-semibold text-content">{{ t('category.categoryManagement') }}</h3>
             </div>
-            <div class="p-4">
-              <div class="text-sm text-content-tertiary text-center py-8">
+            <div class="p-4 space-y-3">
+              <!-- 新增類別表單 -->
+              <div class="flex gap-2">
+                <input
+                  v-model="newCategoryName"
+                  type="text"
+                  class="input flex-1 text-sm"
+                  :placeholder="t('category.enterCategoryName')"
+                  @keyup.enter="addCategory"
+                />
+                <button
+                  type="button"
+                  @click="addCategory"
+                  :disabled="!newCategoryName.trim()"
+                  class="btn-secondary text-sm px-3"
+                >
+                  <ph-icon icon="plus" class="w-4 h-4" />
+                </button>
+              </div>
+              <!-- 已新增的類別列表 -->
+              <div v-if="draftStore.cachedCategories.length > 0" class="space-y-2">
+                <div
+                  v-for="(category, index) in draftStore.cachedCategories"
+                  :key="index"
+                  class="flex items-center justify-between px-3 py-2 bg-surface-secondary rounded-lg"
+                >
+                  <span class="text-sm text-content">{{ category.name }}</span>
+                  <button
+                    type="button"
+                    @click="removeCategory(index)"
+                    class="text-content-tertiary hover:text-red-500 transition-colors"
+                  >
+                    <ph-icon icon="trash" class="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              <div v-else class="text-sm text-content-tertiary text-center py-4">
                 {{ t('category.noCategories') }}
               </div>
             </div>
@@ -486,25 +602,107 @@ onUnmounted(() => {
 
         <!-- 管理區塊組 3: 清單管理 | 分組管理 -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-          <!-- 清單管理 -->
+          <!-- 欄位管理 -->
           <div class="settings-card">
             <div class="px-4 py-3 border-b border-edge">
-              <h3 class="text-base font-semibold text-content">{{ t('column.columns') }}</h3>
+              <h3 class="text-base font-semibold text-content">{{ t('column.columnManagement') }}</h3>
             </div>
-            <div class="p-4">
-              <div class="text-sm text-content-tertiary text-center py-8">
+            <div class="p-4 space-y-3">
+              <!-- 新增欄位表單 -->
+              <div class="flex gap-2">
+                <input
+                  v-model="newColumnTitle"
+                  type="text"
+                  class="input flex-1 text-sm"
+                  :placeholder="t('column.enterColumnTitle')"
+                  @keyup.enter="addColumn"
+                />
+                <input
+                  v-model.number="newColumnLimit"
+                  type="number"
+                  min="0"
+                  class="input w-20 text-sm"
+                  :placeholder="t('column.wipLimit')"
+                />
+                <button
+                  type="button"
+                  @click="addColumn"
+                  :disabled="!newColumnTitle.trim()"
+                  class="btn-secondary text-sm px-3"
+                >
+                  <ph-icon icon="plus" class="w-4 h-4" />
+                </button>
+              </div>
+              <!-- 已新增的欄位列表 -->
+              <div v-if="draftStore.cachedColumns.length > 0" class="space-y-2">
+                <div
+                  v-for="(column, index) in draftStore.cachedColumns"
+                  :key="index"
+                  class="flex items-center justify-between px-3 py-2 bg-surface-secondary rounded-lg"
+                >
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm text-content">{{ column.title }}</span>
+                    <span v-if="column.taskLimit > 0" class="text-xs text-content-tertiary">
+                      ({{ t('column.wipLimit') }}: {{ column.taskLimit }})
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    @click="removeColumn(index)"
+                    class="text-content-tertiary hover:text-red-500 transition-colors"
+                  >
+                    <ph-icon icon="trash" class="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              <div v-else class="text-sm text-content-tertiary text-center py-4">
                 {{ t('column.noColumns') }}
               </div>
             </div>
           </div>
 
-          <!-- 分組管理 -->
+          <!-- 泳道管理 -->
           <div class="settings-card">
             <div class="px-4 py-3 border-b border-edge">
-              <h3 class="text-base font-semibold text-content">{{ t('swimlane.swimlanes') }}</h3>
+              <h3 class="text-base font-semibold text-content">{{ t('swimlane.swimlaneManagement') }}</h3>
             </div>
-            <div class="p-4">
-              <div class="text-sm text-content-tertiary text-center py-8">
+            <div class="p-4 space-y-3">
+              <!-- 新增泳道表單 -->
+              <div class="flex gap-2">
+                <input
+                  v-model="newSwimlaneName"
+                  type="text"
+                  class="input flex-1 text-sm"
+                  :placeholder="t('swimlane.enterSwimlaneName')"
+                  @keyup.enter="addSwimlane"
+                />
+                <button
+                  type="button"
+                  @click="addSwimlane"
+                  :disabled="!newSwimlaneName.trim()"
+                  class="btn-secondary text-sm px-3"
+                >
+                  <ph-icon icon="plus" class="w-4 h-4" />
+                </button>
+              </div>
+              <!-- 已新增的泳道列表 -->
+              <div v-if="draftStore.cachedSwimlanes.length > 0" class="space-y-2">
+                <div
+                  v-for="(swimlane, index) in draftStore.cachedSwimlanes"
+                  :key="index"
+                  class="flex items-center justify-between px-3 py-2 bg-surface-secondary rounded-lg"
+                >
+                  <span class="text-sm text-content">{{ swimlane.name }}</span>
+                  <button
+                    type="button"
+                    @click="removeSwimlane(index)"
+                    class="text-content-tertiary hover:text-red-500 transition-colors"
+                  >
+                    <ph-icon icon="trash" class="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              <div v-else class="text-sm text-content-tertiary text-center py-4">
                 {{ t('swimlane.noSwimlanes') }}
               </div>
             </div>

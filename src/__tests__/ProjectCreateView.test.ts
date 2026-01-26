@@ -2,14 +2,25 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import { createRouter, createMemoryHistory } from 'vue-router'
+import { createI18n } from 'vue-i18n'
 import ProjectCreateView from '@/views/ProjectCreateView.vue'
 import { useProjectDraftStore } from '@/stores/projectDraft'
 import { useAuthStore } from '@/stores/auth'
 import { useProjectsStore } from '@/stores/projects'
+import en_US from '@/i18n/locales/en_US.json'
+import zh_TW from '@/i18n/locales/zh_TW.json'
 
 // Mock fetch
 const mockFetch = vi.fn()
 vi.stubGlobal('fetch', mockFetch)
+
+// Create i18n instance for tests
+const i18n = createI18n({
+  legacy: false,
+  locale: 'zh_TW',
+  fallbackLocale: 'en_US',
+  messages: { en_US, zh_TW }
+})
 
 // Create a mock router
 const router = createRouter({
@@ -59,7 +70,7 @@ describe('ProjectCreateView', () => {
   function mountView() {
     return mount(ProjectCreateView, {
       global: {
-        plugins: [router],
+        plugins: [router, i18n],
         stubs: {
           PhIcon,
           UserAvatar: true
@@ -161,7 +172,7 @@ describe('ProjectCreateView', () => {
     it('should render columns section', () => {
       const wrapper = mountView()
       const columnsSection = wrapper.text()
-      expect(columnsSection).toContain('清單')
+      expect(columnsSection).toContain('欄位')
     })
 
     it('should render swimlanes section', () => {
@@ -177,15 +188,15 @@ describe('ProjectCreateView', () => {
       const draftStore = useProjectDraftStore()
 
       // Find category name input and add button
-      const inputs = wrapper.findAll('input[placeholder="類別名稱"]')
+      const inputs = wrapper.findAll('input[placeholder="輸入類別名稱"]')
       expect(inputs.length).toBeGreaterThan(0)
 
       const categoryInput = inputs[0]
       await categoryInput.setValue('Bug')
 
       // Find the add button in the category section
-      const categorySection = wrapper.findAll('.settings-card')[1]
-      const addBtn = categorySection.find('button.btn-secondary')
+      const categorySection = wrapper.findAll('.settings-card')[2]
+      const addBtn = categorySection.find('button')
       await addBtn.trigger('click')
 
       expect(draftStore.cachedCategories).toHaveLength(1)
@@ -198,14 +209,14 @@ describe('ProjectCreateView', () => {
       const wrapper = mountView()
       const draftStore = useProjectDraftStore()
 
-      const inputs = wrapper.findAll('input[placeholder="清單名稱"]')
+      const inputs = wrapper.findAll('input[placeholder="輸入欄位名稱"]')
       expect(inputs.length).toBeGreaterThan(0)
 
       const columnInput = inputs[0]
       await columnInput.setValue('Backlog')
 
-      const columnSection = wrapper.findAll('.settings-card')[2]
-      const addBtn = columnSection.find('button.btn-secondary')
+      const columnSection = wrapper.findAll('.settings-card')[4]
+      const addBtn = columnSection.find('button')
       await addBtn.trigger('click')
 
       expect(draftStore.cachedColumns).toHaveLength(1)
@@ -218,14 +229,14 @@ describe('ProjectCreateView', () => {
       const wrapper = mountView()
       const draftStore = useProjectDraftStore()
 
-      const inputs = wrapper.findAll('input[placeholder="泳道名稱"]')
+      const inputs = wrapper.findAll('input[placeholder="輸入泳道名稱"]')
       expect(inputs.length).toBeGreaterThan(0)
 
       const swimlaneInput = inputs[0]
       await swimlaneInput.setValue('Sprint 1')
 
-      const swimlaneSection = wrapper.findAll('.settings-card')[3]
-      const addBtn = swimlaneSection.find('button.btn-secondary')
+      const swimlaneSection = wrapper.findAll('.settings-card')[5]
+      const addBtn = swimlaneSection.find('button')
       await addBtn.trigger('click')
 
       expect(draftStore.cachedSwimlanes).toHaveLength(1)
@@ -317,6 +328,110 @@ describe('ProjectCreateView', () => {
       await flushPromises()
 
       expect(wrapper.text()).toContain('建立專案失敗')
+    })
+
+    it('should create cached categories via API after project creation', async () => {
+      const wrapper = mountView()
+      const draftStore = useProjectDraftStore()
+
+      draftStore.updateDraft({ name: 'Test Project' })
+      draftStore.addCachedCategory({ name: 'Bug' })
+      draftStore.addCachedCategory({ name: 'Feature' })
+      await wrapper.vm.$nextTick()
+
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 1,
+          result: 123
+        })
+      })
+
+      const createBtn = wrapper.find('button.btn-primary')
+      await createBtn.trigger('click')
+      await flushPromises()
+
+      const calls = mockFetch.mock.calls
+      const createCategoryCalls = calls.filter(call => {
+        try {
+          const body = JSON.parse(call[1].body)
+          return body.method === 'createCategory'
+        } catch {
+          return false
+        }
+      })
+
+      expect(createCategoryCalls).toHaveLength(2)
+    })
+
+    it('should create cached columns via API after project creation', async () => {
+      const wrapper = mountView()
+      const draftStore = useProjectDraftStore()
+
+      draftStore.updateDraft({ name: 'Test Project' })
+      draftStore.addCachedColumn({ title: 'Backlog', taskLimit: 0 })
+      draftStore.addCachedColumn({ title: 'In Progress', taskLimit: 3 })
+      await wrapper.vm.$nextTick()
+
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 1,
+          result: 123
+        })
+      })
+
+      const createBtn = wrapper.find('button.btn-primary')
+      await createBtn.trigger('click')
+      await flushPromises()
+
+      const calls = mockFetch.mock.calls
+      const addColumnCalls = calls.filter(call => {
+        try {
+          const body = JSON.parse(call[1].body)
+          return body.method === 'addColumn'
+        } catch {
+          return false
+        }
+      })
+
+      expect(addColumnCalls).toHaveLength(2)
+    })
+
+    it('should create cached swimlanes via API after project creation', async () => {
+      const wrapper = mountView()
+      const draftStore = useProjectDraftStore()
+
+      draftStore.updateDraft({ name: 'Test Project' })
+      draftStore.addCachedSwimlane({ name: 'Sprint 1', description: '' })
+      await wrapper.vm.$nextTick()
+
+      mockFetch.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({
+          jsonrpc: '2.0',
+          id: 1,
+          result: 123
+        })
+      })
+
+      const createBtn = wrapper.find('button.btn-primary')
+      await createBtn.trigger('click')
+      await flushPromises()
+
+      const calls = mockFetch.mock.calls
+      const addSwimlaneCalls = calls.filter(call => {
+        try {
+          const body = JSON.parse(call[1].body)
+          return body.method === 'addSwimlane'
+        } catch {
+          return false
+        }
+      })
+
+      expect(addSwimlaneCalls).toHaveLength(1)
     })
   })
 
