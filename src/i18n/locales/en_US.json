@@ -371,6 +371,7 @@
   },
   "column": {
     "columnManagement": "Column management",
+    "columnDescription": "Workflow stage columns in the project",
     "addColumn": "Add column",
     "addingColumn": "Adding column...",
     "columnAdded": "Column has been added",
@@ -393,6 +394,7 @@
   },
   "swimlane": {
     "swimlaneManagement": "Swimlane management",
+    "swimlaneDescription": "Horizontal task groupings in the project",
     "addSwimlane": "Add swimlane",
     "addingSwimlane": "Adding swimlane...",
     "swimlaneAdded": "Swimlane has been added",

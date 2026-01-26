@@ -219,6 +219,7 @@ const isSwimlaneSaving = (swimlaneId: number) => savingSwimlaneIds.value.has(swi
         <ph-icon icon="rows-plus-bottom" weight="fill" class="w-5 h-5" />
       </button>
     </div>
+    <p class="text-xs text-content-tertiary mb-4 -mt-2">{{ t('swimlane.swimlaneDescription') }}</p>
 
     <div class="space-y-3">
       <!-- Add swimlane form -->

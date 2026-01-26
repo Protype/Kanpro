@@ -203,6 +203,7 @@ const isColumnSaving = (columnId: number) => savingColumnIds.value.has(columnId)
         <ph-icon icon="columns-plus-right" weight="fill" class="w-5 h-5" />
       </button>
     </div>
+    <p class="text-xs text-content-tertiary mb-4 -mt-2">{{ t('column.columnDescription') }}</p>
 
     <div class="space-y-3">
       <!-- Add column form -->
