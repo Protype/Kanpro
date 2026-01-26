@@ -4,18 +4,22 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useProjectsStore } from '@/stores/projects'
 import { useUsersStore } from '@/stores/users'
+import { useMembersStore } from '@/stores/members'
+import { useGroupsStore } from '@/stores/groups'
 import { useProjectDraftStore } from '@/stores/projectDraft'
 import { useCategoriesStore } from '@/stores/categories'
 import { useColumnsStore } from '@/stores/columns'
 import { useSwimlanesStore } from '@/stores/swimlanes'
 import { useToast } from '@/stores/toast'
 import UserAvatar from '@/components/UserAvatar.vue'
-import type { User } from '@/types'
+import type { User, Group } from '@/types'
 
 const router = useRouter()
 const { t } = useI18n()
 const projectsStore = useProjectsStore()
 const usersStore = useUsersStore()
+const membersStore = useMembersStore()
+const groupsStore = useGroupsStore()
 const draftStore = useProjectDraftStore()
 const categoriesStore = useCategoriesStore()
 const columnsStore = useColumnsStore()
@@ -76,9 +80,22 @@ const showOwnerDropdown = ref(false)
 
 // === 管理區塊輸入狀態 ===
 const newCategoryName = ref('')
+const newCategoryColor = ref('')
 const newColumnTitle = ref('')
 const newColumnLimit = ref(0)
 const newSwimlaneName = ref('')
+const newSwimlaneDescription = ref('')
+
+// === 成員管理狀態 ===
+type AddMemberType = 'user' | 'group'
+const addMemberType = ref<AddMemberType>('user')
+const showMemberUserDropdown = ref(false)
+const showMemberGroupDropdown = ref(false)
+const memberUserSearchQuery = ref('')
+const memberGroupSearchQuery = ref('')
+const selectedMemberUserId = ref<number | null>(null)
+const selectedMemberGroupId = ref<number | null>(null)
+const selectedMemberRole = ref<'project-manager' | 'project-member' | 'project-viewer'>('project-member')
 
 // === Computed ===
 const isValid = computed(() => projectName.value.trim().length > 0)
@@ -97,6 +114,69 @@ const selectedOwner = computed(() => {
   return usersStore.users.find(u => u.id === ownerId.value) || null
 })
 
+// 成員管理 computed
+const filteredMemberUsers = computed(() => {
+  const query = memberUserSearchQuery.value.toLowerCase()
+  // 過濾掉已經加入的成員
+  const addedUserIds = draftStore.cachedMembers.map(m => m.userId)
+  const available = usersStore.activeUsers.filter(u => !addedUserIds.includes(u.id))
+  if (!query) return available
+  return available.filter(u =>
+    u.username.toLowerCase().includes(query) ||
+    (u.name?.toLowerCase().includes(query) ?? false)
+  )
+})
+
+const filteredMemberGroups = computed(() => {
+  const query = memberGroupSearchQuery.value.toLowerCase()
+  const allGroups = groupsStore.groups
+  if (!query) return allGroups
+  return allGroups.filter(g =>
+    g.name.toLowerCase().includes(query)
+  )
+})
+
+const selectedMemberUser = computed(() => {
+  if (!selectedMemberUserId.value) return null
+  return usersStore.users.find(u => u.id === selectedMemberUserId.value) || null
+})
+
+const selectedMemberGroup = computed(() => {
+  if (!selectedMemberGroupId.value) return null
+  return groupsStore.groups.find(g => g.id === selectedMemberGroupId.value) || null
+})
+
+// 取得緩存成員的使用者資料
+const getCachedMemberUser = (userId: number) => {
+  return usersStore.users.find(u => u.id === userId)
+}
+
+const getRoleName = (role: string) => {
+  switch (role) {
+    case 'project-manager':
+      return t('member.projectManager')
+    case 'project-member':
+      return t('member.projectMember')
+    case 'project-viewer':
+      return t('member.projectViewer')
+    default:
+      return role
+  }
+}
+
+const getRoleBadgeClass = (role: string): string => {
+  switch (role) {
+    case 'project-manager':
+      return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+    case 'project-member':
+      return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+    case 'project-viewer':
+      return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+    default:
+      return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+  }
+}
+
 // === Functions ===
 function selectOwner(user: User) {
   ownerId.value = user.id
@@ -109,13 +189,59 @@ function clearOwner() {
   showOwnerDropdown.value = false
 }
 
+// === 成員管理 ===
+function selectMemberUser(user: User) {
+  selectedMemberUserId.value = user.id
+  memberUserSearchQuery.value = ''
+  showMemberUserDropdown.value = false
+}
+
+function clearMemberUser() {
+  selectedMemberUserId.value = null
+  showMemberUserDropdown.value = false
+}
+
+function selectMemberGroup(group: Group) {
+  selectedMemberGroupId.value = group.id
+  memberGroupSearchQuery.value = ''
+  showMemberGroupDropdown.value = false
+}
+
+function clearMemberGroup() {
+  selectedMemberGroupId.value = null
+  showMemberGroupDropdown.value = false
+}
+
+function addMember() {
+  if (addMemberType.value === 'user') {
+    if (!selectedMemberUserId.value) return
+    draftStore.addCachedMember({
+      userId: selectedMemberUserId.value,
+      role: selectedMemberRole.value
+    })
+    selectedMemberUserId.value = null
+    selectedMemberRole.value = 'project-member'
+  } else {
+    // 群組新增（目前暫不支援緩存群組，只支援使用者）
+    if (!selectedMemberGroupId.value) return
+    // 群組需要在專案建立後才能加入
+    selectedMemberGroupId.value = null
+  }
+}
+
+function removeMember(userId: number) {
+  draftStore.removeCachedMember(userId)
+}
+
 // === 類別管理 ===
 function addCategory() {
   if (!newCategoryName.value.trim()) return
   draftStore.addCachedCategory({
-    name: newCategoryName.value.trim()
+    name: newCategoryName.value.trim(),
+    color: newCategoryColor.value || undefined
   })
   newCategoryName.value = ''
+  newCategoryColor.value = ''
 }
 
 function removeCategory(index: number) {
@@ -142,9 +268,10 @@ function addSwimlane() {
   if (!newSwimlaneName.value.trim()) return
   draftStore.addCachedSwimlane({
     name: newSwimlaneName.value.trim(),
-    description: ''
+    description: newSwimlaneDescription.value.trim()
   })
   newSwimlaneName.value = ''
+  newSwimlaneDescription.value = ''
 }
 
 function removeSwimlane(index: number) {
@@ -205,6 +332,15 @@ async function handleCreate() {
       }
     }
 
+    // Step 5: 建立緩存的成員
+    for (const member of draftStore.cachedMembers) {
+      try {
+        await membersStore.addProjectUser(projectId, member.userId, member.role)
+      } catch (err) {
+        console.error('Failed to add member:', err)
+      }
+    }
+
     // 清除草稿資料
     draftStore.resetDraft()
 
@@ -229,6 +365,12 @@ function handleClickOutside(event: MouseEvent) {
   if (!target.closest('.owner-dropdown-container')) {
     showOwnerDropdown.value = false
   }
+  if (!target.closest('.member-user-dropdown-container')) {
+    showMemberUserDropdown.value = false
+  }
+  if (!target.closest('.member-group-dropdown-container')) {
+    showMemberGroupDropdown.value = false
+  }
 }
 
 onMounted(() => {
@@ -237,6 +379,8 @@ onMounted(() => {
   if (usersStore.users.length === 0) {
     usersStore.fetchAllUsers()
   }
+  // 載入群組列表
+  groupsStore.fetchAllGroups()
 })
 
 onUnmounted(() => {
@@ -513,15 +657,229 @@ onUnmounted(() => {
       <div>
         <!-- 管理區塊組 1: 權限管理 | 專案角色 -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-          <!-- 權限管理 -->
+          <!-- 成員管理 -->
           <div class="settings-card">
             <div class="px-4 py-3 border-b border-edge">
               <h3 class="text-base font-semibold text-content">{{ t('member.members') }}</h3>
             </div>
-            <div class="p-4">
-              <div class="text-sm text-content-tertiary text-center py-8">
-                {{ t('member.noMembers') }}
+            <div class="p-4 space-y-3">
+              <!-- 使用者/群組切換 -->
+              <div class="flex gap-2 mb-3">
+                <button
+                  type="button"
+                  @click="addMemberType = 'user'"
+                  :class="[
+                    'px-3 py-1.5 text-sm rounded-md transition-colors',
+                    addMemberType === 'user'
+                      ? 'bg-accent text-white'
+                      : 'bg-surface-secondary hover:bg-surface-hover text-content-secondary'
+                  ]"
+                >
+                  <ph-icon icon="user" class="w-4 h-4 inline-block mr-1" />
+                  {{ t('member.user') }}
+                </button>
+                <button
+                  type="button"
+                  @click="addMemberType = 'group'"
+                  :class="[
+                    'px-3 py-1.5 text-sm rounded-md transition-colors',
+                    addMemberType === 'group'
+                      ? 'bg-accent text-white'
+                      : 'bg-surface-secondary hover:bg-surface-hover text-content-secondary'
+                  ]"
+                >
+                  <ph-icon icon="users-three" class="w-4 h-4 inline-block mr-1" />
+                  {{ t('group.group') }}
+                </button>
               </div>
+
+              <!-- 新增成員表單 -->
+              <div class="flex gap-2">
+                <!-- 使用者選擇器 -->
+                <div v-if="addMemberType === 'user'" class="member-user-dropdown-container flex-1">
+                  <div class="relative">
+                    <button
+                      type="button"
+                      @click="showMemberUserDropdown = !showMemberUserDropdown"
+                      class="w-full h-9 px-3 bg-surface border border-edge rounded-md text-left flex items-center gap-2 hover:bg-surface-hover transition-colors text-sm"
+                    >
+                      <template v-if="selectedMemberUser">
+                        <UserAvatar :user="selectedMemberUser" size="xs" class="flex-shrink-0" />
+                        <span class="flex-1 truncate text-content">
+                          {{ selectedMemberUser.name || selectedMemberUser.username }}
+                        </span>
+                        <button
+                          type="button"
+                          @click.stop="clearMemberUser"
+                          class="text-content-tertiary hover:text-content-secondary flex-shrink-0"
+                        >
+                          <ph-icon icon="xmark" class="w-3 h-3" />
+                        </button>
+                      </template>
+                      <template v-else>
+                        <span class="flex-1 text-content-tertiary">{{ t('member.selectUser') }}</span>
+                      </template>
+                      <ph-icon icon="chevron-down" class="w-4 h-4 text-content-tertiary flex-shrink-0" />
+                    </button>
+
+                    <!-- User Dropdown -->
+                    <Transition name="dropdown">
+                      <div
+                        v-if="showMemberUserDropdown"
+                        class="absolute z-10 w-full mt-1 bg-surface border border-edge rounded-md shadow-lg max-h-48 overflow-y-auto"
+                      >
+                        <div class="p-2 border-b border-edge">
+                          <input
+                            v-model="memberUserSearchQuery"
+                            type="text"
+                            :placeholder="t('user.searchUsers')"
+                            class="w-full px-2 py-1 text-sm bg-surface-secondary border border-edge rounded text-content placeholder:text-content-tertiary focus:outline-none focus:ring-1 focus:ring-accent"
+                          />
+                        </div>
+                        <div class="py-1">
+                          <button
+                            v-for="user in filteredMemberUsers"
+                            :key="user.id"
+                            type="button"
+                            @click="selectMemberUser(user)"
+                            class="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-surface-hover transition-colors"
+                          >
+                            <UserAvatar :user="user" size="sm" />
+                            <div class="flex-1 min-w-0">
+                              <div class="text-sm text-content truncate">{{ user.name || user.username }}</div>
+                              <div class="text-xs text-content-tertiary truncate">@{{ user.username }}</div>
+                            </div>
+                          </button>
+                          <div v-if="filteredMemberUsers.length === 0" class="px-3 py-2 text-sm text-content-tertiary">
+                            {{ t('member.noUsersToAdd') }}
+                          </div>
+                        </div>
+                      </div>
+                    </Transition>
+                  </div>
+                </div>
+
+                <!-- 群組選擇器 -->
+                <div v-else class="member-group-dropdown-container flex-1">
+                  <div class="relative">
+                    <button
+                      type="button"
+                      @click="showMemberGroupDropdown = !showMemberGroupDropdown"
+                      class="w-full h-9 px-3 bg-surface border border-edge rounded-md text-left flex items-center gap-2 hover:bg-surface-hover transition-colors text-sm"
+                    >
+                      <template v-if="selectedMemberGroup">
+                        <div class="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
+                          <ph-icon icon="users-three" class="w-3 h-3 text-accent" />
+                        </div>
+                        <span class="flex-1 truncate text-content">
+                          {{ selectedMemberGroup.name }}
+                        </span>
+                        <button
+                          type="button"
+                          @click.stop="clearMemberGroup"
+                          class="text-content-tertiary hover:text-content-secondary flex-shrink-0"
+                        >
+                          <ph-icon icon="xmark" class="w-3 h-3" />
+                        </button>
+                      </template>
+                      <template v-else>
+                        <span class="flex-1 text-content-tertiary">{{ t('member.selectGroup') }}</span>
+                      </template>
+                      <ph-icon icon="chevron-down" class="w-4 h-4 text-content-tertiary flex-shrink-0" />
+                    </button>
+
+                    <!-- Group Dropdown -->
+                    <Transition name="dropdown">
+                      <div
+                        v-if="showMemberGroupDropdown"
+                        class="absolute z-10 w-full mt-1 bg-surface border border-edge rounded-md shadow-lg max-h-48 overflow-y-auto"
+                      >
+                        <div class="p-2 border-b border-edge">
+                          <input
+                            v-model="memberGroupSearchQuery"
+                            type="text"
+                            :placeholder="t('group.searchPlaceholder')"
+                            class="w-full px-2 py-1 text-sm bg-surface-secondary border border-edge rounded text-content placeholder:text-content-tertiary focus:outline-none focus:ring-1 focus:ring-accent"
+                          />
+                        </div>
+                        <div class="py-1">
+                          <button
+                            v-for="group in filteredMemberGroups"
+                            :key="group.id"
+                            type="button"
+                            @click="selectMemberGroup(group)"
+                            class="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-surface-hover transition-colors"
+                          >
+                            <div class="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center">
+                              <ph-icon icon="users-three" class="w-3 h-3 text-accent" />
+                            </div>
+                            <div class="flex-1 min-w-0">
+                              <div class="text-sm text-content truncate">{{ group.name }}</div>
+                            </div>
+                          </button>
+                          <div v-if="filteredMemberGroups.length === 0" class="px-3 py-2 text-sm text-content-tertiary">
+                            {{ t('member.noGroupsToAdd') }}
+                          </div>
+                        </div>
+                      </div>
+                    </Transition>
+                  </div>
+                </div>
+
+                <!-- 角色選擇器 -->
+                <select
+                  v-model="selectedMemberRole"
+                  class="h-9 px-2 text-sm bg-surface border border-edge rounded-md text-content focus:outline-none focus:ring-1 focus:ring-accent"
+                >
+                  <option value="project-manager">{{ t('member.projectManager') }}</option>
+                  <option value="project-member">{{ t('member.projectMember') }}</option>
+                  <option value="project-viewer">{{ t('member.projectViewer') }}</option>
+                </select>
+
+                <!-- 新增按鈕 -->
+                <button
+                  type="button"
+                  @click="addMember"
+                  :disabled="addMemberType === 'user' ? !selectedMemberUserId : !selectedMemberGroupId"
+                  class="btn-secondary text-sm px-3 h-9"
+                >
+                  <ph-icon icon="plus" class="w-4 h-4" />
+                </button>
+              </div>
+
+              <!-- 已新增的成員列表 -->
+              <div v-if="draftStore.cachedMembers.length > 0" class="space-y-2">
+                <div
+                  v-for="member in draftStore.cachedMembers"
+                  :key="member.userId"
+                  class="flex items-center justify-between px-3 py-2 bg-surface-secondary rounded-lg"
+                >
+                  <div class="flex items-center gap-2">
+                    <UserAvatar v-if="getCachedMemberUser(member.userId)" :user="getCachedMemberUser(member.userId)!" size="sm" />
+                    <div>
+                      <span class="text-sm text-content">
+                        {{ getCachedMemberUser(member.userId)?.name || getCachedMemberUser(member.userId)?.username || `User #${member.userId}` }}
+                      </span>
+                      <span :class="['ml-2 text-xs px-1.5 py-0.5 rounded', getRoleBadgeClass(member.role)]">
+                        {{ getRoleName(member.role) }}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    @click="removeMember(member.userId)"
+                    class="text-content-tertiary hover:text-red-500 transition-colors"
+                  >
+                    <ph-icon icon="trash" class="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              <div v-else class="text-sm text-content-tertiary text-center py-4">
+                {{ t('member.noMembersAdded') }}
+              </div>
+              <p class="text-xs text-content-tertiary">
+                {{ t('project.membersWillBeAdded') }}
+              </p>
             </div>
           </div>
 
@@ -555,6 +913,12 @@ onUnmounted(() => {
                   :placeholder="t('category.enterCategoryName')"
                   @keyup.enter="addCategory"
                 />
+                <input
+                  v-model="newCategoryColor"
+                  type="color"
+                  class="w-9 h-9 p-0.5 bg-surface border border-edge rounded-md cursor-pointer"
+                  :title="t('category.color')"
+                />
                 <button
                   type="button"
                   @click="addCategory"
@@ -571,7 +935,14 @@ onUnmounted(() => {
                   :key="index"
                   class="flex items-center justify-between px-3 py-2 bg-surface-secondary rounded-lg"
                 >
-                  <span class="text-sm text-content">{{ category.name }}</span>
+                  <div class="flex items-center gap-2">
+                    <div
+                      v-if="category.color"
+                      class="w-4 h-4 rounded-full border border-edge"
+                      :style="{ backgroundColor: category.color }"
+                    ></div>
+                    <span class="text-sm text-content">{{ category.name }}</span>
+                  </div>
                   <button
                     type="button"
                     @click="removeCategory(index)"
@@ -668,22 +1039,30 @@ onUnmounted(() => {
             </div>
             <div class="p-4 space-y-3">
               <!-- 新增泳道表單 -->
-              <div class="flex gap-2">
+              <div class="space-y-2">
+                <div class="flex gap-2">
+                  <input
+                    v-model="newSwimlaneName"
+                    type="text"
+                    class="input flex-1 text-sm"
+                    :placeholder="t('swimlane.enterSwimlaneName')"
+                    @keyup.enter="addSwimlane"
+                  />
+                  <button
+                    type="button"
+                    @click="addSwimlane"
+                    :disabled="!newSwimlaneName.trim()"
+                    class="btn-secondary text-sm px-3"
+                  >
+                    <ph-icon icon="plus" class="w-4 h-4" />
+                  </button>
+                </div>
                 <input
-                  v-model="newSwimlaneName"
+                  v-model="newSwimlaneDescription"
                   type="text"
-                  class="input flex-1 text-sm"
-                  :placeholder="t('swimlane.enterSwimlaneName')"
-                  @keyup.enter="addSwimlane"
+                  class="input w-full text-sm"
+                  :placeholder="t('common.descriptionOptional')"
                 />
-                <button
-                  type="button"
-                  @click="addSwimlane"
-                  :disabled="!newSwimlaneName.trim()"
-                  class="btn-secondary text-sm px-3"
-                >
-                  <ph-icon icon="plus" class="w-4 h-4" />
-                </button>
               </div>
               <!-- 已新增的泳道列表 -->
               <div v-if="draftStore.cachedSwimlanes.length > 0" class="space-y-2">
@@ -692,7 +1071,12 @@ onUnmounted(() => {
                   :key="index"
                   class="flex items-center justify-between px-3 py-2 bg-surface-secondary rounded-lg"
                 >
-                  <span class="text-sm text-content">{{ swimlane.name }}</span>
+                  <div>
+                    <span class="text-sm text-content">{{ swimlane.name }}</span>
+                    <span v-if="swimlane.description" class="text-xs text-content-tertiary ml-2">
+                      ({{ swimlane.description }})
+                    </span>
+                  </div>
                   <button
                     type="button"
                     @click="removeSwimlane(index)"
