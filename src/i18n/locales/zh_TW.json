@@ -441,6 +441,7 @@
     "removeCategoryFailed": "刪除類別失敗",
     "enterCategoryName": "輸入類別名稱",
     "categoryName": "類別名稱",
+    "color": "顏色",
     "colorOptional": "顏色（選填）",
     "noCategoriesAdded": "尚未新增類別"
   },

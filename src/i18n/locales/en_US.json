@@ -441,6 +441,7 @@
     "removeCategoryFailed": "Failed to remove category",
     "enterCategoryName": "Enter category name",
     "categoryName": "Category name",
+    "color": "Color",
     "colorOptional": "Color (optional)",
     "noCategoriesAdded": "No categories added"
   },
