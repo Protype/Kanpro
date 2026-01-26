@@ -171,6 +171,8 @@
     "noUserFound": "找不到使用者",
     "selectOwnerOptional": "選擇擁有者（選填）",
     "projectCreated": "專案已建立",
+    "createProjectFirst": "請先建立專案",
+    "managementAvailableAfterCreate": "建立專案後即可設定成員、類別、欄位及泳道",
     "membersWillBeAdded": "專案建立後將自動加入這些成員",
     "categoriesWillBeCreated": "專案建立後將自動建立這些類別",
     "columnsWillBeCreated": "專案建立後將自動建立這些欄位",

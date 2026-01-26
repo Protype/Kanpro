@@ -5,10 +5,6 @@ import { useI18n } from 'vue-i18n'
 import { useProjectsStore } from '@/stores/projects'
 import { useUsersStore } from '@/stores/users'
 import { useProjectDraftStore } from '@/stores/projectDraft'
-import { useColumnsStore } from '@/stores/columns'
-import { useCategoriesStore } from '@/stores/categories'
-import { useSwimlanesStore } from '@/stores/swimlanes'
-import { useMembersStore } from '@/stores/members'
 import { useToast } from '@/stores/toast'
 import UserAvatar from '@/components/UserAvatar.vue'
 import type { User } from '@/types'
@@ -18,10 +14,6 @@ const { t } = useI18n()
 const projectsStore = useProjectsStore()
 const usersStore = useUsersStore()
 const draftStore = useProjectDraftStore()
-const columnsStore = useColumnsStore()
-const categoriesStore = useCategoriesStore()
-const swimlanesStore = useSwimlanesStore()
-const membersStore = useMembersStore()
 const toast = useToast()
 
 // === 基本資訊欄位 (綁定到 draft store) ===
@@ -76,21 +68,6 @@ const error = ref<string | null>(null)
 const ownerSearchQuery = ref('')
 const showOwnerDropdown = ref(false)
 
-// === 管理區塊輸入狀態 ===
-const newMemberUserId = ref<number | null>(null)
-const newMemberRole = ref<'project-manager' | 'project-member' | 'project-viewer'>('project-member')
-const showMemberDropdown = ref(false)
-const memberSearchQuery = ref('')
-
-const newCategoryName = ref('')
-const newCategoryColor = ref('')
-
-const newColumnTitle = ref('')
-const newColumnLimit = ref(0)
-
-const newSwimlaneName = ref('')
-const newSwimlaneDescription = ref('')
-
 // === Computed ===
 const isValid = computed(() => projectName.value.trim().length > 0)
 
@@ -108,19 +85,6 @@ const selectedOwner = computed(() => {
   return usersStore.users.find(u => u.id === ownerId.value) || null
 })
 
-const filteredMemberUsers = computed(() => {
-  const query = memberSearchQuery.value.toLowerCase()
-  const existingIds = draftStore.cachedMembers.map(m => m.userId)
-  let users = usersStore.activeUsers.filter(u => !existingIds.includes(u.id))
-  if (query) {
-    users = users.filter(u =>
-      u.username.toLowerCase().includes(query) ||
-      (u.name?.toLowerCase().includes(query) ?? false)
-    )
-  }
-  return users
-})
-
 // === Functions ===
 function selectOwner(user: User) {
   ownerId.value = user.id
@@ -131,78 +95,6 @@ function selectOwner(user: User) {
 function clearOwner() {
   ownerId.value = null
   showOwnerDropdown.value = false
-}
-
-function getUserById(userId: number): User | undefined {
-  return usersStore.users.find(u => u.id === userId)
-}
-
-// === 成員管理 ===
-function addMember() {
-  if (!newMemberUserId.value) return
-  draftStore.addCachedMember({
-    userId: newMemberUserId.value,
-    role: newMemberRole.value
-  })
-  newMemberUserId.value = null
-  newMemberRole.value = 'project-member'
-  showMemberDropdown.value = false
-  memberSearchQuery.value = ''
-}
-
-function selectMemberUser(user: User) {
-  newMemberUserId.value = user.id
-  memberSearchQuery.value = ''
-  showMemberDropdown.value = false
-}
-
-function removeMember(userId: number) {
-  draftStore.removeCachedMember(userId)
-}
-
-// === 類別管理 ===
-function addCategory() {
-  if (!newCategoryName.value.trim()) return
-  draftStore.addCachedCategory({
-    name: newCategoryName.value.trim(),
-    color: newCategoryColor.value || undefined
-  })
-  newCategoryName.value = ''
-  newCategoryColor.value = ''
-}
-
-function removeCategory(index: number) {
-  draftStore.removeCachedCategory(index)
-}
-
-// === 欄位管理 ===
-function addColumn() {
-  if (!newColumnTitle.value.trim()) return
-  draftStore.addCachedColumn({
-    title: newColumnTitle.value.trim(),
-    taskLimit: newColumnLimit.value || 0
-  })
-  newColumnTitle.value = ''
-  newColumnLimit.value = 0
-}
-
-function removeColumn(index: number) {
-  draftStore.removeCachedColumn(index)
-}
-
-// === 泳道管理 ===
-function addSwimlane() {
-  if (!newSwimlaneName.value.trim()) return
-  draftStore.addCachedSwimlane({
-    name: newSwimlaneName.value.trim(),
-    description: newSwimlaneDescription.value
-  })
-  newSwimlaneName.value = ''
-  newSwimlaneDescription.value = ''
-}
-
-function removeSwimlane(index: number) {
-  draftStore.removeCachedSwimlane(index)
 }
 
 // === 建立專案 ===
@@ -232,42 +124,6 @@ async function handleCreate() {
       throw new Error(projectsStore.error || t('project.createFailed'))
     }
 
-    // Step 2: 建立緩存的成員
-    for (const member of draftStore.cachedMembers) {
-      try {
-        await membersStore.addProjectUser(projectId, member.userId, member.role)
-      } catch (err) {
-        console.error('Failed to add member:', err)
-      }
-    }
-
-    // Step 3: 建立緩存的類別
-    for (const category of draftStore.cachedCategories) {
-      try {
-        await categoriesStore.addCategory(projectId, category.name)
-      } catch (err) {
-        console.error('Failed to create category:', err)
-      }
-    }
-
-    // Step 4: 建立緩存的欄位
-    for (const column of draftStore.cachedColumns) {
-      try {
-        await columnsStore.addColumn(projectId, column.title, column.taskLimit)
-      } catch (err) {
-        console.error('Failed to add column:', err)
-      }
-    }
-
-    // Step 5: 建立緩存的泳道
-    for (const swimlane of draftStore.cachedSwimlanes) {
-      try {
-        await swimlanesStore.addSwimlane(projectId, swimlane.name, swimlane.description)
-      } catch (err) {
-        console.error('Failed to add swimlane:', err)
-      }
-    }
-
     // 清除草稿資料
     draftStore.resetDraft()
 
@@ -291,9 +147,6 @@ function handleClickOutside(event: MouseEvent) {
   const target = event.target as HTMLElement
   if (!target.closest('.owner-dropdown-container')) {
     showOwnerDropdown.value = false
-  }
-  if (!target.closest('.member-dropdown-container')) {
-    showMemberDropdown.value = false
   }
 }
 
@@ -575,259 +428,94 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <!-- 管理區塊 - 2x2 Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        <!-- 成員管理 -->
-        <div class="settings-card">
-          <div class="px-4 py-3 border-b border-edge">
-            <h3 class="text-base font-semibold text-content">{{ t('member.members') }}</h3>
-            <p class="text-xs text-content-tertiary mt-0.5">{{ t('project.membersWillBeAdded') }}</p>
+      <!-- 管理區塊 - 與專案設定頁一致的 3x2 佈局，但加上遮罩 -->
+      <div class="relative">
+        <!-- 遮罩層 - 專案建立前禁用 -->
+        <div class="absolute inset-0 z-10 bg-surface-secondary/80 backdrop-blur-[1px] rounded-xl flex items-center justify-center">
+          <div class="text-center px-6 py-8">
+            <ph-icon icon="lock" class="w-12 h-12 mx-auto mb-3 text-content-tertiary" />
+            <p class="text-content-secondary font-medium">{{ t('project.createProjectFirst') }}</p>
+            <p class="text-sm text-content-tertiary mt-1">{{ t('project.managementAvailableAfterCreate') }}</p>
           </div>
-          <div class="p-4 space-y-3">
-            <!-- 新增成員表單 -->
-            <div class="flex gap-2 member-dropdown-container">
-              <div class="relative flex-1">
-                <button
-                  type="button"
-                  @click="showMemberDropdown = !showMemberDropdown"
-                  class="w-full px-3 py-2 bg-surface-secondary border border-edge rounded-md text-left text-sm text-content-tertiary hover:bg-surface-hover transition-colors"
-                >
-                  {{ newMemberUserId ? getUserById(newMemberUserId)?.name || getUserById(newMemberUserId)?.username : t('member.selectUser') }}
-                </button>
-                <Transition name="dropdown">
-                  <div
-                    v-if="showMemberDropdown"
-                    class="absolute z-10 w-full mt-1 bg-surface border border-edge rounded-md shadow-lg max-h-48 overflow-y-auto"
-                  >
-                    <div class="p-2 border-b border-edge">
-                      <input
-                        v-model="memberSearchQuery"
-                        type="text"
-                        :placeholder="t('user.searchUsers')"
-                        class="w-full px-2 py-1 text-sm bg-surface-secondary border border-edge rounded text-content placeholder:text-content-tertiary focus:outline-none focus:ring-1 focus:ring-accent"
-                      />
-                    </div>
-                    <div class="py-1">
-                      <button
-                        v-for="user in filteredMemberUsers"
-                        :key="user.id"
-                        type="button"
-                        @click="selectMemberUser(user)"
-                        class="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-surface-hover transition-colors"
-                      >
-                        <UserAvatar :user="user" size="sm" />
-                        <div class="flex-1 min-w-0">
-                          <div class="text-sm text-content truncate">{{ user.name || user.username }}</div>
-                        </div>
-                      </button>
-                      <div v-if="filteredMemberUsers.length === 0" class="px-3 py-2 text-sm text-content-tertiary">
-                        {{ t('member.noUsersToAdd') }}
-                      </div>
-                    </div>
-                  </div>
-                </Transition>
-              </div>
-              <select
-                v-model="newMemberRole"
-                class="input text-sm w-32"
-              >
-                <option value="project-manager">{{ t('member.roleManager') }}</option>
-                <option value="project-member">{{ t('member.roleMember') }}</option>
-                <option value="project-viewer">{{ t('member.roleViewer') }}</option>
-              </select>
-              <button
-                type="button"
-                @click="addMember"
-                :disabled="!newMemberUserId"
-                class="btn-secondary px-3"
-              >
-                <ph-icon icon="plus" class="w-4 h-4" />
-              </button>
+        </div>
+
+        <!-- 管理區塊組 1: 權限管理 | 專案角色 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+          <!-- 權限管理 -->
+          <div class="settings-card settings-card-disabled">
+            <div class="px-4 py-3 border-b border-edge">
+              <h3 class="text-base font-semibold text-content">{{ t('member.members') }}</h3>
             </div>
-            <!-- 成員列表 -->
-            <div v-if="draftStore.cachedMembers.length > 0" class="space-y-2">
-              <div
-                v-for="member in draftStore.cachedMembers"
-                :key="member.userId"
-                class="flex items-center justify-between p-2 bg-surface-secondary rounded-md"
-              >
-                <div class="flex items-center gap-2">
-                  <UserAvatar :user="getUserById(member.userId)" size="sm" />
-                  <span class="text-sm text-content">{{ getUserById(member.userId)?.name || getUserById(member.userId)?.username }}</span>
-                  <span class="text-xs text-content-tertiary px-1.5 py-0.5 bg-surface rounded">
-                    {{ member.role === 'project-manager' ? t('member.roleManager') : member.role === 'project-member' ? t('member.roleMember') : t('member.roleViewer') }}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  @click="removeMember(member.userId)"
-                  class="text-content-tertiary hover:text-red-500 transition-colors"
-                >
-                  <ph-icon icon="xmark" class="w-4 h-4" />
-                </button>
+            <div class="p-4">
+              <div class="text-sm text-content-tertiary text-center py-8">
+                {{ t('member.noMembers') }}
               </div>
             </div>
-            <div v-else class="text-sm text-content-tertiary text-center py-4">
-              {{ t('member.noMembersAdded') }}
+          </div>
+
+          <!-- 專案角色 -->
+          <div class="settings-card settings-card-disabled">
+            <div class="px-4 py-3 border-b border-edge">
+              <h3 class="text-base font-semibold text-content">{{ t('role.roles') }}</h3>
+            </div>
+            <div class="p-4">
+              <div class="text-sm text-content-tertiary text-center py-8">
+                {{ t('role.advancedRoles') }}
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- 類別管理 -->
-        <div class="settings-card">
-          <div class="px-4 py-3 border-b border-edge">
-            <h3 class="text-base font-semibold text-content">{{ t('category.categories') }}</h3>
-            <p class="text-xs text-content-tertiary mt-0.5">{{ t('project.categoriesWillBeCreated') }}</p>
-          </div>
-          <div class="p-4 space-y-3">
-            <!-- 新增類別表單 -->
-            <div class="flex gap-2">
-              <input
-                v-model="newCategoryName"
-                type="text"
-                :placeholder="t('category.categoryName')"
-                class="input text-sm flex-1"
-              />
-              <input
-                v-model="newCategoryColor"
-                type="text"
-                :placeholder="t('category.colorOptional')"
-                class="input text-sm w-24"
-              />
-              <button
-                type="button"
-                @click="addCategory"
-                :disabled="!newCategoryName.trim()"
-                class="btn-secondary px-3"
-              >
-                <ph-icon icon="plus" class="w-4 h-4" />
-              </button>
+        <!-- 管理區塊組 2: 類別管理 | 標籤管理 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+          <!-- 類別管理 -->
+          <div class="settings-card settings-card-disabled">
+            <div class="px-4 py-3 border-b border-edge">
+              <h3 class="text-base font-semibold text-content">{{ t('category.categories') }}</h3>
             </div>
-            <!-- 類別列表 -->
-            <div v-if="draftStore.cachedCategories.length > 0" class="space-y-2">
-              <div
-                v-for="(category, index) in draftStore.cachedCategories"
-                :key="index"
-                class="flex items-center justify-between p-2 bg-surface-secondary rounded-md"
-              >
-                <span class="text-sm text-content">{{ category.name }}</span>
-                <button
-                  type="button"
-                  @click="removeCategory(index)"
-                  class="text-content-tertiary hover:text-red-500 transition-colors"
-                >
-                  <ph-icon icon="xmark" class="w-4 h-4" />
-                </button>
+            <div class="p-4">
+              <div class="text-sm text-content-tertiary text-center py-8">
+                {{ t('category.noCategories') }}
               </div>
             </div>
-            <div v-else class="text-sm text-content-tertiary text-center py-4">
-              {{ t('category.noCategoriesAdded') }}
+          </div>
+
+          <!-- 標籤管理 -->
+          <div class="settings-card settings-card-disabled">
+            <div class="px-4 py-3 border-b border-edge">
+              <h3 class="text-base font-semibold text-content">{{ t('tag.tags') }}</h3>
+            </div>
+            <div class="p-4">
+              <div class="text-sm text-content-tertiary text-center py-8">
+                {{ t('tag.noTags') }}
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- 欄位管理 -->
-        <div class="settings-card">
-          <div class="px-4 py-3 border-b border-edge">
-            <h3 class="text-base font-semibold text-content">{{ t('column.columns') }}</h3>
-            <p class="text-xs text-content-tertiary mt-0.5">{{ t('project.columnsWillBeCreated') }}</p>
-          </div>
-          <div class="p-4 space-y-3">
-            <!-- 新增欄位表單 -->
-            <div class="flex gap-2">
-              <input
-                v-model="newColumnTitle"
-                type="text"
-                :placeholder="t('column.columnName')"
-                class="input text-sm flex-1"
-              />
-              <input
-                v-model.number="newColumnLimit"
-                type="number"
-                min="0"
-                :placeholder="t('column.wipLimit')"
-                class="input text-sm w-24"
-              />
-              <button
-                type="button"
-                @click="addColumn"
-                :disabled="!newColumnTitle.trim()"
-                class="btn-secondary px-3"
-              >
-                <ph-icon icon="plus" class="w-4 h-4" />
-              </button>
+        <!-- 管理區塊組 3: 清單管理 | 分組管理 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+          <!-- 清單管理 -->
+          <div class="settings-card settings-card-disabled">
+            <div class="px-4 py-3 border-b border-edge">
+              <h3 class="text-base font-semibold text-content">{{ t('column.columns') }}</h3>
             </div>
-            <!-- 欄位列表 -->
-            <div v-if="draftStore.cachedColumns.length > 0" class="space-y-2">
-              <div
-                v-for="(column, index) in draftStore.cachedColumns"
-                :key="index"
-                class="flex items-center justify-between p-2 bg-surface-secondary rounded-md"
-              >
-                <div class="flex items-center gap-2">
-                  <span class="text-sm text-content">{{ column.title }}</span>
-                  <span v-if="column.taskLimit > 0" class="text-xs text-content-tertiary px-1.5 py-0.5 bg-surface rounded">
-                    WIP: {{ column.taskLimit }}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  @click="removeColumn(index)"
-                  class="text-content-tertiary hover:text-red-500 transition-colors"
-                >
-                  <ph-icon icon="xmark" class="w-4 h-4" />
-                </button>
+            <div class="p-4">
+              <div class="text-sm text-content-tertiary text-center py-8">
+                {{ t('column.noColumns') }}
               </div>
             </div>
-            <div v-else class="text-sm text-content-tertiary text-center py-4">
-              {{ t('column.noColumnsAddedDefault') }}
-            </div>
           </div>
-        </div>
 
-        <!-- 泳道管理 -->
-        <div class="settings-card">
-          <div class="px-4 py-3 border-b border-edge">
-            <h3 class="text-base font-semibold text-content">{{ t('swimlane.swimlanes') }}</h3>
-            <p class="text-xs text-content-tertiary mt-0.5">{{ t('project.swimlanesWillBeCreated') }}</p>
-          </div>
-          <div class="p-4 space-y-3">
-            <!-- 新增泳道表單 -->
-            <div class="flex gap-2">
-              <input
-                v-model="newSwimlaneName"
-                type="text"
-                :placeholder="t('swimlane.swimlaneName')"
-                class="input text-sm flex-1"
-              />
-              <button
-                type="button"
-                @click="addSwimlane"
-                :disabled="!newSwimlaneName.trim()"
-                class="btn-secondary px-3"
-              >
-                <ph-icon icon="plus" class="w-4 h-4" />
-              </button>
+          <!-- 分組管理 -->
+          <div class="settings-card settings-card-disabled">
+            <div class="px-4 py-3 border-b border-edge">
+              <h3 class="text-base font-semibold text-content">{{ t('swimlane.swimlanes') }}</h3>
             </div>
-            <!-- 泳道列表 -->
-            <div v-if="draftStore.cachedSwimlanes.length > 0" class="space-y-2">
-              <div
-                v-for="(swimlane, index) in draftStore.cachedSwimlanes"
-                :key="index"
-                class="flex items-center justify-between p-2 bg-surface-secondary rounded-md"
-              >
-                <span class="text-sm text-content">{{ swimlane.name }}</span>
-                <button
-                  type="button"
-                  @click="removeSwimlane(index)"
-                  class="text-content-tertiary hover:text-red-500 transition-colors"
-                >
-                  <ph-icon icon="xmark" class="w-4 h-4" />
-                </button>
+            <div class="p-4">
+              <div class="text-sm text-content-tertiary text-center py-8">
+                {{ t('swimlane.noSwimlanes') }}
               </div>
-            </div>
-            <div v-else class="text-sm text-content-tertiary text-center py-4">
-              {{ t('swimlane.noSwimlanesAddedDefault') }}
             </div>
           </div>
         </div>
@@ -841,6 +529,10 @@ onUnmounted(() => {
 
 .settings-card {
   @apply bg-surface rounded-xl border border-edge overflow-hidden;
+}
+
+.settings-card-disabled {
+  @apply opacity-60 pointer-events-none;
 }
 
 /* Dropdown Transition */

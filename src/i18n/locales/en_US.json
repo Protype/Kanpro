@@ -171,6 +171,8 @@
     "noUserFound": "No user found",
     "selectOwnerOptional": "Select owner (optional)",
     "projectCreated": "Project created",
+    "createProjectFirst": "Create project first",
+    "managementAvailableAfterCreate": "You can configure members, categories, columns and swimlanes after creating the project",
     "membersWillBeAdded": "Members will be automatically added after project creation",
     "categoriesWillBeCreated": "Categories will be automatically created after project creation",
     "columnsWillBeCreated": "Columns will be automatically created after project creation",
