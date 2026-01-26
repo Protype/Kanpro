@@ -428,21 +428,12 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <!-- 管理區塊 - 與專案設定頁一致的 3x2 佈局，但加上遮罩 -->
-      <div class="relative">
-        <!-- 遮罩層 - 專案建立前禁用 -->
-        <div class="absolute inset-0 z-10 bg-surface-secondary/80 backdrop-blur-[1px] rounded-xl flex items-center justify-center">
-          <div class="text-center px-6 py-8">
-            <ph-icon icon="lock" class="w-12 h-12 mx-auto mb-3 text-content-tertiary" />
-            <p class="text-content-secondary font-medium">{{ t('project.createProjectFirst') }}</p>
-            <p class="text-sm text-content-tertiary mt-1">{{ t('project.managementAvailableAfterCreate') }}</p>
-          </div>
-        </div>
-
+      <!-- 管理區塊 - 與專案設定頁一致的 3x2 佈局 -->
+      <div>
         <!-- 管理區塊組 1: 權限管理 | 專案角色 -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
           <!-- 權限管理 -->
-          <div class="settings-card settings-card-disabled">
+          <div class="settings-card">
             <div class="px-4 py-3 border-b border-edge">
               <h3 class="text-base font-semibold text-content">{{ t('member.members') }}</h3>
             </div>
@@ -454,7 +445,7 @@ onUnmounted(() => {
           </div>
 
           <!-- 專案角色 -->
-          <div class="settings-card settings-card-disabled">
+          <div class="settings-card">
             <div class="px-4 py-3 border-b border-edge">
               <h3 class="text-base font-semibold text-content">{{ t('role.roles') }}</h3>
             </div>
@@ -469,7 +460,7 @@ onUnmounted(() => {
         <!-- 管理區塊組 2: 類別管理 | 標籤管理 -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
           <!-- 類別管理 -->
-          <div class="settings-card settings-card-disabled">
+          <div class="settings-card">
             <div class="px-4 py-3 border-b border-edge">
               <h3 class="text-base font-semibold text-content">{{ t('category.categories') }}</h3>
             </div>
@@ -481,7 +472,7 @@ onUnmounted(() => {
           </div>
 
           <!-- 標籤管理 -->
-          <div class="settings-card settings-card-disabled">
+          <div class="settings-card">
             <div class="px-4 py-3 border-b border-edge">
               <h3 class="text-base font-semibold text-content">{{ t('tag.tags') }}</h3>
             </div>
@@ -496,7 +487,7 @@ onUnmounted(() => {
         <!-- 管理區塊組 3: 清單管理 | 分組管理 -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
           <!-- 清單管理 -->
-          <div class="settings-card settings-card-disabled">
+          <div class="settings-card">
             <div class="px-4 py-3 border-b border-edge">
               <h3 class="text-base font-semibold text-content">{{ t('column.columns') }}</h3>
             </div>
@@ -508,7 +499,7 @@ onUnmounted(() => {
           </div>
 
           <!-- 分組管理 -->
-          <div class="settings-card settings-card-disabled">
+          <div class="settings-card">
             <div class="px-4 py-3 border-b border-edge">
               <h3 class="text-base font-semibold text-content">{{ t('swimlane.swimlanes') }}</h3>
             </div>
@@ -529,10 +520,6 @@ onUnmounted(() => {
 
 .settings-card {
   @apply bg-surface rounded-xl border border-edge overflow-hidden;
-}
-
-.settings-card-disabled {
-  @apply opacity-60 pointer-events-none;
 }
 
 /* Dropdown Transition */
