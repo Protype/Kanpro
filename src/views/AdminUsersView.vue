@@ -34,7 +34,6 @@ const editName = ref('')
 const editEmail = ref('')
 const editRole = ref('')
 
-const roleValues = ['app-admin', 'app-manager', 'app-user']
 
 const roles = computed(() => [
   { value: 'app-admin', label: t('user.roleAdmin') },

@@ -268,12 +268,13 @@ const projectOwner = computed(() => {
     return membersMap[project.value.owner_id]
   }
   // Fallback: try to find in members list
-  const ownerName = getMemberName(members.value.find((m: unknown) => {
+  const member = members.value.find((m: unknown) => {
     if (typeof m === 'object' && m !== null && 'id' in m) {
       return String((m as { id: unknown }).id) === String(project.value?.owner_id)
     }
     return false
-  }))
+  })
+  const ownerName = member ? getMemberName(member) : null
   return ownerName || null
 })
 

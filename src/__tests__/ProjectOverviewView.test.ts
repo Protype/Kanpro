@@ -5,9 +5,6 @@ import { createRouter, createMemoryHistory } from 'vue-router'
 import ProjectOverviewView from '@/views/ProjectOverviewView.vue'
 import { useBoardStore } from '@/stores/board'
 import { useAuthStore } from '@/stores/auth'
-import { useMembersStore } from '@/stores/members'
-import { useProjectsStore } from '@/stores/projects'
-import { useAnalyticsStore } from '@/stores/analytics'
 
 // Mock fetch
 const mockFetch = vi.fn()
@@ -66,8 +63,7 @@ describe('ProjectOverviewView', () => {
 
     it('should render without errors', () => {
       const boardStore = useBoardStore()
-      boardStore.project = { id: 1, name: 'Test', is_active: 1 }
-      boardStore.columns = []
+      boardStore.project = { id: 1, name: 'Test', is_active: 1, owner_id: 1, is_private: 0, is_public: 0 }
 
       const wrapper = mount(ProjectOverviewView, {
         global: {

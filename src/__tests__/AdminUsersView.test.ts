@@ -41,7 +41,9 @@ describe('AdminUsersView', () => {
       id: 1,
       name: 'Admin',
       username: 'admin',
-      role: 'app-admin'
+      role: 'app-admin',
+      email: 'admin@example.com',
+      is_active: true
     }
 
     // Mock API responses for users list

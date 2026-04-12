@@ -3,6 +3,7 @@
 .env.*.local
 public/config.json
 LOCAL.md
+build.sh
 
 # 依賴套件
 node_modules/

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { mount, flushPromises } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
 import { setActivePinia, createPinia } from 'pinia'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import { createI18n } from 'vue-i18n'
@@ -54,7 +54,8 @@ describe('UserDropdown', () => {
       name: '管理員測試',
       username: 'admin',
       role: 'app-admin',
-      email: 'admin@example.com'
+      email: 'admin@example.com',
+      is_active: true
     }
 
     // Mock API responses

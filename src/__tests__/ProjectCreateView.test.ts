@@ -6,7 +6,6 @@ import { createI18n } from 'vue-i18n'
 import ProjectCreateView from '@/views/ProjectCreateView.vue'
 import { useProjectDraftStore } from '@/stores/projectDraft'
 import { useAuthStore } from '@/stores/auth'
-import { useProjectsStore } from '@/stores/projects'
 import en_US from '@/i18n/locales/en_US.json'
 import zh_TW from '@/i18n/locales/zh_TW.json'
 

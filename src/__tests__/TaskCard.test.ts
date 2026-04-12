@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import TaskCard from '@/components/TaskCard.vue'
-import UserAvatar from '@/components/UserAvatar.vue'
 
 // Mock PhIcon component
 const PhIcon = {
@@ -17,8 +16,12 @@ describe('TaskCard', () => {
     color_id: 'blue',
     column_id: 1,
     project_id: 1,
+    swimlane_id: 1,
     position: 1,
-    is_active: 1,
+    is_active: true,
+    priority: 0,
+    owner_id: 0,
+    creator_id: 1,
     date_creation: 1704067200,
     date_modification: 1704067200
   }

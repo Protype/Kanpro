@@ -5,7 +5,6 @@ import { createRouter, createMemoryHistory } from 'vue-router'
 import ProjectActivityView from '@/views/ProjectActivityView.vue'
 import { useBoardStore } from '@/stores/board'
 import { useAuthStore } from '@/stores/auth'
-import { useNotificationsStore } from '@/stores/notifications'
 
 // Mock fetch
 const mockFetch = vi.fn()
@@ -63,7 +62,7 @@ describe('ProjectActivityView', () => {
 
     it('should render without errors', () => {
       const boardStore = useBoardStore()
-      boardStore.project = { id: 1, name: 'Test', is_active: 1 }
+      boardStore.project = { id: 1, name: 'Test', is_active: 1, owner_id: 1, is_private: 0, is_public: 0 }
 
       const wrapper = mount(ProjectActivityView, {
         global: {
